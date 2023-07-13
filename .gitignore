@@ -237,3 +237,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/java,emacs,linux,maven,eclipse,windows,macos
+
+# nohup logs
+nohup.out
