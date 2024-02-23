@@ -20,22 +20,24 @@ import ca.bc.gov.nrs.vdyp.io.parse.common.ResourceParseException;
  *
  * VDYPPASS IN/OUT I*4(10) Major Control Functions
  * <ul>
- * <li> (1) IN Perform Initiation activities? (0=No, 1=Yes)
- * <li> (2) IN Open the stand data files (0=No, 1=Yes)
- * <li> (3) IN Process stands (0=No, 1=Yes)
- * <li> (4) IN Allow multiple polygons (0=No, 1=Yes) (Subset of stand processing. May limit to 1 stand)
- * <li> (5) IN CLOSE data files.
- * <li> (10) OUT Indicator variable that in the case of single stand processing with VDYPPASS(4) set, behaves as follows:
+ * <li>(1) IN Perform Initiation activities? (0=No, 1=Yes)
+ * <li>(2) IN Open the stand data files (0=No, 1=Yes)
+ * <li>(3) IN Process stands (0=No, 1=Yes)
+ * <li>(4) IN Allow multiple polygons (0=No, 1=Yes) (Subset of stand processing.
+ * May limit to 1 stand)
+ * <li>(5) IN CLOSE data files.
+ * <li>(10) OUT Indicator variable that in the case of single stand processing
+ * with VDYPPASS(4) set, behaves as follows:
  * <ul>
- * <li> -100 due to EOF, nothing to read 
- * <li> other -ve value, incl -99. Could not process the stand. 
- * <li> 0 Stand was processed and written
- * <li> +ve value. Serious error. Set to IER.
- * <li> IER OUTPUT I*4 Error code 
+ * <li>-100 due to EOF, nothing to read
+ * <li>other -ve value, incl -99. Could not process the stand.
+ * <li>0 Stand was processed and written
+ * <li>+ve value. Serious error. Set to IER.
+ * <li>IER OUTPUT I*4 Error code
  * <ul>
- * <li> 0: No error 
- * <li> >0: Error 99: Error generated in routine called by this subr. 
- * <li> <0: Warning 
+ * <li>0: No error
+ * <li>>0: Error 99: Error generated in routine called by this subr.
+ * <li><0: Warning
  * </ul>
  * </ul>
  * </ol>
@@ -97,5 +99,6 @@ public class VdypForwardProcessor {
 	 * @throws ProcessingException
 	 */
 	public void process() throws ProcessingException {
+		// TODO VDYP-192 VDYP-193 VDYP-198
 	}
 }

@@ -1,10 +1,10 @@
 package ca.bc.gov.nrs.vdyp.forward;
 
-import static ca.bc.gov.nrs.vdyp.forward.VdypPass.Pass1;
-import static ca.bc.gov.nrs.vdyp.forward.VdypPass.Pass2;
-import static ca.bc.gov.nrs.vdyp.forward.VdypPass.Pass3;
-import static ca.bc.gov.nrs.vdyp.forward.VdypPass.Pass4;
-import static ca.bc.gov.nrs.vdyp.forward.VdypPass.Pass5;
+import static ca.bc.gov.nrs.vdyp.forward.VdypPass.PASS_1;
+import static ca.bc.gov.nrs.vdyp.forward.VdypPass.PASS_2;
+import static ca.bc.gov.nrs.vdyp.forward.VdypPass.PASS_3;
+import static ca.bc.gov.nrs.vdyp.forward.VdypPass.PASS_4;
+import static ca.bc.gov.nrs.vdyp.forward.VdypPass.PASS_5;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,7 +30,7 @@ public class VdypForwardApplication extends VdypApplication {
 	public static final String DEFAULT_VDYP_CONTROL_FILE_NAME = "vdyp.ctr";
 
 	private static Set<VdypPass> vdypPassSet = new HashSet<>(
-			Arrays.asList(new VdypPass[] { Pass1, Pass2, Pass3, Pass4, Pass5 })
+			Arrays.asList(new VdypPass[] { PASS_1, PASS_2, PASS_3, PASS_4, PASS_5 })
 	);
 
 	public static void main(final String... args) {
@@ -82,7 +82,7 @@ public class VdypForwardApplication extends VdypApplication {
 
 	@Override
 	public VdypApplicationIdentifier getId() {
-		return VdypApplicationIdentifier.VDYPForward;
+		return VdypApplicationIdentifier.VDYP_FORWARD;
 	}
 
 //	public static final float PI_40K = 0.78539816E-04f;

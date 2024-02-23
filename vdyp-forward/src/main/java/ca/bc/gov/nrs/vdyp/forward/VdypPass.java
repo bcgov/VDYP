@@ -16,5 +16,5 @@ package ca.bc.gov.nrs.vdyp.forward;
 //                             +ve value.  Serious error. Set to IER.
 
 public enum VdypPass {
-	Pass1, Pass2, Pass3, Pass4, Pass5, Pass6
+	PASS_1, PASS_2, PASS_3, PASS_4, PASS_5, PASS_6
 }

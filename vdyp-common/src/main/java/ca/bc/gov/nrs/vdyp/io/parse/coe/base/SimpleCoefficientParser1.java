@@ -93,10 +93,10 @@ public abstract class SimpleCoefficientParser1<K1> implements ControlMapSubResou
 		return delegate.coefficients(number, length);
 	}
 
-	public <K> BaseCoefficientParser<Coefficients, Coefficients, MatrixMap<Coefficients>>
-			coefficients(int number, int length
-					, Optional<Function<Void, Coefficients>> defaultEntryValuator
-					, Optional<IntFunction<Float>> defaultCoefficientValuator) {
+	public <K> BaseCoefficientParser<Coefficients, Coefficients, MatrixMap<Coefficients>> coefficients(
+			int number, int length, Optional<Function<Void, Coefficients>> defaultEntryValuator,
+			Optional<IntFunction<Float>> defaultCoefficientValuator
+	) {
 		return delegate.coefficients(number, length, defaultEntryValuator, defaultCoefficientValuator);
 	}
 

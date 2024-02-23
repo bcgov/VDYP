@@ -287,7 +287,9 @@ public class VdypForwardPolygonParserTest {
 
 		var fileResolver = TestUtils.fileResolver(
 				"test.dat",
-				TestUtils.makeInputStream("01002 S000001 00     1970 CWH  A   0.0", "01002 S000002 00     1970 CWH  A  -1.0")
+				TestUtils.makeInputStream(
+						"01002 S000001 00     1970 CWH  A   0.0", "01002 S000002 00     1970 CWH  A  -1.0"
+				)
 		);
 
 		parser.modify(controlMap, fileResolver);

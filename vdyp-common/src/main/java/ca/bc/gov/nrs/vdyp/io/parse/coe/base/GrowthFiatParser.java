@@ -20,16 +20,14 @@ public abstract class GrowthFiatParser implements ControlMapSubResourceParser<Ma
 	public static final String REGION_ID_KEY = "RegionId";
 	public static final String COEFFICIENTS_KEY = "Coefficients";
 
-	public GrowthFiatParser() {
-		
+	protected GrowthFiatParser() {
+
 		this.lineParser = new LineParser() {
-				@Override
-				public boolean isStopLine(String line) {
-					return line == null || line.substring(0, Math.min(3, line.length())).trim().length() == 0;
-				}
+			@Override
+			public boolean isStopLine(String line) {
+				return line == null || line.substring(0, Math.min(3, line.length())).trim().length() == 0;
 			}
-			.value(3, REGION_ID_KEY, ValueParser.INTEGER)
-			.multiValue(11, 6, COEFFICIENTS_KEY, ValueParser.FLOAT);
+		}.value(3, REGION_ID_KEY, ValueParser.INTEGER).multiValue(11, 6, COEFFICIENTS_KEY, ValueParser.FLOAT);
 	}
 
 	private LineParser lineParser;
@@ -39,16 +37,18 @@ public abstract class GrowthFiatParser implements ControlMapSubResourceParser<Ma
 			throws IOException, ResourceParseException {
 
 		Map<Region, GrowthFiatDetails> result = new HashMap<>();
-		
+
 		lineParser.parse(is, result, (value, r, lineNumber) -> {
 			var regionId = (Integer) value.get(REGION_ID_KEY);
-			
+
 			if (regionId != 1 && regionId != 2) {
 				throw new ValueParseException(
-						MessageFormat.format("Line {0}: region id is not recognized; the value must be 1 or 2"
-								, lineNumber, regionId));
+						MessageFormat.format(
+								"Line {0}: region id is not recognized; the value must be 1 or 2", lineNumber, regionId
+						)
+				);
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			var coefficients = (List<Float>) value.get(COEFFICIENTS_KEY);
 

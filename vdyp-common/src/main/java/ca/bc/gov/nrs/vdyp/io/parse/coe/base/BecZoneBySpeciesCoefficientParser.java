@@ -19,16 +19,18 @@ import ca.bc.gov.nrs.vdyp.model.MatrixMap2;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap2Impl;
 
 /**
- * Base class for parsers of configuration files whose lines contain a BEC Zone Alias, an integer
- * index, an indicator flag and a list of 16 coefficients (one per species) and generates a
- * MatrixMap2 indexed by BEC Zone alias and then sp0 alias of coefficients, one per index.
- * 
+ * Base class for parsers of configuration files whose lines contain a BEC Zone
+ * Alias, an integer index, an indicator flag and a list of 16 coefficients (one
+ * per species) and generates a MatrixMap2 indexed by BEC Zone alias and then
+ * sp0 alias of coefficients, one per index.
+ *
  * Indices range from 0 to a parameterized value (7, for example).
  *
  * @author Michael Junkin, Vivid Solutions
  * @see ControlMapSubResourceParser
  */
-public abstract class BecZoneBySpeciesCoefficientParser implements ControlMapSubResourceParser<MatrixMap2<String, String, Coefficients>> {
+public abstract class BecZoneBySpeciesCoefficientParser
+		implements ControlMapSubResourceParser<MatrixMap2<String, String, Coefficients>> {
 
 	public static final String BEC_ZONE_ID_KEY = "BecId";
 	public static final String INDEX_KEY = "index";
@@ -38,7 +40,7 @@ public abstract class BecZoneBySpeciesCoefficientParser implements ControlMapSub
 	private final int nCoefficients;
 	private static final int NUM_SPECIES = 16;
 
-	public BecZoneBySpeciesCoefficientParser(int nCoefficients) {
+	protected BecZoneBySpeciesCoefficientParser(int nCoefficients) {
 
 		this.nCoefficients = nCoefficients;
 
@@ -49,12 +51,9 @@ public abstract class BecZoneBySpeciesCoefficientParser implements ControlMapSub
 				return line.substring(0, Math.min(4, line.length())).trim().length() == 0;
 			}
 
-		}
-		.value(4, BEC_ZONE_ID_KEY, ValueParser.STRING)
-		.space(2)
-		.value(1, INDEX_KEY, ValueParser.INTEGER)
-		.value(2, INDICATOR_KEY, ValueParser.INTEGER)
-		.multiValue(NUM_SPECIES, 8, COEFFICIENTS_KEY, ValueParser.FLOAT);
+		}.value(4, BEC_ZONE_ID_KEY, ValueParser.STRING).space(2).value(1, INDEX_KEY, ValueParser.INTEGER)
+				.value(2, INDICATOR_KEY, ValueParser.INTEGER)
+				.multiValue(NUM_SPECIES, 8, COEFFICIENTS_KEY, ValueParser.FLOAT);
 	}
 
 	LineParser lineParser;

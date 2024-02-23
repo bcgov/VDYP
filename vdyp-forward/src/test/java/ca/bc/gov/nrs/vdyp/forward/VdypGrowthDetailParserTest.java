@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParseException;
 
 class VdypGrowthDetailParserTest {
-	
+
 	@Test
 	void testNullInput() throws Exception {
 		try {
@@ -22,7 +22,7 @@ class VdypGrowthDetailParserTest {
 			assertThat(e, hasProperty("message", is("VdypVtrolParser: supplied string is null")));
 		}
 	}
-	
+
 	@Test
 	void testEmptyInput() throws Exception {
 		try {
@@ -33,7 +33,7 @@ class VdypGrowthDetailParserTest {
 			assertThat(e, hasProperty("message", is("VdypVtrolParser: supplied string \"   \" is empty")));
 		}
 	}
-	
+
 	@Test
 	void testInvalidInput() throws Exception {
 		try {
@@ -44,7 +44,7 @@ class VdypGrowthDetailParserTest {
 			assertThat(e, hasProperty("message", is("\"a\" is not a valid Integer")));
 		}
 	}
-	
+
 	@Test
 	void testValidInput() throws Exception {
 		var parser = new VdypVtrolParser();
@@ -60,7 +60,7 @@ class VdypGrowthDetailParserTest {
 		assertThat(5, equalTo(details2.getVtrol(5)));
 		assertThat(6, equalTo(details2.getVtrol(6)));
 	}
-	
+
 	@Test
 	void testExtraInputIgnored() throws Exception {
 		var parser = new VdypVtrolParser();

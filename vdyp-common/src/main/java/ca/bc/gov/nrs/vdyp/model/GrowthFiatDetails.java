@@ -10,7 +10,8 @@ public class GrowthFiatDetails {
 
 	/**
 	 * Describes a GrowthFiat model.
-	 * @param regionId either 1 (coast) or 2 (interior)
+	 *
+	 * @param regionId     either 1 (coast) or 2 (interior)
 	 * @param coefficients (11: 0-3 ages, 4-7 coefficients, 8-10 mixed coefficients)
 	 */
 	public GrowthFiatDetails(int regionId, List<Float> numbers) {

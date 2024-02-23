@@ -310,7 +310,7 @@ public class TestUtils {
 			fail(ex);
 		}
 	}
-	
+
 	public static void populateControlMapFromStream(
 			Map<String, Object> controlMap, ResourceControlMapModifier parser, InputStream is
 	) {

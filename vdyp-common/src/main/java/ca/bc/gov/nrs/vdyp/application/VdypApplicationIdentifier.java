@@ -7,22 +7,16 @@ package ca.bc.gov.nrs.vdyp.application;
  * @author Michael Junkin, Vivid Solutions
  */
 public enum VdypApplicationIdentifier {
-	
-	FIPStart(1),
-	VRIStart(3),
-	VDYPForward(6),
-	VDYPBack(7),
-	VRIAdjust(8);
-	
+
+	FIP_START(1), VRI_START(3), VDYP_FORWARD(6), VDYP_BACK(7), VRI_ADJUST(8);
+
 	private final int jProgramNumber;
 
-	VdypApplicationIdentifier(int jProgramNumber)
-	{
+	VdypApplicationIdentifier(int jProgramNumber) {
 		this.jProgramNumber = jProgramNumber;
 	}
-	
-	public int getJProgramNumber()
-	{
+
+	public int getJProgramNumber() {
 		return jProgramNumber;
 	}
 }

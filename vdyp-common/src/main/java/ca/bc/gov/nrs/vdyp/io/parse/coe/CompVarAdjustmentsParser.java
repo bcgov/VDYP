@@ -36,11 +36,16 @@ import ca.bc.gov.nrs.vdyp.model.CompVarAdjustments;
  * <li>51 - lorey height adjustment for primary species
  * <li>52 - lorey height adjustment for other species
  * <li>5 - 8 - basal area adjustment for Utilization Classes 1 - 4, respectively
- * <li>15 - 18 - quadratic mean diameter adjustment for Utilization Classes 1 - 4, respectively
- * <li>11, 21, 31, 41: whole stem volume adjustment for Utilization Classes 1 - 4, respectively
- * <li>12, 22, 32, 42: close util volume adjustment for Utilization Classes 1 - 4, respectively
- * <li>13, 23, 33, 43: close util volume, less decay, adjustment for Utilization Classes 1 - 4, respectively
- * <li>14, 24, 34, 44: close util volume, less decay, less waste, adjustment for Utilization Classes 1 - 4, respectively
+ * <li>15 - 18 - quadratic mean diameter adjustment for Utilization Classes 1 -
+ * 4, respectively
+ * <li>11, 21, 31, 41: whole stem volume adjustment for Utilization Classes 1 -
+ * 4, respectively
+ * <li>12, 22, 32, 42: close util volume adjustment for Utilization Classes 1 -
+ * 4, respectively
+ * <li>13, 23, 33, 43: close util volume, less decay, adjustment for Utilization
+ * Classes 1 - 4, respectively
+ * <li>14, 24, 34, 44: close util volume, less decay, less waste, adjustment for
+ * Utilization Classes 1 - 4, respectively
  * </ul>
  * <p>
  * Control index: 028

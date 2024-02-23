@@ -89,7 +89,9 @@ class ModifierParserTest {
 	protected void modifierDefaultAsserts(Map<String, Object> controlMap) {
 		var expectedSp0Aliases = TestUtils.getSpeciesAliases();
 
-		assertThat(controlMap, (Matcher) hasSpecificEntry(ControlKey.MODIFIER_FILE.name(), present(is("testFilename"))));
+		assertThat(
+				controlMap, (Matcher) hasSpecificEntry(ControlKey.MODIFIER_FILE.name(), present(is("testFilename")))
+		);
 
 		assertThat(
 				controlMap,

@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.forward;
 
+@SuppressWarnings("java:S2187") // TODO VDYP-192 VDYP-193 VDYP-198
 class VdypForwardTest {
 
 //	@Test

@@ -17,16 +17,19 @@ import ca.bc.gov.nrs.vdyp.model.Coefficients;
 import ca.bc.gov.nrs.vdyp.model.ModelCoefficients;
 
 /**
- * Parses a mapping from a Basal Area Group number to a ModelCoefficients instance. Each row contains 
+ * Parses a mapping from a Basal Area Group number to a ModelCoefficients
+ * instance. Each row contains
  * <ol>
  * <li>(cols 0-1) int - Basal Area Group number</li>
  * <li>(cols 2-4) float - max. basal area for group</li>
  * <li>(cols 5-14, 15-24, 25-34) float - coefficients for group function</li>
  * </ol>
- * All lines are parsed. There is no provision for blank lines. If a value for a given Basal Area Group 
- * is not included in the file, the values model value and coefficients (0.0, 0.0, 0.0) are used.
+ * All lines are parsed. There is no provision for blank lines. If a value for a
+ * given Basal Area Group is not included in the file, the values model value
+ * and coefficients (0.0, 0.0, 0.0) are used.
  * <p>
- * The result of the parse is a map from a Basal Area Group number to ModelCoefficients instance.
+ * The result of the parse is a map from a Basal Area Group number to
+ * ModelCoefficients instance.
  *
  * @author Michael Junkin, Vivid Solutions
  * @see ControlMapSubResourceParser
@@ -44,17 +47,15 @@ public abstract class PrimarySpeciesGrowthParser
 	public static final String MODEL_NUMBER_KEY = "Model";
 	public static final String COEFFICIENTS_KEY = "Coefficients";
 
-	public PrimarySpeciesGrowthParser() {
+	protected PrimarySpeciesGrowthParser() {
 
 		this.lineParser = new LineParser() {
-					@Override
-					public boolean isStopLine(String line) {
-						return line == null || line.trim().length() == 0;
-					}
-				}
-			.value(2, BASAL_AREA_GROUP_ID_KEY, ValueParser.INTEGER)
-			.value(3, MODEL_NUMBER_KEY, ValueParser.INTEGER)
-			.multiValue(3, 10, COEFFICIENTS_KEY, ValueParser.FLOAT);
+			@Override
+			public boolean isStopLine(String line) {
+				return line == null || line.trim().length() == 0;
+			}
+		}.value(2, BASAL_AREA_GROUP_ID_KEY, ValueParser.INTEGER).value(3, MODEL_NUMBER_KEY, ValueParser.INTEGER)
+				.multiValue(3, 10, COEFFICIENTS_KEY, ValueParser.FLOAT);
 	}
 
 	private LineParser lineParser;
