@@ -9,8 +9,8 @@ import ca.bc.gov.nrs.vdyp.io.parse.common.ResourceParseException;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 
 /**
- * Modify a control map based on a resource referenced within it if it is
- * specified, otherwise perform a default operation.
+ * Modify a control map based on a resource referenced within it if it is specified, otherwise perform a default
+ * operation.
  *
  * @author Kevin Smith, Vivid Solutions
  *

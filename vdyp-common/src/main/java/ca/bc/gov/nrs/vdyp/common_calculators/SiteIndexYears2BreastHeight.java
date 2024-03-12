@@ -404,8 +404,8 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_HM_WILEY: // copied from Hw Wiley 1978 // seed (root collar) y2bh =
-		 * 9.43 - site_index / 7.088; if (y2bh < 1){ y2bh = 1; } break;
+		 * case SI_HM_WILEY: // copied from Hw Wiley 1978 // seed (root collar) y2bh = 9.43 - site_index / 7.088; if
+		 * (y2bh < 1){ y2bh = 1; } break;
 		 */
 
 		case SI_HWI_NIGH:
@@ -471,23 +471,19 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_PF_GOUDIE_DRY: // copied from Pli Goudie // from seed y2bh = 2 + 3.6
-		 * + 42.64 / site_index; break;
+		 * case SI_PF_GOUDIE_DRY: // copied from Pli Goudie // from seed y2bh = 2 + 3.6 + 42.64 / site_index; break;
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_PF_GOUDIE_WET: // copied from Pli Goudie // from seed y2bh = 2 + 3.6
-		 * + 42.64 / site_index; break;
+		 * case SI_PF_GOUDIE_WET: // copied from Pli Goudie // from seed y2bh = 2 + 3.6 + 42.64 / site_index; break;
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_PJ_HUANG_PLA: // from seed y2bh = 3.5 + 1.872138 + 49.555513 /
-		 * site_index; break;
+		 * case SI_PJ_HUANG_PLA: // from seed y2bh = 3.5 + 1.872138 + 49.555513 / site_index; break;
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_PJ_HUANG_NAT: // from seed y2bh = 5 + 1.872138 + 49.555513 /
-		 * site_index; break;
+		 * case SI_PJ_HUANG_NAT: // from seed y2bh = 5 + 1.872138 + 49.555513 / site_index; break;
 		 */
 
 		case SI_PJ_HUANG:
@@ -604,8 +600,7 @@ public class SiteIndexYears2BreastHeight {
 				y2bh = 21.6623 * ppow(site_index - 9.05671, -0.550762);
 			}
 			/*
-			 * slightly older version y2bh = 22.41028 * ppow (site_index - 8.90585,
-			 * -0.5614);
+			 * slightly older version y2bh = 22.41028 * ppow (site_index - 8.90585, -0.5614);
 			 */
 			break;
 
@@ -667,14 +662,14 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant\
 		/*
-		 * case SI_SE_GOUDIE_PLA: // copied from Sw Goudie // from seed y2bh = 2.0 +
-		 * 2.1578 + 110.76 / site_index; break;
+		 * case SI_SE_GOUDIE_PLA: // copied from Sw Goudie // from seed y2bh = 2.0 + 2.1578 + 110.76 / site_index;
+		 * break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_SE_GOUDIE_NAT: // copied from Sw Goudie // from seed y2bh = 6.0 +
-		 * 2.1578 + 110.76 / site_index; break;
+		 * case SI_SE_GOUDIE_NAT: // copied from Sw Goudie // from seed y2bh = 6.0 + 2.1578 + 110.76 / site_index;
+		 * break;
 		 */
 
 		case SI_SW_NIGHGI:
@@ -970,15 +965,13 @@ public class SiteIndexYears2BreastHeight {
 			break;
 		// Couldn't find constant
 		/*
-		 * case SI_BC_KURUCZ82: //Copied from Bl Kurucz82 (Thrower) // from seed (root
-		 * collar) y2bh = 42.25 - 10.66 * llog (site_index); if (y2bh < 5.0){ y2bh =
-		 * 5.0; } break;
+		 * case SI_BC_KURUCZ82: //Copied from Bl Kurucz82 (Thrower) // from seed (root collar) y2bh = 42.25 - 10.66 *
+		 * llog (site_index); if (y2bh < 5.0){ y2bh = 5.0; } break;
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_BG_KURUCZ82: //Copied from Bl Kurucz82 (Thrower) // from seed (root
-		 * collar) y2bh = 42.25 - 10.66 * llog (site_index); if (y2bh < 5.0){ y2bh =
-		 * 5.0; } break;
+		 * case SI_BG_KURUCZ82: //Copied from Bl Kurucz82 (Thrower) // from seed (root collar) y2bh = 42.25 - 10.66 *
+		 * llog (site_index); if (y2bh < 5.0){ y2bh = 5.0; } break;
 		 */
 
 		case SI_FDI_NIGHGI:
@@ -1149,8 +1142,7 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_BB_HUANG: // from seed y2bh = 8 + 8.299433 + 59.302950 / site_index;
-		 * break;
+		 * case SI_BB_HUANG: // from seed y2bh = 8 + 8.299433 + 59.302950 / site_index; break;
 		 */
 
 		// Couldn't find constant
@@ -1191,14 +1183,14 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_LA_MILNER: // Copied from Lw Milner. //from seed (root collar) y2bh =
-		 * 3.36 + 87.18 / site_index; break;
+		 * case SI_LA_MILNER: // Copied from Lw Milner. //from seed (root collar) y2bh = 3.36 + 87.18 / site_index;
+		 * break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_LT_MILNER: // Copied from Lw Milner. //from seed (root collar) y2bh =
-		 * 3.36 + 87.18 / site_index; break;
+		 * case SI_LT_MILNER: // Copied from Lw Milner. //from seed (root collar) y2bh = 3.36 + 87.18 / site_index;
+		 * break;
 		 */
 
 		case SI_LW_MILNER:
@@ -1231,14 +1223,12 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_EP_CHEN: // equation copied from At Goudie y2bh = 1.331 + 38.56 /
-		 * site_index; break;
+		 * case SI_EP_CHEN: // equation copied from At Goudie y2bh = 1.331 + 38.56 / site_index; break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_EP_GOUDIE: //equation copied from At Goudie y2bh = 1.331 + 38.56 /
-		 * site_index; break;
+		 * case SI_EP_GOUDIE: //equation copied from At Goudie y2bh = 1.331 + 38.56 / site_index; break;
 		 */
 
 		case SI_EP_NIGH:
@@ -1264,27 +1254,23 @@ public class SiteIndexYears2BreastHeight {
 
 		// Couldn't find constant
 		/*
-		 * case SI_PA_GOUDIE_DRY: //copied from Pli Goudie // from seed y2bh = 2 + 3.6 +
-		 * 42.64 / site_index; break;
+		 * case SI_PA_GOUDIE_DRY: //copied from Pli Goudie // from seed y2bh = 2 + 3.6 + 42.64 / site_index; break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_PA_GOUDIE_WET: //copied from Pli Goudie // from seed y2bh = 2 + 3.6 +
-		 * 42.64 / site_index; break;
+		 * case SI_PA_GOUDIE_WET: //copied from Pli Goudie // from seed y2bh = 2 + 3.6 + 42.64 / site_index; break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_YC_KURUCZ: // equation copied from Cw //approximate function,
-		 * borrowed from Fdc Bruce 1981 // from seed y2bh = 13.25 - site_index / 6.096;
-		 * if (y2bh < 1){ y2bh = 1; } break;
+		 * case SI_YC_KURUCZ: // equation copied from Cw //approximate function, borrowed from Fdc Bruce 1981 // from
+		 * seed y2bh = 13.25 - site_index / 6.096; if (y2bh < 1){ y2bh = 1; } break;
 		 */
 
 		// Couldn't find constant
 		/*
-		 * case SI_TE_GOUDIE: y2bh = 5.063 - 0.1797 * site_index; if (y2bh < 1){ y2bh =
-		 * 1; } break;
+		 * case SI_TE_GOUDIE: y2bh = 5.063 - 0.1797 * site_index; if (y2bh < 1){ y2bh = 1; } break;
 		 */
 
 		default:

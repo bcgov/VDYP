@@ -18,19 +18,15 @@ import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 import ca.bc.gov.nrs.vdyp.model.Coefficients;
 
 /**
- * Parses a mapping from a Basal Area Group number to a list of eight
- * coefficients. Each row contains
+ * Parses a mapping from a Basal Area Group number to a list of eight coefficients. Each row contains
  * <ol>
  * <li>(cols 0-2) int - Basal Area Group number</li>
- * <li>(cols 3-11, 12-20, 21-30, 31-39, 40-48, 49-57) float * 6 - coefficient
- * list (9 characters)</li>
+ * <li>(cols 3-11, 12-20, 21-30, 31-39, 40-48, 49-57) float * 6 - coefficient list (9 characters)</li>
  * <li>(cols 58-63, 64-69) float * 2 - coefficient list (6 characters)</li>
  * </ol>
- * All lines are parsed. There is no provision for blank lines; all lines must
- * have content.
+ * All lines are parsed. There is no provision for blank lines; all lines must have content.
  * <p>
- * The result of the parse is a map from a Basal Area Group number to a
- * (zero-based) eight-element coefficient array.
+ * The result of the parse is a map from a Basal Area Group number to a (zero-based) eight-element coefficient array.
  * <p>
  * Control index: 123
  * <p>

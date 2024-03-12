@@ -56,8 +56,9 @@ class BasalAreaGrowthFiatParserTest {
 		var is = TestUtils.makeInputStream("  1     1   .02   100   .01   200     0     0     0   100   150   1.0");
 
 		assertThat(
-		    assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
-		    Matchers.hasProperty("message", Matchers.is("Details for Interior region missing")));
+				assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
+				Matchers.hasProperty("message", Matchers.is("Details for Interior region missing"))
+		);
 	}
 
 	@Test
@@ -68,8 +69,9 @@ class BasalAreaGrowthFiatParserTest {
 		var is = TestUtils.makeInputStream("  2     1   .02   100   .01   200     0     0     0   100   150   1.0");
 
 		assertThat(
-		    assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
-			Matchers.hasProperty("message", Matchers.is("Details for Coastal region missing")));
+				assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
+				Matchers.hasProperty("message", Matchers.is("Details for Coastal region missing"))
+		);
 	}
 
 	@Test
@@ -79,9 +81,10 @@ class BasalAreaGrowthFiatParserTest {
 
 		var is = TestUtils.makeInputStream();
 
-        assertThat(
-            assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
-			Matchers.hasProperty("message", Matchers.is("Details for Interior and Coastal regions missing")));
+		assertThat(
+				assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
+				Matchers.hasProperty("message", Matchers.is("Details for Interior and Coastal regions missing"))
+		);
 	}
 
 	@Test
@@ -94,9 +97,10 @@ class BasalAreaGrowthFiatParserTest {
 				"  2     1   .02   100   .01   200     0     0     0   100   150   1.0"
 		);
 
-        assertThat(
-            assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
-			Matchers.hasProperty("message", Matchers.is("Error at line 1: Region Id 1 contains no age ranges")));
+		assertThat(
+				assertThrows(ResourceParseException.class, () -> parser.parse(is, new HashMap<>())),
+				Matchers.hasProperty("message", Matchers.is("Error at line 1: Region Id 1 contains no age ranges"))
+		);
 	}
 
 	@Test
@@ -111,9 +115,11 @@ class BasalAreaGrowthFiatParserTest {
 		);
 
 		assertThat(
-		    assertThrows(ResourceParseLineException.class, () -> parser.parse(is, new HashMap<>())),
-			Matchers.hasProperty(
-					"message",
-					Matchers.is("Error at line 3: Region Id INTERIOR is present multiple times in the file")));
+				assertThrows(ResourceParseLineException.class, () -> parser.parse(is, new HashMap<>())),
+				Matchers.hasProperty(
+						"message",
+						Matchers.is("Error at line 3: Region Id INTERIOR is present multiple times in the file")
+				)
+		);
 	}
 }

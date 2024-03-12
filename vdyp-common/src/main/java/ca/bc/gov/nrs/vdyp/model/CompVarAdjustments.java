@@ -33,8 +33,7 @@ public class CompVarAdjustments {
 	private Map<Integer, Float> values;
 
 	/**
-	 * Constructs a default instance, one in which all index values are 1.0f. See
-	 * rd_e028.for.
+	 * Constructs a default instance, one in which all index values are 1.0f. See rd_e028.for.
 	 */
 	public CompVarAdjustments() {
 		values = new HashMap<>();

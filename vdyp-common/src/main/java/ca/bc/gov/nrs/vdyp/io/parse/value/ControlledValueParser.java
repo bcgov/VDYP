@@ -16,8 +16,7 @@ public interface ControlledValueParser<T> {
 	public static final String DELEGATE_MUST_NOT_BE_NULL = "delegate must not be null";
 
 	/**
-	 * Parse a string to a value using a control map for context. Should not attempt
-	 * to modify the map.
+	 * Parse a string to a value using a control map for context. Should not attempt to modify the map.
 	 *
 	 * @param s
 	 * @param control
@@ -31,8 +30,7 @@ public interface ControlledValueParser<T> {
 	 *
 	 * @param <U>
 	 * @param delegate
-	 * @param validator Function that returns an error string if the parsed value is
-	 *                  invalid
+	 * @param validator Function that returns an error string if the parsed value is invalid
 	 * @return
 	 */
 	public static <U> ControlledValueParser<U> validate(
@@ -50,8 +48,7 @@ public interface ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses if the string is not blank, and returns an empty
-	 * Optional otherwise.
+	 * Makes a parser that parses if the string is not blank, and returns an empty Optional otherwise.
 	 *
 	 * @param delegate Parser to use if the string is not blank
 	 */
@@ -61,8 +58,7 @@ public interface ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses if the string passes the test, and returns an
-	 * empty Optional otherwise.
+	 * Makes a parser that parses if the string passes the test, and returns an empty Optional otherwise.
 	 *
 	 * @param delegate Parser to use if the string is not blank
 	 * @param test     Test to apply to the string
@@ -79,8 +75,7 @@ public interface ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses the string, then tests it, and returns empty if it
-	 * fails.
+	 * Makes a parser that parses the string, then tests it, and returns empty if it fails.
 	 *
 	 * @param delegate Parser to use
 	 * @param test     Test to apply to the parsed result
@@ -98,8 +93,7 @@ public interface ControlledValueParser<T> {
 	}
 
 	/**
-	 * Parser that strips whitespace and validates that the string is a Genus (SP0)
-	 * ID
+	 * Parser that strips whitespace and validates that the string is a Genus (SP0) ID
 	 */
 	static final ControlledValueParser<String> GENUS = (string, control) -> {
 		var result = string.strip();

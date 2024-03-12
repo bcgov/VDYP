@@ -18,7 +18,7 @@ import ca.bc.gov.nrs.vdyp.common.ControlKey;
 import ca.bc.gov.nrs.vdyp.fip.model.FipPolygon;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParser;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParserFactory;
-import ca.bc.gov.nrs.vdyp.model.FipMode;
+import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 import ca.bc.gov.nrs.vdyp.test.TestUtils;
 import ca.bc.gov.nrs.vdyp.test.VdypMatchers;
 
@@ -81,7 +81,7 @@ public class FipPolygonParserTest {
 		assertThat(poly, hasProperty("forestInventoryZone", is("A")));
 		assertThat(poly, hasProperty("biogeoclimaticZone", is("CWH")));
 		assertThat(poly, hasProperty("percentAvailable", present(is(90.0f))));
-		assertThat(poly, hasProperty("modeFip", present(is(FipMode.FIPYOUNG))));
+		assertThat(poly, hasProperty("modeFip", present(is(PolygonMode.YOUNG))));
 		assertThat(poly, hasProperty("nonproductiveDescription", present(is("BLAH"))));
 		assertThat(poly, hasProperty("yieldFactor", is(0.95f)));
 

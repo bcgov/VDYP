@@ -16,8 +16,8 @@ public interface MatrixMap3<K1, K2, K3, V> extends MatrixMap<V> {
 	}
 
 	/**
-	 * Cast a 3 dimension MatrixMap to MatrixMap3, wrapping it if it has 3
-	 * dimensions but does not implement the interface.
+	 * Cast a 3 dimension MatrixMap to MatrixMap3, wrapping it if it has 3 dimensions but does not implement the
+	 * interface.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <K1, K2, K3, V> MatrixMap3<K1, K2, K3, V>

@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.io.parse.value;
 
+import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.closeTo;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.notPresent;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.present;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -247,6 +248,43 @@ class ValueParserTest {
 				() -> ValueParser.toMap(ValueParser.segmentList(3, ValueParser.INTEGER), defaults, "A", "B", "C", "D")
 		);
 		assertThat(ex, hasProperty("message", is("Keys with defaults must follow those without")));
+	}
+
+	@Test
+	void testRangeSilentLow() throws Exception {
+
+		var parser = ValueParser.rangeSilentLow(ValueParser.FLOAT, 1f, true, 4f, false, "test");
+
+		assertThat(parser.parse("0"), notPresent());
+		assertThat(parser.parse("0.99999"), notPresent());
+		assertThat(parser.parse("1"), present(closeTo(1f)));
+		assertThat(parser.parse("3.99999"), present(closeTo(3.99999f)));
+
+		assertThat(
+				assertThrows(ValueParseException.class, () -> parser.parse("4")),
+				hasProperty("message", is("test must be less than 4.0."))
+		);
+		assertThat(
+				assertThrows(ValueParseException.class, () -> parser.parse("5")),
+				hasProperty("message", is("test must be less than 4.0."))
+		);
+
+		var parser2 = ValueParser.rangeSilentLow(ValueParser.FLOAT, 1f, false, 4f, true, "test");
+
+		assertThat(parser2.parse("0"), notPresent());
+		assertThat(parser2.parse("0.99999"), notPresent());
+		assertThat(parser2.parse("1"), notPresent());
+		assertThat(parser2.parse("3.99999"), present(closeTo(3.99999f)));
+		assertThat(parser2.parse("4"), present(closeTo(4f)));
+
+		assertThat(
+				assertThrows(ValueParseException.class, () -> parser2.parse("4.0001")),
+				hasProperty("message", is("test must be less than or equal to 4.0."))
+		);
+		assertThat(
+				assertThrows(ValueParseException.class, () -> parser2.parse("5")),
+				hasProperty("message", is("test must be less than or equal to 4.0."))
+		);
 	}
 
 }

@@ -4,11 +4,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -24,8 +26,7 @@ public class Utils {
 	}
 
 	/**
-	 * Returns a singleton set containing the value if it's not null, otherwise an
-	 * empty set
+	 * Returns a singleton set containing the value if it's not null, otherwise an empty set
 	 *
 	 * @param <T>
 	 * @param value
@@ -39,8 +40,7 @@ public class Utils {
 	}
 
 	/**
-	 * Normalize a nullable value that may or may not be an Optional to a non-null
-	 * Optional.
+	 * Normalize a nullable value that may or may not be an Optional to a non-null Optional.
 	 *
 	 * Mostly useful for Optionalizing values from maps.
 	 *
@@ -53,10 +53,34 @@ public class Utils {
 		return Optional.ofNullable(value).flatMap(x -> x instanceof Optional o ? o : (Optional) Optional.of(x));
 	}
 
+	/**
+	 * Passes both operands to the consumer only if both are present.
+	 *
+	 * @return
+	 */
 	public static <T, U> void ifBothPresent(Optional<T> opt1, Optional<U> opt2, BiConsumer<T, U> consumer) {
 		opt1.ifPresent(v1 -> {
 			opt2.ifPresent(v2 -> consumer.accept(v1, v2));
 		});
+	}
+
+	/**
+	 * Returns the result of the function applied to the operands if both are present, otherwise empty.
+	 *
+	 * @return
+	 */
+	public static <T, U, V> Optional<V> mapBoth(Optional<T> opt1, Optional<U> opt2, BiFunction<T, U, V> function) {
+		return opt1.flatMap(v1 -> opt2.map(v2 -> function.apply(v1, v2)));
+	}
+
+	/**
+	 * Returns the result of the function applied to the operands if both are present, otherwise empty.
+	 *
+	 * @return
+	 */
+	public static <T, U, V> Optional<V>
+			flatMapBoth(Optional<T> opt1, Optional<U> opt2, BiFunction<T, U, Optional<V>> function) {
+		return opt1.flatMap(v1 -> opt2.flatMap(v2 -> function.apply(v1, v2)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,8 +115,7 @@ public class Utils {
 	 * @param control The control map
 	 * @param key     Key for the entry in the control map
 	 * @param clazz   Expected type for the entry
-	 * @throws IllegalStateException if the control map does not have the requested
-	 *                               entry or it is the wrong type.
+	 * @throws IllegalStateException if the control map does not have the requested entry or it is the wrong type.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -107,8 +130,7 @@ public class Utils {
 	 * @param control The control map
 	 * @param key     Key for the entry in the control map
 	 * @param clazz   Expected type for the entry
-	 * @throws IllegalStateException if the control map does not have the requested
-	 *                               entry or it is the wrong type.
+	 * @throws IllegalStateException if the control map does not have the requested entry or it is the wrong type.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -117,8 +139,8 @@ public class Utils {
 	}
 
 	/**
-	 * Creates a Comparator that compares two objects by applying the given accessor
-	 * function to get comparable values that are then compared.
+	 * Creates a Comparator that compares two objects by applying the given accessor function to get comparable values
+	 * that are then compared.
 	 *
 	 * @param <T>      type to be compared with the Comparator
 	 * @param <V>      Comparable type
@@ -163,8 +185,8 @@ public class Utils {
 	}
 
 	/**
-	 * Takes two iterables and returns an iterable of pairs of their entries. If
-	 * they have different lengths, it stops when the first one does.
+	 * Takes two iterables and returns an iterable of pairs of their entries. If they have different lengths, it stops
+	 * when the first one does.
 	 *
 	 * @param <T>
 	 * @param <U>
@@ -193,36 +215,47 @@ public class Utils {
 		};
 	}
 
-    /**
-     * @return true iff <code>string</code> is null or when the result of 
-     * passing the first {@code Math.min(string.length(), length)} characters of 
-     * {@code string} to {@code java.lang.String.isBlank()} would return true.
-     * 
-     * @param string the String against which the check is being made
-     * @param length the length of the prefix of {@code string} that's being checked.
-     */
+	/**
+	 * @return true iff <code>string</code> is null or when the result of passing the first
+	 *         {@code Math.min(string.length(), length)} characters of {@code string} to
+	 *         {@code java.lang.String.isBlank()} would return true.
+	 *
+	 * @param string the String against which the check is being made
+	 * @param length the length of the prefix of {@code string} that's being checked.
+	 */
 	public static boolean nullOrPrefixBlank(@Nullable String string, int length) {
 		return string == null || (string.length() <= length && string.isBlank())
 				|| (string.length() > length && string.substring(0, length).isBlank());
 	}
 
 	/**
-	 * @return true iff <code>string</code> is null or {@code java.lang.String.isBlank()} would
-	 * return true.
-     * 
-     * @param string the String against which the check is being made
+	 * @return true iff <code>string</code> is null or {@code java.lang.String.isBlank()} would return true.
+	 *
+	 * @param string the String against which the check is being made
 	 */
 	public static boolean nullOrBlank(@Nullable String string) {
 		return string == null || string.isBlank();
 	}
 
-    /**
-     * @return true iff <code>string</code> is null or {@code java.lang.String.isEmpty()} would
-     * return true.
-     * 
-     * @param string the String against which the check is being made
-     */
+	/**
+	 * @return true iff <code>string</code> is null or {@code java.lang.String.isEmpty()} would return true.
+	 *
+	 * @param string the String against which the check is being made
+	 */
 	public static boolean nullOrEmpty(@Nullable String string) {
 		return string == null || string.isEmpty();
+	}
+
+	public static boolean parsesBlankOrNonPositive(String string) {
+		if (string == null || string.isBlank())
+			return true;
+		var value = Float.valueOf(string);
+		return value != null && value <= 0;
+	}
+
+	public static <T> Optional<T> getIfPresent(List<T> list, int index) {
+		if (list.size() >= index)
+			return Optional.of(list.get(index));
+		return Optional.empty();
 	}
 }

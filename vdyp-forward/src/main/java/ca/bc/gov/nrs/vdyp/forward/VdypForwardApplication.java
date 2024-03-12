@@ -27,8 +27,9 @@ public class VdypForwardApplication extends VdypApplication {
 
 	static {
 		try {
-			LogManager.getLogManager().readConfiguration(VdypForwardProcessor.class.getClassLoader()
-					.getResourceAsStream("logging.properties"));
+			LogManager.getLogManager().readConfiguration(
+					VdypForwardProcessor.class.getClassLoader().getResourceAsStream("logging.properties")
+			);
 		} catch (SecurityException | IOException e) {
 			System.err.println("Unable to configure logging system");
 		}
@@ -41,9 +42,7 @@ public class VdypForwardApplication extends VdypApplication {
 
 	public static final String DEFAULT_VDYP_CONTROL_FILE_NAME = "vdyp.ctr";
 
-	private static Set<VdypPass> vdypPassSet = new HashSet<>(
-			Arrays.asList(PASS_1, PASS_2, PASS_3, PASS_4, PASS_5)
-	);
+	private static Set<VdypPass> vdypPassSet = new HashSet<>(Arrays.asList(PASS_1, PASS_2, PASS_3, PASS_4, PASS_5));
 
 	@SuppressWarnings("java:S106")
 	public static void main(final String... args) {
@@ -80,9 +79,9 @@ public class VdypForwardApplication extends VdypApplication {
 
 		try {
 			VdypForwardProcessor processor = new VdypForwardProcessor();
-			
+
 			processor.run(new FileSystemFileResolver(), controlFileNames, vdypPassSet);
-			
+
 		} catch (Exception ex) {
 			logger.error("Error during processing", ex);
 			System.exit(PROCESSING_ERROR);

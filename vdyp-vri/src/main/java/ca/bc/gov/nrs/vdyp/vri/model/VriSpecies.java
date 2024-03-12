@@ -11,12 +11,6 @@ public class VriSpecies extends BaseVdypSpecies {
 		super(polygonIdentifier, layer, genus, percentGenus);
 	}
 
-	public VriSpecies(VriSpecies toCopy) {
-		super(toCopy);
-	}
-	// TODO Stub, to be completed in VDYP-176
-	// @formatter:off
-
 	/**
 	 * Accepts a configuration function that accepts a builder to configure.
 	 *
@@ -31,31 +25,12 @@ public class VriSpecies extends BaseVdypSpecies {
 	 *
 	 * @param config The configuration function
 	 * @return The object built by the configured builder.
-	 * @throws IllegalStateException if any required properties have not been set by
-	 *                               the configuration function.
+	 * @throws IllegalStateException if any required properties have not been set by the configuration function.
 	 */
-/*	public static VriSpecies build(Consumer<Builder> config) {
+	public static VriSpecies build(Consumer<Builder> config) {
 		var builder = new Builder();
 		config.accept(builder);
 		return builder.build();
-	}*/
-
-	/**
-	 * Builds a species and adds it to the layer.
-	 *
-	 * @param layer  Layer to create the species for.
-	 * @param config Configuration function for the builder.
-	 * @return the new species.
-	 */
-/*	public static VriSpecies build(VriLayer layer, Consumer<Builder> config) {
-		var result = build(builder -> {
-			builder.polygonIdentifier(layer.getPolygonIdentifier());
-			builder.layerType(layer.getLayer());
-
-			config.accept(builder);
-		});
-		layer.getSpecies().put(result.getGenus(), result);
-		return result;
 	}
 
 	public static class Builder extends BaseVdypSpecies.Builder<VriSpecies> {
@@ -69,6 +44,5 @@ public class VriSpecies extends BaseVdypSpecies {
 					this.percentGenus.get()
 			);
 		}
-	}*/
-	// @formatter:off
+	}
 }

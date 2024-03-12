@@ -96,7 +96,7 @@ class FipLayerParserTest {
 								hasProperty("siteIndex", present(is(35.0f))), //
 								hasProperty("crownClosure", is(87.4f)), //
 								hasProperty("siteGenus", present(is("D"))), //
-								hasProperty("siteSpecies", is("D")), //
+								hasProperty("siteSpecies", present(is("D"))), //
 								hasProperty("yearsToBreastHeightSafe", is(1.0f)), //
 								hasProperty("stockingClass", present(is('0'))), //
 								hasProperty("inventoryTypeGroup", notPresent()), //
@@ -153,7 +153,7 @@ class FipLayerParserTest {
 								hasProperty("siteIndex", present(is(31.9f))), //
 								hasProperty("crownClosure", is(82.8f)), //
 								hasProperty("siteGenus", present(is("H"))), //
-								hasProperty("siteSpecies", is("H")), //
+								hasProperty("siteSpecies", present(is("H"))), //
 								hasProperty("yearsToBreastHeightSafe", is(4.9f)), //
 								hasProperty("stockingClass", present(is('0'))), //
 								hasProperty("inventoryTypeGroup", notPresent()), //
@@ -172,7 +172,7 @@ class FipLayerParserTest {
 								hasProperty("siteIndex", present(is(22.3f))), //
 								hasProperty("crownClosure", is(4.0f)), //
 								hasProperty("siteGenus", present(is("B"))), //
-								hasProperty("siteSpecies", is("B")), //
+								hasProperty("siteSpecies", present(is("B"))), //
 								hasProperty("yearsToBreastHeightSafe", is(9.4f))
 								// hasProperty("stockingClass", present(is("2"))),
 								// hasProperty("siteCurveNumber", present(is(8)))
@@ -228,7 +228,7 @@ class FipLayerParserTest {
 								hasProperty("siteIndex", present(is(31.9f))), //
 								hasProperty("crownClosure", is(82.8f)), //
 								hasProperty("siteGenus", present(is("H"))), //
-								hasProperty("siteSpecies", is("H")), //
+								hasProperty("siteSpecies", present(is("H"))), //
 								hasProperty("yearsToBreastHeightSafe", is(4.9f)), //
 								hasProperty("stockingClass", present(is('0'))), //
 								hasProperty("inventoryTypeGroup", notPresent()), //
@@ -285,7 +285,7 @@ class FipLayerParserTest {
 								hasProperty("siteIndex", present(is(31.9f))), //
 								hasProperty("crownClosure", is(82.8f)), //
 								hasProperty("siteGenus", present(is("H"))), //
-								hasProperty("siteSpecies", is("H")), //
+								hasProperty("siteSpecies", present(is("H"))), //
 								hasProperty("yearsToBreastHeightSafe", is(4.9f)),
 								hasProperty("stockingClass", present(is('0'))), //
 								hasProperty("inventoryTypeGroup", notPresent()), //

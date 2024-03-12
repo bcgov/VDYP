@@ -4,9 +4,8 @@ import ca.bc.gov.nrs.vdyp.common.ControlKey;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.base.PrimarySpeciesGrowthParser;
 
 /**
- * Parses a mapping from a Basal Area Group number to a ModelCoefficients
- * instance containing the coefficients for the Quadratic Mean Diameter Primary
- * Species Growth function as described in IPSJF150.doc.
+ * Parses a mapping from a Basal Area Group number to a ModelCoefficients instance containing the coefficients for the
+ * Quadratic Mean Diameter Primary Species Growth function as described in IPSJF150.doc.
  * <p>
  * Control index: 150
  * <p>

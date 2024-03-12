@@ -39,7 +39,7 @@ public class FileSystemFileResolver implements FileResolver {
 	}
 
 	@Override
-	public FileSystemFileResolver relative(String path) {
+	public FileSystemFileResolver relative(String path) throws IOException {
 		return new FileSystemFileResolver(toPath(path));
 	}
 }

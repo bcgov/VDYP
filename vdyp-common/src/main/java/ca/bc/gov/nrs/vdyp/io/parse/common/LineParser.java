@@ -127,8 +127,7 @@ public class LineParser {
 	}
 
 	/**
-	 * A string segment stripped of leading and trailing whitespace with no bounds.
-	 * No further segments may be added.
+	 * A string segment stripped of leading and trailing whitespace with no bounds. No further segments may be added.
 	 */
 	public LineParser strippedString(String name) {
 		return this.value(name, ValueParser.STRING);
@@ -251,13 +250,10 @@ public class LineParser {
 	 * @param <T>         Type of the resulting object
 	 * @param is          Input stream to parse
 	 * @param result      Starting state for the resulting object
-	 * @param addToResult Add a record from the file to the result object and return
-	 *                    it
+	 * @param addToResult Add a record from the file to the result object and return it
 	 * @return The result object after parsing
-	 * @throws IOException                if an error occurs while reading from the
-	 *                                    stream
-	 * @throws ResourceParseLineException if the content of the stream could not be
-	 *                                    parsed
+	 * @throws IOException                if an error occurs while reading from the stream
+	 * @throws ResourceParseLineException if the content of the stream could not be parsed
 	 */
 	public <T> T parse(
 			InputStream is, T result, ParseEntryHandler<Map<String, Object>, T> addToResult, Map<String, Object> control
@@ -276,8 +272,7 @@ public class LineParser {
 	}
 
 	/**
-	 * Returns a LineStream of parsed entry maps. Closing it will close the provided
-	 * stream.
+	 * Returns a LineStream of parsed entry maps. Closing it will close the provided stream.
 	 *
 	 * @param is
 	 * @param control
@@ -376,10 +371,8 @@ public class LineParser {
 	 *
 	 * @param is Input stream to parse
 	 * @return A list of maps, one per line of the stream
-	 * @throws IOException                if an error occurs while reading from the
-	 *                                    stream
-	 * @throws ResourceParseLineException if the content of the stream could not be
-	 *                                    parsed
+	 * @throws IOException                if an error occurs while reading from the stream
+	 * @throws ResourceParseLineException if the content of the stream could not be parsed
 	 */
 	public List<Map<String, Object>> parse(InputStream is, Map<String, Object> control)
 			throws IOException, ResourceParseLineException {
@@ -390,32 +383,28 @@ public class LineParser {
 	}
 
 	/**
-	 * If this returns true for a segmented line, parsing will stop and that line
-	 * will not be included in the result.
+	 * If this returns true for a segmented line, parsing will stop and that line will not be included in the result.
 	 */
 	public boolean isStopSegment(List<String> entry) {
 		return false;
 	}
 
 	/**
-	 * If this returns true for an unparsed line, parsing will stop and that line
-	 * will not be included in the result.
+	 * If this returns true for an unparsed line, parsing will stop and that line will not be included in the result.
 	 */
 	public boolean isStopLine(String line) {
 		return false;
 	}
 
 	/**
-	 * If this returns true for a segmented line, that line will not be included in
-	 * the result.
+	 * If this returns true for a segmented line, that line will not be included in the result.
 	 */
 	public boolean isIgnoredSegment(List<String> entry) {
 		return false;
 	}
 
 	/**
-	 * If this returns true for an unparsed line, that line will not be included in
-	 * the result.
+	 * If this returns true for an unparsed line, that line will not be included in the result.
 	 */
 	public boolean isIgnoredLine(String line) {
 		return false;

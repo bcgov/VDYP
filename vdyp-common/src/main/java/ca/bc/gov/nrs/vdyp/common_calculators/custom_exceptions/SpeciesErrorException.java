@@ -1,9 +1,8 @@
 package ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions;
 
 /**
- * The SpeciesErrorException exist to replace the SI_ERR_SPEC(-10) error code
- * found in the original C code This exception is generally thrown when if the
- * input parameter is not a valid species index or there is another species
+ * The SpeciesErrorException exist to replace the SI_ERR_SPEC(-10) error code found in the original C code This
+ * exception is generally thrown when if the input parameter is not a valid species index or there is another species
  * related error
  */
 public class SpeciesErrorException extends RuntimeException {

@@ -102,8 +102,8 @@ public class TestUtils {
 	}
 
 	/**
-	 * Return a mock file resolver that expects to resolve one file with the given
-	 * name and returns the given input stream.
+	 * Return a mock file resolver that expects to resolve one file with the given name and returns the given input
+	 * stream.
 	 *
 	 * @param expectedFilename
 	 * @param is
@@ -123,8 +123,8 @@ public class TestUtils {
 	}
 
 	/**
-	 * Add a mock control map entry for SP0 parse results. Alternates assigning to
-	 * Coastal and Interior regions, starting with Coastal.
+	 * Add a mock control map entry for SP0 parse results. Alternates assigning to Coastal and Interior regions,
+	 * starting with Coastal.
 	 */
 	public static void populateControlMapBec(Map<String, Object> controlMap, String... aliases) {
 
@@ -140,8 +140,8 @@ public class TestUtils {
 	}
 
 	/**
-	 * Add a mock control map entry for BEC parse results with species "B1" and "B2"
-	 * for Coastal and Interior Regions respectively
+	 * Add a mock control map entry for BEC parse results with species "B1" and "B2" for Coastal and Interior Regions
+	 * respectively
 	 */
 	public static void populateControlMapBec(Map<String, Object> controlMap) {
 		populateControlMapBec(controlMap, "B1", "B2");

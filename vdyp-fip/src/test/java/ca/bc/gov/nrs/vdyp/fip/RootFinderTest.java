@@ -118,9 +118,15 @@ class RootFinderTest {
 		final var layer = VdypLayer.build(builder -> {
 			builder.polygonIdentifier("Test");
 			builder.layerType(LayerType.PRIMARY);
-			builder.ageTotal(50f);
-			builder.yearsToBreastHeight(1f);
-			builder.height(20f);
+
+			builder.addSite(siteBuilder -> {
+				siteBuilder.ageTotal(50f);
+				siteBuilder.yearsToBreastHeight(1f);
+				siteBuilder.height(20f);
+
+				siteBuilder.siteIndex(5f);
+				siteBuilder.siteGenus("L");
+			});
 		});
 
 		var spec3 = VdypSpecies.build(layer, builder -> {

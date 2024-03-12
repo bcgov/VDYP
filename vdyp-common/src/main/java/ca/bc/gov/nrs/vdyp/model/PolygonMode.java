@@ -2,13 +2,13 @@ package ca.bc.gov.nrs.vdyp.model;
 
 import java.util.Optional;
 
-public enum FipMode {
+public enum PolygonMode {
 
-	DONT_PROCESS(-1), FIPSTART(1), FIPYOUNG(2);
+	DONT_PROCESS(-1), START(1), YOUNG(2), BATN(3), BATC(4);
 
 	private final int code;
 
-	FipMode(int i) {
+	PolygonMode(int i) {
 		code = i;
 	}
 
@@ -16,16 +16,20 @@ public enum FipMode {
 		return code;
 	}
 
-	public static Optional<FipMode> getByCode(int code) {
+	public static Optional<PolygonMode> getByCode(int code) {
 		switch (code) {
 		case -1:
 			return Optional.of(DONT_PROCESS);
 		case 0:
 			return Optional.empty();
 		case 1:
-			return Optional.of(FIPSTART);
+			return Optional.of(START);
 		case 2:
-			return Optional.of(FIPYOUNG);
+			return Optional.of(YOUNG);
+		case 3:
+			return Optional.of(BATN);
+		case 4:
+			return Optional.of(BATC);
 		default:
 			return Optional.of(DONT_PROCESS);
 		}

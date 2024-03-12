@@ -20,9 +20,15 @@ class VdypLayerTest {
 		var result = VdypLayer.build(builder -> {
 			builder.polygonIdentifier("Test");
 			builder.layerType(LayerType.PRIMARY);
-			builder.ageTotal(42f);
-			builder.yearsToBreastHeight(2f);
-			builder.height(10f);
+
+			builder.addSite(siteBuilder -> {
+				siteBuilder.height(10f);
+				siteBuilder.ageTotal(42f);
+				siteBuilder.yearsToBreastHeight(2f);
+				siteBuilder.siteGenus("PL");
+				siteBuilder.siteCurveNumber(0);
+			});
+
 		});
 		assertThat(result, hasProperty("polygonIdentifier", is("Test")));
 		assertThat(result, hasProperty("layer", is(LayerType.PRIMARY)));
@@ -52,9 +58,14 @@ class VdypLayerTest {
 
 		var result = VdypLayer.build(poly, builder -> {
 			builder.layerType(LayerType.PRIMARY);
-			builder.ageTotal(42f);
-			builder.yearsToBreastHeight(2f);
-			builder.height(10f);
+			builder.addSite(siteBuilder -> {
+				siteBuilder.height(10f);
+				siteBuilder.ageTotal(42f);
+				siteBuilder.yearsToBreastHeight(2f);
+				siteBuilder.siteGenus("PL");
+				siteBuilder.siteCurveNumber(0);
+			});
+
 		});
 
 		assertThat(result, hasProperty("polygonIdentifier", is("Test")));
@@ -76,12 +87,22 @@ class VdypLayerTest {
 		var result = VdypLayer.build(builder -> {
 			builder.polygonIdentifier("Test");
 			builder.layerType(LayerType.PRIMARY);
-			builder.ageTotal(42f);
-			builder.yearsToBreastHeight(2f);
-			builder.height(10f);
-			builder.addSpecies(mock);
+			builder.addSite(siteBuilder -> {
+				siteBuilder.height(10f);
+				siteBuilder.ageTotal(42f);
+				siteBuilder.yearsToBreastHeight(2f);
+				siteBuilder.siteGenus("PL");
+				siteBuilder.siteCurveNumber(0);
+			});
+			builder.addSpecies(specBuilder -> {
+				specBuilder.genus("B");
+				specBuilder.percentGenus(90f);
+				specBuilder.volumeGroup(10);
+				specBuilder.decayGroup(10);
+				specBuilder.breakageGroup(10);
+			});
 		});
-		assertThat(result, hasProperty("species", hasEntry("B", mock)));
+		assertThat(result, hasProperty("species", hasEntry(is("B"), hasProperty("genus", is("B")))));
 	}
 
 }

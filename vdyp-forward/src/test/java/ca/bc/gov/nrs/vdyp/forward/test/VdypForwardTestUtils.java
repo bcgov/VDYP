@@ -69,8 +69,7 @@ public class VdypForwardTestUtils {
 	}
 
 	/**
-	 * Load the control map from resources in the test package using the full
-	 * control map parser.
+	 * Load the control map from resources in the test package using the full control map parser.
 	 */
 	public static Map<String, Object> loadControlMap() {
 		var parser = new VdypForwardControlParser();

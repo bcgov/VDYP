@@ -1,8 +1,7 @@
 package ca.bc.gov.nrs.vdyp.application;
 
 /**
- * Identifies the VDYP applications. Matches the values used for the FORTRAN
- * implementation's JPROGRAM COMMON variable.
+ * Identifies the VDYP applications. Matches the values used for the FORTRAN implementation's JPROGRAM COMMON variable.
  *
  * @author Michael Junkin, Vivid Solutions
  */

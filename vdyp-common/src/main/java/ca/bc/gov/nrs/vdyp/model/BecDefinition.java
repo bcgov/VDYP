@@ -43,8 +43,7 @@ public class BecDefinition extends AliasedEntity {
 	}
 
 	/**
-	 * Get the BEC to use in a Growth context. Will return this BEC if it is a
-	 * growth BEC otherwise one that is.
+	 * Get the BEC to use in a Growth context. Will return this BEC if it is a growth BEC otherwise one that is.
 	 */
 	public BecDefinition getGrowthBec() {
 		var result = growthBec.orElse(this);
@@ -54,8 +53,7 @@ public class BecDefinition extends AliasedEntity {
 	}
 
 	/**
-	 * Get the BEC to use in a Volume context. Will return this BEC if it is a
-	 * volume BEC otherwise one that is.
+	 * Get the BEC to use in a Volume context. Will return this BEC if it is a volume BEC otherwise one that is.
 	 */
 	public BecDefinition getVolumeBec() {
 		var result = volumeBec.orElse(this);
@@ -65,8 +63,7 @@ public class BecDefinition extends AliasedEntity {
 	}
 
 	/**
-	 * Get the BEC to use in a Decay context. Will return this BEC if it is a decay
-	 * BEC otherwise one that is.
+	 * Get the BEC to use in a Decay context. Will return this BEC if it is a decay BEC otherwise one that is.
 	 */
 	public BecDefinition getDecayBec() {
 		var result = decayBec.orElse(this);

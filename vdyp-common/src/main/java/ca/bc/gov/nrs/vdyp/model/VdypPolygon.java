@@ -8,14 +8,13 @@ public class VdypPolygon extends BaseVdypPolygon<VdypLayer, Float> {
 
 	public VdypPolygon(
 			String polygonIdentifier, Float percentAvailable, String fiz, String becIdentifier,
-			Optional<FipMode> modeFip
+			Optional<PolygonMode> modeFip
 	) {
 		super(polygonIdentifier, percentAvailable, fiz, becIdentifier, modeFip);
 	}
 
 	/**
-	 * Copy constructs from the simple attributes of another polygon, but does not
-	 * copy layers.
+	 * Copy constructs from the simple attributes of another polygon, but does not copy layers.
 	 *
 	 * @param <O>                     Type of the polygon to copy
 	 * @param <U>                     Type of percent available in the other polygon
@@ -38,8 +37,7 @@ public class VdypPolygon extends BaseVdypPolygon<VdypLayer, Float> {
 	 *
 	 * @param config The configuration function
 	 * @return The object built by the configured builder.
-	 * @throws IllegalStateException if any required properties have not been set by
-	 *                               the configuration function.
+	 * @throws IllegalStateException if any required properties have not been set by the configuration function.
 	 */
 	public static VdypPolygon build(Consumer<Builder> config) {
 		var builder = new Builder();

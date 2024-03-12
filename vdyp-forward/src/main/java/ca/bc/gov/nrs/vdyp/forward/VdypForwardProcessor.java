@@ -47,18 +47,19 @@ import ca.bc.gov.nrs.vdyp.io.parse.common.ResourceParseException;
 public class VdypForwardProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(VdypForwardProcessor.class);
-	
+
 	/**
 	 * Initialize VdypForwardProcessor
 	 *
 	 * @param resolver
 	 * @param controlFileNames
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws ResourceParseException
-	 * @throws ProcessingException 
+	 * @throws ProcessingException
 	 */
-	void run(FileSystemFileResolver resolver, List<String> controlFileNames, Set<VdypPass> vdypPassSet) throws IOException, ResourceParseException, ProcessingException {
+	void run(FileSystemFileResolver resolver, List<String> controlFileNames, Set<VdypPass> vdypPassSet)
+			throws IOException, ResourceParseException, ProcessingException {
 
 		logger.info("VDYPPASS: {}", vdypPassSet);
 		logger.debug("VDYPPASS(1): Perform Initiation activities?");
@@ -67,10 +68,10 @@ public class VdypForwardProcessor {
 		logger.debug("VDYPPASS(4): Allow multiple polygons");
 		logger.debug("VDYPPASS(5): Close data files");
 		logger.debug(" ");
-		
+
 		// Load the control map
 		Map<String, Object> controlMap = new HashMap<>();
-		
+
 		var parser = new VdypForwardControlParser();
 
 		for (var controlFileName : controlFileNames) {
@@ -83,7 +84,7 @@ public class VdypForwardProcessor {
 				parser.parse(is, relativeResolver, controlMap);
 			}
 		}
-		
+
 		process(vdypPassSet, controlMap);
 	}
 
@@ -95,24 +96,24 @@ public class VdypForwardProcessor {
 	public void process(Set<VdypPass> vdypPassSet, Map<String, Object> controlMap) throws ProcessingException {
 
 		logger.info("Beginning processing with given configuration");
-		
+
 		int maxPoly = 0;
 		if (vdypPassSet.contains(VdypPass.PASS_1)) {
 			Object maxPolyValue = controlMap.get(ControlKey.MAX_NUM_POLY.name());
 			if (maxPolyValue != null) {
-				maxPoly = (Integer)maxPolyValue;
+				maxPoly = (Integer) maxPolyValue;
 			}
 		}
-		
+
 		logger.debug("MaxPoly: {}", maxPoly);
 
 		if (vdypPassSet.contains(VdypPass.PASS_2)) {
 			// input files are already opened
 			// TODO: open output files
 		}
-		
+
 		if (vdypPassSet.contains(VdypPass.PASS_3)) {
-			
+
 		}
 	}
 }

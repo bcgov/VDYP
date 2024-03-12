@@ -13,7 +13,7 @@ import ca.bc.gov.nrs.vdyp.io.parse.control.ControlMapValueReplacer;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.AbstractStreamingParser;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParserFactory;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
-import ca.bc.gov.nrs.vdyp.model.FipMode;
+import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 
 public class FipPolygonParser implements ControlMapValueReplacer<StreamingParserFactory<FipPolygon>, String> {
 
@@ -62,7 +62,7 @@ public class FipPolygonParser implements ControlMapValueReplacer<StreamingParser
 						builder.forestInventoryZone(fizId);
 						builder.biogeoclimaticZone(becId);
 						builder.percentAvailable(percentForestLand);
-						builder.modeFip(fipMode.flatMap(FipMode::getByCode));
+						builder.modeFip(fipMode.flatMap(PolygonMode::getByCode));
 						builder.nonproductiveDescription(nonproductiveDesc);
 						builder.yieldFactor(yieldFactor.orElse(1.0f));
 					});

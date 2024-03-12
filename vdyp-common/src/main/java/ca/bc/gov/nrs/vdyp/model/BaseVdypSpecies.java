@@ -81,7 +81,7 @@ public abstract class BaseVdypSpecies {
 		return genus;
 	}
 
-	protected abstract static class Builder<T extends BaseVdypSpecies> extends ModelClassBuilder<T> {
+	public abstract static class Builder<T extends BaseVdypSpecies> extends ModelClassBuilder<T> {
 		protected Optional<String> polygonIdentifier = Optional.empty();
 		protected Optional<LayerType> layer = Optional.empty();
 		protected Optional<String> genus = Optional.empty();

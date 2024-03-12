@@ -28,9 +28,9 @@ public class VriControlParser extends NonFipControlParser {
 			// V7O_FIS
 			new VriSpeciesParser()
 	);
-	
+
 	public VriControlParser() {
-		
+
 		initialize();
 	}
 
@@ -57,6 +57,9 @@ public class VriControlParser extends NonFipControlParser {
 
 	@Override
 	protected List<ControlKey> outputFileParsers() {
-		return List.of(ControlKey.VRI_OUTPUT_VDYP_POLYGON, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SPECIES, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SP0_BY_UTIL);
+		return List.of(
+				ControlKey.VRI_OUTPUT_VDYP_POLYGON, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SPECIES,
+				ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SP0_BY_UTIL
+		);
 	}
 }

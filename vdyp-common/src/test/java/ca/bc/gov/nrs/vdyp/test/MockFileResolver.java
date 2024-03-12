@@ -9,16 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import ca.bc.gov.nrs.vdyp.io.FileResolver;
+import ca.bc.gov.nrs.vdyp.io.FileSystemFileResolver;
 
 /**
  * A mock file resolver for testing which returns specified
  */
-public class MockFileResolver implements FileResolver {
+public class MockFileResolver extends FileSystemFileResolver {
 
 	Map<String, InputStream> isMap = new HashMap<>();
 	Map<String, OutputStream> osMap = new HashMap<>();
-	Map<String, FileResolver> subResolverMap = new HashMap<>();
+	Map<String, FileSystemFileResolver> subResolverMap = new HashMap<>();
 
 	Map<String, Supplier<? extends Throwable>> errorMap = new HashMap<>();
 
@@ -72,8 +72,8 @@ public class MockFileResolver implements FileResolver {
 	}
 
 	@Override
-	public FileResolver relative(String path) throws IOException {
-		return get(subResolverMap, path, "relative");
+	public FileSystemFileResolver relative(String path) throws IOException {
+		return (FileSystemFileResolver) get(subResolverMap, path, "relative");
 	}
 
 	public void addStream(String filename, InputStream is) {
@@ -84,7 +84,7 @@ public class MockFileResolver implements FileResolver {
 		this.osMap.put(filename, os);
 	}
 
-	public void addChild(String filename, FileResolver child) {
+	public void addChild(String filename, FileSystemFileResolver child) {
 		this.subResolverMap.put(filename, child);
 	}
 

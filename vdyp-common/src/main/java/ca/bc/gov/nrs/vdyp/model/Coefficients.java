@@ -141,8 +141,7 @@ public class Coefficients extends AbstractList<Float> implements List<Float> {
 	}
 
 	/**
-	 * Performs a pairwise operation with a compatible Coefficients object and
-	 * returns the result.
+	 * Performs a pairwise operation with a compatible Coefficients object and returns the result.
 	 *
 	 * @param coe2 must have the same size and index offset
 	 * @param op   operation to perform for each pair of coefficients
@@ -152,8 +151,7 @@ public class Coefficients extends AbstractList<Float> implements List<Float> {
 	}
 
 	/**
-	 * Performs a pairwise operation with a compatible Coefficients object and
-	 * returns the result.
+	 * Performs a pairwise operation with a compatible Coefficients object and returns the result.
 	 *
 	 * @param coe2 must have the same size and index offset
 	 * @param op   operation to perform for each pair of coefficients

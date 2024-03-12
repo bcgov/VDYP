@@ -1,4 +1,4 @@
-package ca.bc.gov.nrs.vdyp.fip;
+package ca.bc.gov.nrs.vdyp.application;
 
 /*
  * An exception preventing a particular stand from being processed, but which should not affect other stands

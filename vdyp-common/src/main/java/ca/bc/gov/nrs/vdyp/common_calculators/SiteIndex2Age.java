@@ -135,15 +135,14 @@ public class SiteIndex2Age {
 	public static final double MAX_AGE = 999.0;
 
 	/*
-	 * Wrapped in directives which check if TEST is defined. The code that defines
-	 * TEST as 1 is commented out, so I am assuming this wouldn't run
+	 * Wrapped in directives which check if TEST is defined. The code that defines TEST as 1 is commented out, so I am
+	 * assuming this wouldn't run
 	 */
 	public static final boolean TEST = false;
 
 	/*
-	 * #ifdef TEST File* testFile; they test before opening the file so removing the
-	 * directives should be fine I have moved the file stuff into the functions
-	 * where it happens #endif
+	 * #ifdef TEST File* testFile; they test before opening the file so removing the directives should be fine I have
+	 * moved the file stuff into the functions where it happens #endif
 	 */
 
 	public static double
@@ -151,8 +150,7 @@ public class SiteIndex2Age {
 		double x1, x2, x3, x4;
 		double a, b, c;
 		/*
-		 * I could not find HOOP, so I am assuming it is not intialized and as such the
-		 * directives wouldn't trigger
+		 * I could not find HOOP, so I am assuming it is not intialized and as such the directives wouldn't trigger
 		 */
 		boolean HOOP = false;
 
@@ -282,33 +280,27 @@ public class SiteIndex2Age {
 			break;
 		// Cannot find constant
 		/*
-		 * case SI_HM_WILEY: if (site_height / 0.3048 < 4.5){ age = y2bh * ppow
-		 * (site_height / 1.37, 0.5);
+		 * case SI_HM_WILEY: if (site_height / 0.3048 < 4.5){ age = y2bh * ppow (site_height / 1.37, 0.5);
 		 *
 		 * if (age_type == SI_AT_BREAST){ age -= y2bh; }
 		 *
-		 * if (age < 0.0){ age = 0.0; } } else{ x1 = 2500 / (site_index / 0.3048 - 4.5);
-		 * x2 = -1.7307 + 0.1394 * x1; x3 = -0.0616 + 0.0137 * x1; x4 = 0.00192428 +
-		 * 0.00007024 * x1;
+		 * if (age < 0.0){ age = 0.0; } } else{ x1 = 2500 / (site_index / 0.3048 - 4.5); x2 = -1.7307 + 0.1394 * x1; x3
+		 * = -0.0616 + 0.0137 * x1; x4 = 0.00192428 + 0.00007024 * x1;
 		 *
 		 * x1 = (4.5 - site_height / 0.3048); a = 1 + x1 * x4; b = x1 * x3; c = x1 * x2;
 		 *
-		 * x1 = ppow (b * b - 4 * a * c, 0.5); if (x1 == 0.0){ age = SI_ERR_NO_ANS; }
-		 * else{ age = (-b + x1) / (2 * a);
+		 * x1 = ppow (b * b - 4 * a * c, 0.5); if (x1 == 0.0){ age = SI_ERR_NO_ANS; } else{ age = (-b + x1) / (2 * a);
 		 *
 		 * if (age_type == SI_AT_TOTAL){ age += y2bh; }
 		 *
-		 * if (age < 0){ age = SI_ERR_NO_ANS; } else if (age > MAX_AGE){ age =
-		 * SI_ERR_NO_ANS; } } }
+		 * if (age < 0){ age = SI_ERR_NO_ANS; } else if (age > MAX_AGE){ age = SI_ERR_NO_ANS; } } }
 		 *
-		 * if (age < 10 && age > 0){ age = iterate (cu_index, site_height, age_type,
-		 * site_index, y2bh); if(HOOP){ ht5 = index_to_height (cu_index, 5.0,
-		 * SI_AT_BREAST, site_index, y2bh, 0.5); // 0.5 may have to change
+		 * if (age < 10 && age > 0){ age = iterate (cu_index, site_height, age_type, site_index, y2bh); if(HOOP){ ht5 =
+		 * index_to_height (cu_index, 5.0, SI_AT_BREAST, site_index, y2bh, 0.5); // 0.5 may have to change
 		 *
-		 * if (site_height <= ht5){ site_height -= (1 - ((ht5 - site_height) / ht5)) *
-		 * 1.5; } else{ ht10 = index_to_height (cu_index, 10.0, SI_AT_BREAST,
-		 * site_index, y2bh, 0.5); // 0.5 may have to change site_height -= (((ht10 -
-		 * site_height) / (ht10 - ht5))) * 1.5; } } } break;
+		 * if (site_height <= ht5){ site_height -= (1 - ((ht5 - site_height) / ht5)) * 1.5; } else{ ht10 =
+		 * index_to_height (cu_index, 10.0, SI_AT_BREAST, site_index, y2bh, 0.5); // 0.5 may have to change site_height
+		 * -= (((ht10 - site_height) / (ht10 - ht5))) * 1.5; } } } break;
 		 */
 		case SI_PLI_GOUDIE_DRY:
 			if (site_height < 1.3) {
@@ -376,16 +368,14 @@ public class SiteIndex2Age {
 			break;
 		// Couldn't find constant
 		/*
-		 * case SI_PF_GOUDIE_DRY: if (site_height < 1.3){ age = y2bh * ppow (site_height
-		 * / 1.3, 0.5);
+		 * case SI_PF_GOUDIE_DRY: if (site_height < 1.3){ age = y2bh * ppow (site_height / 1.3, 0.5);
 		 *
 		 * if (age_type == SI_AT_BREAST){ age -= y2bh; }
 		 *
-		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -1.00726; x2 = 7.81498; x3 =
-		 * -1.28517;
+		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -1.00726; x2 = 7.81498; x3 = -1.28517;
 		 *
-		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) +
-		 * x3 * Math.log(50.0))); b = x2 + x1 * llog (site_index - 1.3);
+		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) + x3 * Math.log(50.0))); b = x2 +
+		 * x1 * llog (site_index - 1.3);
 		 *
 		 * age = Math.exp ((llog (a / (site_height - 1.3) - 1) - b) / x3);
 		 *
@@ -395,16 +385,14 @@ public class SiteIndex2Age {
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_PF_GOUDIE_WET: if (site_height < 1.3){ age = y2bh * ppow (site_height
-		 * / 1.3, 0.5);
+		 * case SI_PF_GOUDIE_WET: if (site_height < 1.3){ age = y2bh * ppow (site_height / 1.3, 0.5);
 		 *
 		 * if (age_type == SI_AT_BREAST){ age -= y2bh; }
 		 *
-		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -0.935; x2 = 7.81498; x3 =
-		 * -1.28517;
+		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -0.935; x2 = 7.81498; x3 = -1.28517;
 		 *
-		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) +
-		 * x3 * Math.log(50.0))); b = x2 + x1 * llog (site_index - 1.3);
+		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) + x3 * Math.log(50.0))); b = x2 +
+		 * x1 * llog (site_index - 1.3);
 		 *
 		 * age = Math.exp ((llog (a / (site_height - 1.3) - 1) - b) / x3);
 		 *
@@ -446,15 +434,14 @@ public class SiteIndex2Age {
 			break;
 		// Couldn't find constant
 		/*
-		 * case SI_SE_GOUDIE_PLA: if (site_height < 1.3){ age = y2bh * ppow (site_height
-		 * / 1.3, 0.5);
+		 * case SI_SE_GOUDIE_PLA: if (site_height < 1.3){ age = y2bh * ppow (site_height / 1.3, 0.5);
 		 *
 		 * if (age_type == SI_AT_BREAST){ age -= y2bh; }
 		 *
 		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -1.2866; x2 = 9.7936; x3 = -1.4661;
 		 *
-		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) +
-		 * x3 * Math.log(50.0))); b = x2 + x1 * llog (site_index - 1.3);
+		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) + x3 * Math.log(50.0))); b = x2 +
+		 * x1 * llog (site_index - 1.3);
 		 *
 		 * age = Math.exp ((llog (a / (site_height - 1.3) - 1) - b) / x3);
 		 *
@@ -464,15 +451,14 @@ public class SiteIndex2Age {
 		 */
 		// Couldn't find constant
 		/*
-		 * case SI_SE_GOUDIE_NAT: if (site_height < 1.3){ age = y2bh * ppow (site_height
-		 * / 1.3, 0.5);
+		 * case SI_SE_GOUDIE_NAT: if (site_height < 1.3){ age = y2bh * ppow (site_height / 1.3, 0.5);
 		 *
 		 * if (age_type == SI_AT_BREAST){ age -= y2bh; }
 		 *
 		 * if (age < 0.0){ age = 0.0; } } else{ x1 = -1.2866; x2 = 9.7936; x3 = -1.4661;
 		 *
-		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) +
-		 * x3 * Math.log(50.0))); b = x2 + x1 * llog (site_index - 1.3);
+		 * a = (site_index - 1.3) * (1 + Math.exp (x2 + x1 * llog (site_index - 1.3) + x3 * Math.log(50.0))); b = x2 +
+		 * x1 * llog (site_index - 1.3);
 		 *
 		 * age = Math.exp ((llog (a / (site_height - 1.3) - 1) - b) / x3);
 		 *
@@ -571,8 +557,7 @@ public class SiteIndex2Age {
 			break;
 		// Couldn't find constant
 		/*
-		 * case SI_PLI_NIGHGI: age = gi_iterate (cu_index, site_height, age_type,
-		 * site_index); break;
+		 * case SI_PLI_NIGHGI: age = gi_iterate (cu_index, site_height, age_type, site_index); break;
 		 */
 		case SI_PLI_NIGHGI97:
 			age = gi_iterate(cu_index, site_height, age_type, site_index);
@@ -702,8 +687,7 @@ public class SiteIndex2Age {
 				}
 			} catch (NoAnswerException e) { /* height > 999 */
 				/*
-				 * printf ("si2age.c: site_height=%f, test_ht=%f, si2age=%f\n", site_height,
-				 * test_ht, si2age);
+				 * printf ("si2age.c: site_height=%f, test_ht=%f, si2age=%f\n", site_height, test_ht, si2age);
 				 */
 				test_ht = 1000; /* should eventualy force an error code */
 				err_count++;

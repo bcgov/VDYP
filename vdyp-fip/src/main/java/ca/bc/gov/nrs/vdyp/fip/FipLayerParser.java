@@ -100,32 +100,38 @@ public class FipLayerParser
 						case PRIMARY:
 							FipLayerPrimary fipLayerPrimary = FipLayerPrimary.buildPrimary(flBuilder -> {
 								flBuilder.polygonIdentifier(polygonId);
-								flBuilder.ageTotal(ageTotal);
-								flBuilder.yearsToBreastHeight(yearsToBreastHeight);
-								flBuilder.height(height);
 
-								flBuilder.siteIndex(siteIndex);
+								flBuilder.addSite(siteBuilder -> {
+									siteBuilder.ageTotal(ageTotal);
+									siteBuilder.yearsToBreastHeight(yearsToBreastHeight);
+									siteBuilder.height(height);
+									siteBuilder.siteIndex(siteIndex);
+									siteBuilder.siteGenus(siteSp0.get());
+									siteBuilder.siteCurveNumber(siteCurveNumber);
+									siteBuilder.siteSpecies(siteSp64.get());
+
+								});
+
 								flBuilder.crownClosure(crownClosure);
-								flBuilder.siteGenus(siteSp0.get());
-								flBuilder.siteSpecies(siteSp64.get());
 
 								flBuilder.stockingClass(stockingClass);
 								flBuilder.inventoryTypeGroup(inventoryTypeGroup);
-								flBuilder.siteCurveNumber(siteCurveNumber);
 							});
 							return vmBuilder.value(Optional.of(fipLayerPrimary));
 						case VETERAN:
 							FipLayer fipLayerVeteran = FipLayer.build(flBuilder -> {
 								flBuilder.polygonIdentifier(polygonId);
 								flBuilder.layerType(LayerType.VETERAN);
-								flBuilder.ageTotal(ageTotal);
-								flBuilder.yearsToBreastHeight(yearsToBreastHeight);
-								flBuilder.height(height);
+								flBuilder.addSite(siteBuilder -> {
+									siteBuilder.ageTotal(ageTotal);
+									siteBuilder.yearsToBreastHeight(yearsToBreastHeight);
+									siteBuilder.height(height);
+									siteBuilder.siteIndex(siteIndex);
+									siteBuilder.siteGenus(siteSp0.get());
+									siteBuilder.siteSpecies(siteSp64.get());
+								});
 
-								flBuilder.siteIndex(siteIndex);
 								flBuilder.crownClosure(crownClosure);
-								flBuilder.siteGenus(siteSp0.get());
-								flBuilder.siteSpecies(siteSp64.get());
 							});
 
 							return vmBuilder.value(Optional.of(fipLayerVeteran));

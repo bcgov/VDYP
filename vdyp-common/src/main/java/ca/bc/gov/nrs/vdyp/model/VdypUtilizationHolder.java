@@ -11,30 +11,26 @@ import java.util.Arrays;
 public interface VdypUtilizationHolder {
 
 	/**
-	 * Close utilization volume net of decay, waste and breakage for utilization
-	 * index -1 through 0
+	 * Close utilization volume net of decay, waste and breakage for utilization index -1 through 0
 	 */
 	void setCloseUtilizationVolumeNetOfDecayWasteAndBreakageByUtilization(
 			Coefficients closeUtilizationVolumeNetOfDecayWasteAndBreakageByUtilization
 	);
 
 	/**
-	 * Close utilization volume net of decay, waste and breakage for utilization
-	 * index -1 through 0
+	 * Close utilization volume net of decay, waste and breakage for utilization index -1 through 0
 	 */
 	Coefficients getCloseUtilizationVolumeNetOfDecayWasteAndBreakageByUtilization();
 
 	/**
-	 * Close utilization volume net of decay and waste for utilization index -1
-	 * through 0
+	 * Close utilization volume net of decay and waste for utilization index -1 through 0
 	 */
 	void setCloseUtilizationVolumeNetOfDecayAndWasteByUtilization(
 			Coefficients closeUtilizationVolumeNetOfDecayAndWasteByUtilization
 	);
 
 	/**
-	 * Close utilization volume net of decay and waste for utilization index -1
-	 * through 0
+	 * Close utilization volume net of decay and waste for utilization index -1 through 0
 	 */
 	Coefficients getCloseUtilizationVolumeNetOfDecayAndWasteByUtilization();
 

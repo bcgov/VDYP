@@ -34,8 +34,7 @@ public class ControlFileWriter implements Closeable {
 	 * Write an entry for a control file
 	 *
 	 * @param index   Control file index (1 to 200 inclusive)
-	 * @param control Value of the control (Max 120 characters, May not contain '!'
-	 *                or newlines)
+	 * @param control Value of the control (Max 120 characters, May not contain '!' or newlines)
 	 * @param comment A human readable comment (May not contain newlines)
 	 * @throws IOException
 	 * @throws IllegalArgumentException
@@ -77,8 +76,7 @@ public class ControlFileWriter implements Closeable {
 	 * Write an entry for a control file
 	 *
 	 * @param index   Control file index (1 to 200 inclusive)
-	 * @param control Value of the control (Max 120 characters, May not contain '!'
-	 *                or newlines)
+	 * @param control Value of the control (Max 120 characters, May not contain '!' or newlines)
 	 * @throws IOException
 	 * @throws IllegalArgumentException
 	 */

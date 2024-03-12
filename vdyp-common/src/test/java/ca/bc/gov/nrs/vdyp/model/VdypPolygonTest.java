@@ -69,9 +69,13 @@ class VdypPolygonTest {
 
 			builder.buildLayer(layerBuilder -> {
 				layerBuilder.layerType(LayerType.PRIMARY);
-				layerBuilder.ageTotal(10f);
-				layerBuilder.yearsToBreastHeight(1f);
-				layerBuilder.height(5f);
+				layerBuilder.addSite(siteBuilder -> {
+					siteBuilder.siteGenus("B");
+					siteBuilder.siteCurveNumber(0);
+					siteBuilder.ageTotal(10f);
+					siteBuilder.yearsToBreastHeight(1f);
+					siteBuilder.height(5f);
+				});
 			});
 		});
 		assertThat(result, hasProperty("polygonIdentifier", is("Test")));

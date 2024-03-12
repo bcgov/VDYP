@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import ca.bc.gov.nrs.vdyp.common.ControlKey;
 import ca.bc.gov.nrs.vdyp.common.Utils;
-import ca.bc.gov.nrs.vdyp.model.FipMode;
+import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.VdypLayer;
 import ca.bc.gov.nrs.vdyp.model.VdypPolygon;
@@ -95,18 +95,20 @@ class VriAdjustInputWriterTest {
 				builder.percentAvailable(90f);
 				builder.biogeoclimaticZone("IDF");
 				builder.forestInventoryZone("D");
-				builder.modeFip(FipMode.FIPSTART);
+				builder.modeFip(PolygonMode.START);
 			});
 			var layer = VdypLayer.build(polygon, builder -> {
 				builder.polygonIdentifier("082E004    615       1988");
 				builder.layerType(LayerType.PRIMARY);
 
-				builder.height(15f);
-				builder.siteIndex(14.7f);
-				builder.ageTotal(60f);
-				builder.yearsToBreastHeight(8.5f);
-				builder.siteGenus("PL");
-				builder.siteCurveNumber(0);
+				builder.addSite(siteBuilder -> {
+					siteBuilder.height(15f);
+					siteBuilder.siteIndex(14.7f);
+					siteBuilder.ageTotal(60f);
+					siteBuilder.yearsToBreastHeight(8.5f);
+					siteBuilder.siteGenus("PL");
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 			// FIXME Add to builder
@@ -129,12 +131,14 @@ class VriAdjustInputWriterTest {
 				builder.polygonIdentifier("082E004    615       1988");
 				builder.layerType(LayerType.PRIMARY);
 
-				builder.height(15f);
-				builder.siteIndex(14.7f);
-				builder.ageTotal(60f);
-				builder.yearsToBreastHeight(8.5f);
-				builder.siteGenus("PL");
-				builder.siteCurveNumber(0);
+				builder.addSite(siteBuilder -> {
+					siteBuilder.height(15f);
+					siteBuilder.siteIndex(14.7f);
+					siteBuilder.ageTotal(60f);
+					siteBuilder.yearsToBreastHeight(8.5f);
+					siteBuilder.siteGenus("PL");
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 			var species = VdypSpecies.build(layer, builder -> {
@@ -166,12 +170,14 @@ class VriAdjustInputWriterTest {
 				builder.polygonIdentifier("082E004    615       1988");
 				builder.layerType(LayerType.PRIMARY);
 
-				builder.height(15f);
-				builder.siteIndex(14.7f);
-				builder.ageTotal(60f);
-				builder.yearsToBreastHeight(8.5f);
-				builder.siteGenus("PL");
-				builder.siteCurveNumber(0);
+				builder.addSite(siteBuilder -> {
+					siteBuilder.height(15f);
+					siteBuilder.siteIndex(14.7f);
+					siteBuilder.ageTotal(60f);
+					siteBuilder.yearsToBreastHeight(8.5f);
+					siteBuilder.siteGenus("PL");
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 			@SuppressWarnings("unused")
@@ -241,12 +247,14 @@ class VriAdjustInputWriterTest {
 				builder.polygonIdentifier("082E004    615       1988");
 				builder.layerType(LayerType.PRIMARY);
 
-				builder.height(15f);
-				builder.siteIndex(14.7f);
-				builder.ageTotal(60f);
-				builder.yearsToBreastHeight(8.5f);
-				builder.siteGenus("PL");
-				builder.siteCurveNumber(0);
+				builder.addSite(siteBuilder -> {
+					siteBuilder.height(15f);
+					siteBuilder.siteIndex(14.7f);
+					siteBuilder.ageTotal(60f);
+					siteBuilder.yearsToBreastHeight(8.5f);
+					siteBuilder.siteGenus("PL");
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 			var species = VdypSpecies.build(layer, builder -> {
@@ -320,18 +328,20 @@ class VriAdjustInputWriterTest {
 				builder.percentAvailable(90f);
 				builder.biogeoclimaticZone("IDF");
 				builder.forestInventoryZone("D");
-				builder.modeFip(FipMode.FIPSTART);
+				builder.modeFip(PolygonMode.START);
 			});
 
 			var layer = VdypLayer.build(polygon, builder -> {
 				builder.layerType(LayerType.PRIMARY);
 
-				builder.height(15f);
-				builder.siteIndex(14.7f);
-				builder.ageTotal(60f);
-				builder.yearsToBreastHeight(8.5f);
-				builder.siteGenus("PL");
-				builder.siteCurveNumber(0);
+				builder.addSite(siteBuilder -> {
+					siteBuilder.height(15f);
+					siteBuilder.siteIndex(14.7f);
+					siteBuilder.ageTotal(60f);
+					siteBuilder.yearsToBreastHeight(8.5f);
+					siteBuilder.siteGenus("PL");
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 			var species = VdypSpecies.build(layer, builder -> {

@@ -19,9 +19,8 @@ import ca.bc.gov.nrs.vdyp.model.MatrixMap2;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap2Impl;
 
 /**
- * Base class for parsers of configuration files whose lines contain a BEC Zone
- * Alias, an integer index, an indicator flag and a list of 16 coefficients (one
- * per species) and generates a MatrixMap2 of coefficients indexed by first BEC 
+ * Base class for parsers of configuration files whose lines contain a BEC Zone Alias, an integer index, an indicator
+ * flag and a list of 16 coefficients (one per species) and generates a MatrixMap2 of coefficients indexed by first BEC
  * Zone Alias and then sp0 Alias, one per index.
  *
  * Indices range from 0 to a parameterized value (7, for example).
@@ -51,14 +50,14 @@ public abstract class BecZoneBySpeciesCoefficientParser
 			}
 
 		} //
-		.value(4, BEC_ZONE_ID_KEY, ControlledValueParser.BEC) //
-		.space(2) //
-		.value(
-				1, INDEX_KEY,
-				ValueParser.range(ValueParser.INTEGER, 0, true, nCoefficients, false, "Index value")
-		) //
-		.value(2, INDICATOR_KEY, ValueParser.LOGICAL_0_1) //
-		.multiValue(NUM_SPECIES, 8, COEFFICIENTS_KEY, ValueParser.FLOAT);
+				.value(4, BEC_ZONE_ID_KEY, ControlledValueParser.BEC) //
+				.space(2) //
+				.value(
+						1, INDEX_KEY,
+						ValueParser.range(ValueParser.INTEGER, 0, true, nCoefficients, false, "Index value")
+				) //
+				.value(2, INDICATOR_KEY, ValueParser.LOGICAL_0_1) //
+				.multiValue(NUM_SPECIES, 8, COEFFICIENTS_KEY, ValueParser.FLOAT);
 	}
 
 	private LineParser lineParser;

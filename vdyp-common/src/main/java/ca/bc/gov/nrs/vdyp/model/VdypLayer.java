@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import ca.bc.gov.nrs.vdyp.common.Computed;
 
-public class VdypLayer extends BaseVdypLayer<VdypSpecies> implements VdypUtilizationHolder {
+public class VdypLayer extends SingleSiteLayer<VdypSpecies, VdypSite> implements VdypUtilizationHolder {
 
 	private Coefficients baseAreaByUtilization = //
 			VdypUtilizationHolder.emptyUtilization(); // LVCOM/BA species 0
@@ -32,15 +32,10 @@ public class VdypLayer extends BaseVdypLayer<VdypSpecies> implements VdypUtiliza
 	private Optional<Integer> empericalRelationshipParameterIndex = Optional.empty(); // INXL1/GRPBA1
 
 	public VdypLayer(
-			String polygonIdentifier, LayerType layer, Optional<Float> ageTotal, Optional<Float> height,
-			Optional<Float> yearsToBreastHeight, Optional<Float> siteIndex, Optional<Integer> siteCurveNumber,
-			Optional<Integer> inventoryTypeGroup, Optional<String> siteGenus,
+			String polygonIdentifier, LayerType layer, Optional<Integer> inventoryTypeGroup,
 			Optional<Integer> empericalRelationshipParameterIndex
 	) {
-		super(
-				polygonIdentifier, layer, ageTotal, height, yearsToBreastHeight, siteIndex, siteCurveNumber,
-				inventoryTypeGroup, siteGenus
-		);
+		super(polygonIdentifier, layer, inventoryTypeGroup);
 		this.empericalRelationshipParameterIndex = empericalRelationshipParameterIndex;
 	}
 
@@ -168,21 +163,14 @@ public class VdypLayer extends BaseVdypLayer<VdypSpecies> implements VdypUtiliza
 	 * VdypLayer myLayer = VdypLayer.build(builder-&gt; {
 			builder.polygonIdentifier(polygonId);
 			builder.layerType(LayerType.VETERAN);
-			builder.ageTotal(8f);
-			builder.yearsToBreastHeight(7f);
-			builder.height(6f);
 
-			builder.siteIndex(5f);
 			builder.crownClosure(0.9f);
-			builder.siteGenus("B");
-			builder.siteSpecies("B");
 	 * })
 	 * </pre>
 	 *
 	 * @param config The configuration function
 	 * @return The object built by the configured builder.
-	 * @throws IllegalStateException if any required properties have not been set by
-	 *                               the configuration function.
+	 * @throws IllegalStateException if any required properties have not been set by the configuration function.
 	 */
 	public static VdypLayer build(Consumer<Builder> config) {
 		var builder = new Builder();
@@ -207,7 +195,8 @@ public class VdypLayer extends BaseVdypLayer<VdypSpecies> implements VdypUtiliza
 		return result;
 	}
 
-	public static class Builder extends BaseVdypLayer.Builder<VdypLayer, VdypSpecies> {
+	public static class Builder
+			extends BaseVdypLayer.Builder<VdypLayer, VdypSpecies, VdypSite, VdypSpecies.Builder, VdypSite.Builder> {
 
 		Optional<Integer> empericalRelationshipParameterIndex = Optional.empty();
 
@@ -224,15 +213,27 @@ public class VdypLayer extends BaseVdypLayer<VdypSpecies> implements VdypUtiliza
 			return (new VdypLayer(
 					polygonIdentifier.get(), //
 					layer.get(), //
-					ageTotal, //
-					height, //
-					yearsToBreastHeight, //
-					siteIndex, //
-					siteCurveNumber, //
 					inventoryTypeGroup, //
-					siteGenus, //
 					empericalRelationshipParameterIndex
 			));
+		}
+
+		@Override
+		protected VdypSpecies buildSpecies(Consumer<VdypSpecies.Builder> config) {
+			return VdypSpecies.build(builder -> {
+				builder.polygonIdentifier(this.polygonIdentifier.get());
+				builder.layerType(this.layer.get());
+				config.accept(builder);
+			});
+		}
+
+		@Override
+		protected VdypSite buildSite(Consumer<VdypSite.Builder> config) {
+			return VdypSite.build(builder -> {
+				builder.polygonIdentifier(polygonIdentifier.get());
+				builder.layerType(layer.get());
+				config.accept(builder);
+			});
 		}
 
 	}

@@ -6,8 +6,7 @@ import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.NoAnswerException
 /**
  * SiteIndex2HeightSmoothed.java
  *
- * @throws NoAnswerException   if iteration could not converge (projected height
- *                             > 999)
+ * @throws NoAnswerException   if iteration could not converge (projected height > 999)
  * @throws LessThan13Exception if site index < 1.3m
  */
 public class SiteIndex2HeightSmoothed {

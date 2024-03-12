@@ -1,8 +1,7 @@
 package ca.bc.gov.nrs.vdyp.common;
 
 /**
- * Applies a floating point operator for a particular indexed location in a
- * sequence
+ * Applies a floating point operator for a particular indexed location in a sequence
  *
  * @author Kevin Smith, Vivid Solutions
  *

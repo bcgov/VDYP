@@ -40,8 +40,8 @@ public interface MatrixMap2<K1, K2, V> extends MatrixMap<V> {
 	}
 
 	/**
-	 * Cast a 2 dimension MatrixMap to MatrixMap2, wrapping it if it has 2
-	 * dimensions but does not implement the interface.
+	 * Cast a 2 dimension MatrixMap to MatrixMap2, wrapping it if it has 2 dimensions but does not implement the
+	 * interface.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <K1, K2, V> MatrixMap2<K1, K2, V> cast(MatrixMap<V> o, Class<K1> keyClass1, Class<K2> keyClass2) {

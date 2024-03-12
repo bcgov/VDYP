@@ -6,36 +6,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class BaseVdypLayer<S extends BaseVdypSpecies> {
+public class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdypSite> {
 
 	private final String polygonIdentifier;
 	private final LayerType layer;
-	private Optional<Float> ageTotal = Optional.empty(); // LVCOM3/AGETOTLV, L1COM3/AGETOTL1
-	private Optional<Float> height = Optional.empty(); // LVCOM3/HDLV, L1COM3/HDL1
-	private Optional<Float> yearsToBreastHeight = Optional.empty(); // LVCOM3/YTBHLV, L1COM3/YTBHL1
 	private LinkedHashMap<String, S> species = new LinkedHashMap<>();
-	private Optional<Float> siteIndex = Optional.empty();
-	private Optional<Integer> siteCurveNumber = Optional.empty();
+	private LinkedHashMap<String, I> sites = new LinkedHashMap<>();
 	private Optional<Integer> inventoryTypeGroup = Optional.empty();
-	private Optional<String> siteGenus = Optional.empty(); // FIPL_1A/SITESP0_L1
 
-	protected BaseVdypLayer(
-			String polygonIdentifier, LayerType layer, Optional<Float> ageTotal, Optional<Float> height,
-			Optional<Float> yearsToBreastHeight, Optional<Float> siteIndex, Optional<Integer> siteCurveNumber,
-			Optional<Integer> inventoryTypeGroup, Optional<String> siteGenus
-	) {
+	protected BaseVdypLayer(String polygonIdentifier, LayerType layer, Optional<Integer> inventoryTypeGroup) {
 		super();
 		this.polygonIdentifier = polygonIdentifier;
 		this.layer = layer;
 
-		this.ageTotal = ageTotal;
-		this.height = height;
-		this.yearsToBreastHeight = yearsToBreastHeight;
-		this.siteIndex = siteIndex;
-		this.siteCurveNumber = siteCurveNumber;
 		this.inventoryTypeGroup = inventoryTypeGroup;
-		this.siteGenus = siteGenus;
 	}
 
 	public String getPolygonIdentifier() {
@@ -44,30 +31,6 @@ public class BaseVdypLayer<S extends BaseVdypSpecies> {
 
 	public LayerType getLayer() {
 		return layer;
-	}
-
-	public Optional<Float> getAgeTotal() {
-		return ageTotal;
-	}
-
-	public Optional<Float> getHeight() {
-		return height;
-	}
-
-	public Optional<Float> getYearsToBreastHeight() {
-		return yearsToBreastHeight;
-	}
-
-	public void setAgeTotal(Optional<Float> ageTotal) {
-		this.ageTotal = ageTotal;
-	}
-
-	public void setHeight(Optional<Float> height) {
-		this.height = height;
-	}
-
-	public void setYearsToBreastHeight(Optional<Float> yearsToBreastHeight) {
-		this.yearsToBreastHeight = yearsToBreastHeight;
 	}
 
 	public LinkedHashMap<String, S> getSpecies() {
@@ -84,20 +47,18 @@ public class BaseVdypLayer<S extends BaseVdypSpecies> {
 		species.forEach(spec -> this.species.put(spec.getGenus(), spec));
 	}
 
-	public Optional<Float> getSiteIndex() {
-		return siteIndex;
+	public LinkedHashMap<String, I> getSites() {
+		return sites;
 	}
 
-	public void setSiteIndex(Optional<Float> siteIndex) {
-		this.siteIndex = siteIndex;
+	public void setSites(Map<String, I> sites) {
+		this.sites.clear();
+		this.sites.putAll(sites);
 	}
 
-	public Optional<Integer> getSiteCurveNumber() {
-		return siteCurveNumber;
-	}
-
-	public void setSiteCurveNumber(Optional<Integer> siteCurveNumber) {
-		this.siteCurveNumber = siteCurveNumber;
+	public void setSites(Collection<I> sites) {
+		this.sites.clear();
+		sites.forEach(spec -> this.sites.put(spec.getSiteGenus(), spec));
 	}
 
 	public Optional<Integer> getInventoryTypeGroup() {
@@ -108,122 +69,59 @@ public class BaseVdypLayer<S extends BaseVdypSpecies> {
 		this.inventoryTypeGroup = inventoryTypeGroup;
 	}
 
-	public Optional<String> getSiteGenus() {
-		return siteGenus;
-	}
-
-	public void setSiteGenus(Optional<String> siteGenus) {
-		this.siteGenus = siteGenus;
-	}
-
-	protected abstract static class Builder<T extends BaseVdypLayer<S>, S extends BaseVdypSpecies>
+	public abstract static class Builder<T extends BaseVdypLayer<S, I>, S extends BaseVdypSpecies, I extends BaseVdypSite, SB extends BaseVdypSpecies.Builder<S>, IB extends BaseVdypSite.Builder<I>>
 			extends ModelClassBuilder<T> {
 		protected Optional<String> polygonIdentifier = Optional.empty();
 		protected Optional<LayerType> layer = Optional.empty();
-		protected Optional<Float> ageTotal = Optional.empty();
-		protected Optional<Float> height = Optional.empty();
-		protected Optional<Float> yearsToBreastHeight = Optional.empty();
 
-		protected Optional<Float> siteIndex = Optional.empty();
-		protected Optional<Integer> siteCurveNumber = Optional.empty();
 		protected Optional<Integer> inventoryTypeGroup = Optional.empty();
-		protected Optional<String> siteGenus = Optional.empty();
 
 		protected List<S> species = new LinkedList<>();
+		protected List<Consumer<SB>> speciesBuilders = new LinkedList<>();
+		protected List<Consumer<IB>> siteBuilders = new LinkedList<>();
 
-		public Builder<T, S> polygonIdentifier(String polygonIdentifier) {
+		public Builder<T, S, I, SB, IB> polygonIdentifier(String polygonIdentifier) {
 			this.polygonIdentifier = Optional.of(polygonIdentifier);
 			return this;
 		}
 
-		public Builder<T, S> layerType(LayerType layer) {
+		public Builder<T, S, I, SB, IB> layerType(LayerType layer) {
 			this.layer = Optional.of(layer);
 			return this;
 		}
 
-		public Builder<T, S> ageTotal(float ageTotal) {
-			return this.ageTotal(Optional.of(ageTotal));
+		public Optional<LayerType> getLayerType() {
+			return layer;
 		}
 
-		public Builder<T, S> ageTotal(Optional<Float> ageTotal) {
-			this.ageTotal = ageTotal;
+		public Builder<T, S, I, SB, IB> addSpecies(Consumer<SB> config) {
+			speciesBuilders.add(config);
 			return this;
 		}
 
-		public Builder<T, S> height(float height) {
-			return this.height(Optional.of(height));
-		}
-
-		public Builder<T, S> height(Optional<Float> height) {
-			this.height = height;
+		public Builder<T, S, I, SB, IB> addSpecies(Collection<S> species) {
+			this.species.addAll(species);
 			return this;
 		}
 
-		public Builder<T, S> yearsToBreastHeight(float yearsToBreastHeight) {
-			return this.yearsToBreastHeight(Optional.of(yearsToBreastHeight));
-		}
-
-		public Builder<T, S> yearsToBreastHeight(Optional<Float> yearsToBreastHeight) {
-			this.yearsToBreastHeight = yearsToBreastHeight;
+		public Builder<T, S, I, SB, IB> addSite(Consumer<IB> config) {
+			siteBuilders.add(config);
 			return this;
 		}
 
-		public Builder<T, S> addSpecies(S spec) {
-			this.species.add(spec);
-			return this;
-		}
-
-		public Builder<T, S> addSpecies(Collection<S> spec) {
-			this.species.addAll(spec);
-			return this;
-		}
-
-		public Builder<T, S> siteIndex(float siteIndex) {
-			return this.siteIndex(Optional.of(siteIndex));
-		}
-
-		public Builder<T, S> siteCurveNumber(int siteCurveNumber) {
-			return this.siteCurveNumber(Optional.of(siteCurveNumber));
-		}
-
-		public Builder<T, S> inventoryTypeGroup(int inventoryTypeGroup) {
+		public Builder<T, S, I, SB, IB> inventoryTypeGroup(int inventoryTypeGroup) {
 			return this.inventoryTypeGroup(Optional.of(inventoryTypeGroup));
 		}
 
-		public Builder<T, S> siteGenus(String siteGenus) {
-			return this.siteGenus(Optional.of(siteGenus));
-		}
-
-		public Builder<T, S> siteIndex(Optional<Float> siteIndex) {
-			this.siteIndex = siteIndex;
-			return this;
-		}
-
-		public Builder<T, S> siteCurveNumber(Optional<Integer> siteCurveNumber) {
-			this.siteCurveNumber = siteCurveNumber;
-			return this;
-		}
-
-		public Builder<T, S> inventoryTypeGroup(Optional<Integer> inventoryTypeGroup) {
+		public Builder<T, S, I, SB, IB> inventoryTypeGroup(Optional<Integer> inventoryTypeGroup) {
 			this.inventoryTypeGroup = inventoryTypeGroup;
 			return this;
 		}
 
-		public Builder<T, S> siteGenus(Optional<String> siteGenus) {
-			this.siteGenus = siteGenus;
-			return this;
-		}
-
-		public Builder<T, S> copy(BaseVdypLayer<?> toCopy) {
+		public Builder<T, S, I, SB, IB> copy(BaseVdypLayer<?, ?> toCopy) {
 			polygonIdentifier(toCopy.getPolygonIdentifier());
 			layerType(toCopy.getLayer());
-			ageTotal(toCopy.getAgeTotal());
-			yearsToBreastHeight(toCopy.getYearsToBreastHeight());
-			height(toCopy.getHeight());
-			siteIndex(toCopy.getSiteIndex());
-			siteCurveNumber(toCopy.getSiteCurveNumber());
 			inventoryTypeGroup(toCopy.getInventoryTypeGroup());
-			siteGenus(toCopy.getSiteGenus());
 			return this;
 		}
 
@@ -233,14 +131,18 @@ public class BaseVdypLayer<S extends BaseVdypSpecies> {
 			requirePresent(layer, "layer", errors);
 		}
 
+		protected abstract S buildSpecies(Consumer<SB> config);
+
+		protected abstract I buildSite(Consumer<IB> config);
+
 		@Override
 		protected void postProcess(T result) {
 			super.postProcess(result);
-
-			// Add species
-			for (S spec : species) {
-				result.getSpecies().put(spec.getGenus(), spec);
-			}
+			var species = this.species;
+			speciesBuilders.stream().map(this::buildSpecies).collect(Collectors.toCollection(() -> species));
+			var sites = siteBuilders.stream().map(this::buildSite).toList();
+			result.setSpecies(species);
+			result.setSites(sites);
 		}
 
 	}

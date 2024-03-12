@@ -57,9 +57,14 @@ class VdypSpeciesTest {
 		var layer = VdypLayer.build(builder -> {
 			builder.polygonIdentifier("Test");
 			builder.layerType(LayerType.PRIMARY);
-			builder.ageTotal(42f);
-			builder.yearsToBreastHeight(2f);
-			builder.height(10f);
+
+			builder.addSite(siteBuilder -> {
+				siteBuilder.siteGenus("B");
+				siteBuilder.siteCurveNumber(0);
+				siteBuilder.ageTotal(42f);
+				siteBuilder.yearsToBreastHeight(2f);
+				siteBuilder.height(10f);
+			});
 		});
 
 		var result = VdypSpecies.build(layer, builder -> {

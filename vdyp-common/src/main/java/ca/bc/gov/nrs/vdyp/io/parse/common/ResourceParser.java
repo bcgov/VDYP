@@ -21,10 +21,8 @@ public interface ResourceParser<T> {
 	 * @param is
 	 * @param control Control parameter map
 	 * @return The parsed resource
-	 * @throws IOException                if there is an error communicating with
-	 *                                    the input stream
-	 * @throws ResourceParseLineException if there is a problem with the content of
-	 *                                    the resource
+	 * @throws IOException                if there is an error communicating with the input stream
+	 * @throws ResourceParseLineException if there is a problem with the content of the resource
 	 */
 	T parse(InputStream is, Map<String, Object> control) throws IOException, ResourceParseException;
 
@@ -35,10 +33,8 @@ public interface ResourceParser<T> {
 	 * @param resourcePath
 	 * @param control      Control parameter map
 	 * @return The parsed resource
-	 * @throws IOException                if there is an error communicating with
-	 *                                    the input stream
-	 * @throws ResourceParseLineException if there is a problem with the content of
-	 *                                    the resource
+	 * @throws IOException                if there is an error communicating with the input stream
+	 * @throws ResourceParseLineException if there is a problem with the content of the resource
 	 */
 	default T parse(Class<?> klazz, String resourcePath, Map<String, Object> control)
 			throws IOException, ResourceParseException {
@@ -58,10 +54,8 @@ public interface ResourceParser<T> {
 	 * @param resourcePath
 	 * @param control      Control parameter map
 	 * @return The parsed resource
-	 * @throws IOException                if there is an error communicating with
-	 *                                    the input stream
-	 * @throws ResourceParseLineException if there is a problem with the content of
-	 *                                    the resource
+	 * @throws IOException                if there is an error communicating with the input stream
+	 * @throws ResourceParseLineException if there is a problem with the content of the resource
 	 */
 	default T parse(Path resourcePath, Map<String, Object> control) throws IOException, ResourceParseException {
 		try (InputStream is = Files.newInputStream(resourcePath)) {

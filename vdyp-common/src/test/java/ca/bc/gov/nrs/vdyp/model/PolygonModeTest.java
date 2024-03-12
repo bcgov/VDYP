@@ -9,26 +9,26 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class FipModeTest {
+class PolygonModeTest {
 
 	@ParameterizedTest()
-	@EnumSource(FipMode.class)
-	void testGetByCodeExpected(FipMode mode) {
-		var result = FipMode.getByCode(mode.getCode());
+	@EnumSource(PolygonMode.class)
+	void testGetByCodeExpected(PolygonMode mode) {
+		var result = PolygonMode.getByCode(mode.getCode());
 		assertThat(result, present(is(mode)));
 	}
 
 	@ParameterizedTest()
 	@ValueSource(ints = { -2, Integer.MIN_VALUE, Integer.MAX_VALUE, 42 })
 	void testGetByCodeUnexpected(int code) {
-		var result = FipMode.getByCode(code);
-		assertThat(result, present(is(FipMode.DONT_PROCESS)));
+		var result = PolygonMode.getByCode(code);
+		assertThat(result, present(is(PolygonMode.DONT_PROCESS)));
 	}
 
 	@ParameterizedTest()
 	@ValueSource(ints = { 0 })
 	void testGetByCodeMissing(int code) {
-		var result = FipMode.getByCode(code);
+		var result = PolygonMode.getByCode(code);
 		assertThat(result, notPresent());
 	}
 

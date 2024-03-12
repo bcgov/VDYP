@@ -17,20 +17,17 @@ import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 import ca.bc.gov.nrs.vdyp.model.Coefficients;
 
 /**
- * Parses a mapping from a Basal Area Group number to a list of two
- * coefficients. Each row contains
+ * Parses a mapping from a Basal Area Group number to a list of two coefficients. Each row contains
  * <ol>
  * <li>(cols 0-2) int - Basal Area Group number</li>
  * <li>(cols 3-10) float - max. basal area for group</li>
  * <li>(cols 12-19) float - max. quadratic mean diameter for group</li>
  * </ol>
- * All lines are parsed. Lines with a Basal Area Group number that's blank or
- * has the integer value 0 are treated as blank lines and ignored. If a value
- * for a given Basal Area Group is not included in the file, the values 0.0f
- * (BA) and 7.6f (DQ) are used.
+ * All lines are parsed. Lines with a Basal Area Group number that's blank or has the integer value 0 are treated as
+ * blank lines and ignored. If a value for a given Basal Area Group is not included in the file, the values 0.0f (BA)
+ * and 7.6f (DQ) are used.
  * <p>
- * The result of the parse is a map from a Basal Area Group number to a
- * (one-based) two-element coefficient array.
+ * The result of the parse is a map from a Basal Area Group number to a (one-based) two-element coefficient array.
  * <p>
  * Control index: 108
  * <p>

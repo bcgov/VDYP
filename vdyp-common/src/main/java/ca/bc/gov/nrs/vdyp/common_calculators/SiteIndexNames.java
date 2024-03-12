@@ -1430,8 +1430,8 @@ public class SiteIndexNames {
 			"Nigh (2016)", };
 
 	/*
-	 * Site index conversion between species. Here's how to use the following array:
-	 * The four elements are: reference species, target species, coeff_a, coeff_b.
+	 * Site index conversion between species. Here's how to use the following array: The four elements are: reference
+	 * species, target species, coeff_a, coeff_b.
 	 *
 	 * Target_SI = coeff_a + coeff_b * Reference_SI
 	 */
@@ -1452,9 +1452,8 @@ public class SiteIndexNames {
 			{ SI_SPEC_LW, SI_SPEC_FDI, -0.69, 0.983 }, };
 
 	/*
-	 * indicates what equations are available (these are additive): 1: ht = fn (si,
-	 * age) 2: si = fn (ht, age) 4: y2bh = fn (si) 8: si = fn (ht, age) growth
-	 * intercept
+	 * indicates what equations are available (these are additive): 1: ht = fn (si, age) 2: si = fn (ht, age) 4: y2bh =
+	 * fn (si) 8: si = fn (ht, age) growth intercept
 	 */
 	public static char[] si_curve_types = {
 			// SI_ACB_HUANG
