@@ -22,8 +22,7 @@ import ca.bc.gov.nrs.vdyp.model.Region;
  * </ul>
  * All lines are read; there is no provision for blank lines.
  * <p>
- * The result is a {@link MatrixMap2} of coefficients (one-based), indexed first
- * by BEC Zone and then Region.
+ * The result is a {@link MatrixMap2} of coefficients (one-based), indexed first by BEC Zone and then Region.
  * <p>
  * FIP Control index: 061
  * <p>

@@ -18,7 +18,7 @@ public enum ControlKey {
 	// VDYP Forward Inputs
 	FORWARD_INPUT_VDYP_POLY(11), FORWARD_INPUT_VDYP_LAYER_BY_SPECIES(12), FORWARD_INPUT_VDYP_LAYER_BY_SP0_BY_UTIL(13),
 	FORWARD_INPUT_GROWTO(14),
-	
+
 	// FIP/VRI Outputs
 	VRI_OUTPUT_VDYP_POLYGON(15), VRI_OUTPUT_VDYP_LAYER_BY_SPECIES(16), VRI_OUTPUT_VDYP_LAYER_BY_SP0_BY_UTIL(18),
 
@@ -60,7 +60,7 @@ public enum ControlKey {
 	BA_MODIFIERS, DQ_MODIFIERS, HL_MODIFIERS, DECAY_MODIFIERS, WASTE_MODIFIERS;
 
 	public final Optional<Integer> sequence;
-	
+
 	ControlKey(int sequence) {
 		this.sequence = Optional.of(sequence);
 	}

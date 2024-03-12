@@ -31,8 +31,7 @@ public abstract class BaseVdypPolygon<L extends BaseVdypLayer<?>, PA> {
 	}
 
 	/**
-	 * Copy constructs from the simple attributes of another polygon, but does not
-	 * copy layers.
+	 * Copy constructs from the simple attributes of another polygon, but does not copy layers.
 	 *
 	 * @param <O>                     Type of the polygon to copy
 	 * @param <U>                     Type of percent available in the other polygon

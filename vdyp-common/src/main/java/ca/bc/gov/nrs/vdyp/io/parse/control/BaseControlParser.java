@@ -33,17 +33,18 @@ public abstract class BaseControlParser {
 	@SuppressWarnings("unchecked")
 	protected static List<ControlMapValueReplacer<Object, String>>
 			inputParserList(@SuppressWarnings("rawtypes") ControlMapValueReplacer... inputParsers) {
-		
-	    return Arrays.asList(inputParsers);
+
+		return Arrays.asList(inputParsers);
 	}
 
 	protected ControlFileParser controlParser = new ControlFileParser();
 
-	protected BaseControlParser() { }
-	
+	protected BaseControlParser() {
+	}
+
 	/**
-	 * This method is to be called after the concrete Control Parsers are initialized. This
-	 * can be from the constructors of those classes, after initialization is complete.
+	 * This method is to be called after the concrete Control Parsers are initialized. This can be from the constructors
+	 * of those classes, after initialization is complete.
 	 */
 	protected void initialize() {
 
@@ -56,7 +57,7 @@ public abstract class BaseControlParser {
 
 		outputFileParsers().forEach(key -> controlParser.record(key, ValueParser.FILENAME));
 
-		configurationFileParsers().forEach(				
+		configurationFileParsers().forEach(
 				subResourceParser -> controlParser
 						.record(subResourceParser.getControlKey(), subResourceParser.getValueParser())
 		);
@@ -71,7 +72,7 @@ public abstract class BaseControlParser {
 	protected abstract List<ControlMapValueReplacer<Object, String>> inputFileParsers();
 
 	protected abstract List<ControlKey> outputFileParsers();
-	
+
 	protected abstract List<ResourceControlMapModifier> configurationFileParsers();
 
 	protected void applyModifiers(

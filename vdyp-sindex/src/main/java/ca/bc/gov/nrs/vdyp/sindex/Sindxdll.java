@@ -490,13 +490,12 @@ public class Sindxdll {
 	private static final int SI_MAX_CURVES = 123;
 
 	/*
-	 * Site index conversion between species. Here's how to use the following array:
-	 * The four elements are: reference species, target species, coeff_a, coeff_b.
+	 * Site index conversion between species. Here's how to use the following array: The four elements are: reference
+	 * species, target species, coeff_a, coeff_b.
 	 *
 	 * Target_SI = coeff_a + coeff_b * Reference_SI
 	 *
-	 * When looping through the array, reject entries that have 0 for both reference
-	 * and target species.
+	 * When looping through the array, reject entries that have 0 for both reference and target species.
 	 */
 	private static final int SI_MAX_CONVERT = 28;
 
@@ -2174,36 +2173,30 @@ public class Sindxdll {
 //Removed WINAPI from all subsequent functions
 
 	/**
-	 * VersionNumber =================== Returns the version number of the Sindex
-	 * routines.
+	 * VersionNumber =================== Returns the version number of the Sindex routines.
 	 *
 	 * @param None
 	 * @return int The number indicating the version of the Sindex routines.
 	 *
-	 * @remarks The format of the number is always in the form of: Mmm where M: the
-	 *          major release number (1, 2, ...) mm: the minor release number (0, 1,
-	 *          ..., 99)
+	 * @remarks The format of the number is always in the form of: Mmm where M: the major release number (1, 2, ...) mm:
+	 *          the minor release number (0, 1, ..., 99)
 	 *
 	 *          An example would be: 631, meaning version 6.31
 	 *
-	 *          If the major release is greater than what your application expects,
-	 *          assume that the Sindex routines cannot be used, and that the user
-	 *          needs to obtain a newer version of sindex.dll.
+	 *          If the major release is greater than what your application expects, assume that the Sindex routines
+	 *          cannot be used, and that the user needs to obtain a newer version of sindex.dll.
 	 *
-	 *          Minor release changes may include: - Addition of a function. -
-	 *          Changed return values (e.g., error messages). - Iterating for
-	 *          solutions may generate different results. - Bug fixes in
-	 *          implementation of site index equations. - Addition of species. -
-	 *          Addition of curve sources (equations). - Change of default curve for
-	 *          a species. - Change of mapping species to a different species.
+	 *          Minor release changes may include: - Addition of a function. - Changed return values (e.g., error
+	 *          messages). - Iterating for solutions may generate different results. - Bug fixes in implementation of
+	 *          site index equations. - Addition of species. - Addition of curve sources (equations). - Change of
+	 *          default curve for a species. - Change of mapping species to a different species.
 	 */
 	public static short VersionNumber() {
 		return 151;
 	}
 
 	/**
-	 * FirstSpecies =================== Returns a species index for the first
-	 * species defined in Sindex.
+	 * FirstSpecies =================== Returns a species index for the first species defined in Sindex.
 	 *
 	 * @param None
 	 * @return int Species index, for use in other Sindex functions.
@@ -2215,15 +2208,12 @@ public class Sindxdll {
 	}
 
 	/**
-	 * NextSpecies ================= Given a species index, returns the next species
-	 * defined in Sindex.
+	 * NextSpecies ================= Given a species index, returns the next species defined in Sindex.
 	 *
 	 * @param sp_index Integer species index
 	 * @return sp_index+1 Integer species index, for use in other Sindex functions.
-	 * @throws SpeciesErrorException if the input parameter is not a valid species
-	 *                               index.
-	 * @throws NoAnswerException     if the input parameter is the last defined
-	 *                               species index.
+	 * @throws SpeciesErrorException if the input parameter is not a valid species index.
+	 * @throws NoAnswerException     if the input parameter is the last defined species index.
 	 *
 	 * @remarks No assumption should be made about the ordering of the species.
 	 */
@@ -2242,11 +2232,9 @@ public class Sindxdll {
 	 *
 	 * @param sp_index Integer species index.
 	 * @return String containing species code.
-	 * @throws IllegalArgumentException if input parameter is not a valid species
-	 *                                  index.
+	 * @throws IllegalArgumentException if input parameter is not a valid species index.
 	 *
-	 * @remarks Species code string takes the form "Xx" or "Xxx", such as "Sw" or
-	 *          "Fdc".
+	 * @remarks Species code string takes the form "Xx" or "Xxx", such as "Sw" or "Fdc".
 	 */
 	public static String SpecCode(short sp_index) throws IllegalArgumentException {
 		if (sp_index < 0 || sp_index >= SI_MAX_SPECIES) {
@@ -2261,8 +2249,7 @@ public class Sindxdll {
 	 *
 	 * @param sp_index Integer species index.
 	 * @return Sstring containing species name.
-	 * @throws IllegalArgumentException if input parameter is not a valid species
-	 *                                  index.
+	 * @throws IllegalArgumentException if input parameter is not a valid species index.
 	 *
 	 * @remarks Species name string examples: "Coastal Douglas-fir", "Sitka Spruce".
 	 */
@@ -2275,16 +2262,13 @@ public class Sindxdll {
 	}
 
 	/**
-	 * SpecUse ============== Returns a code telling where a species generally
-	 * exists.
+	 * SpecUse ============== Returns a code telling where a species generally exists.
 	 *
 	 * @param sp_index Integer species index.
 	 * @return Integer code.
-	 * @throws SpeciesErrorException if input parameter is not a valid species
-	 *                               index.
+	 * @throws SpeciesErrorException if input parameter is not a valid species index.
 	 *
-	 * @remarks Code bits are set as follows: 1: BC coast 10: BC interior 100:
-	 *          common species in BC (0 means uncommon)
+	 * @remarks Code bits are set as follows: 1: BC coast 10: BC interior 100: common species in BC (0 means uncommon)
 	 */
 	public static short SpecUse(short sp_index) {
 		if (sp_index < 0 || sp_index >= SI_MAX_SPECIES) {
@@ -2577,10 +2561,8 @@ public class Sindxdll {
 	 * @param sp_index Integer species index.
 	 * @return Integer curve index, for use in other Sindex functions.
 	 *
-	 * @throws SpeciesErrorException if the input parameter is not a valid species
-	 *                               index.
-	 * @throws NoAnswerException     if the input parameter is the last defined
-	 *                               species index.
+	 * @throws SpeciesErrorException if the input parameter is not a valid species index.
+	 * @throws NoAnswerException     if the input parameter is the last defined species index.
 	 */
 	public static short DefCurve(short sp_index) {
 		if (sp_index < 0 || sp_index >= SI_MAX_SPECIES) {
@@ -2598,8 +2580,7 @@ public class Sindxdll {
 	 * @param sp_index Integer species index.
 	 * @return Integer curve index, for use in other Sindex functions.
 	 *
-	 * @throws SpeciesErrorException if the input parameter is not a valid species
-	 *                               index.
+	 * @throws SpeciesErrorException if the input parameter is not a valid species index.
 	 * @throws NoAnswerException     No GI equations defined for this species.
 	 */
 	public static short DefGICurve(short sp_index) {
@@ -2640,8 +2621,7 @@ public class Sindxdll {
 	}
 
 	/**
-	 * DefCurveEst ================== Returns default curve index for a species and
-	 * establishment type.
+	 * DefCurveEst ================== Returns default curve index for a species and establishment type.
 	 *
 	 * @param sp_index Integer species index.
 	 * @param estab    Integer establishment type.
@@ -2651,9 +2631,8 @@ public class Sindxdll {
 	 * @throws EstablishmentErrorException species index or establishment type.
 	 * @throws NoAnswerException           if no curves defined for this species.
 	 *
-	 * @remarks Orginally said to return SI_ERR_NO_ANS if no curves are defined for
-	 *          the species. I've added an additional check to see if it would
-	 *          return this and thrown the NoAnswerException there instead.
+	 * @remarks Orginally said to return SI_ERR_NO_ANS if no curves are defined for the species. I've added an
+	 *          additional check to see if it would return this and thrown the NoAnswerException there instead.
 	 */
 	public static short DefCurveEst(short sp_index, short estab) {
 		if (sp_index < 0 || sp_index >= SI_MAX_SPECIES) { // spec
@@ -2684,14 +2663,12 @@ public class Sindxdll {
 	 * @param sp_index Integer species index.
 	 * @return Integer curve index, for use in other Sindex functions.
 	 *
-	 * @throws SpeciesErrorException if the input parameter is not a valid species
-	 *                               index.
+	 * @throws SpeciesErrorException if the input parameter is not a valid species index.
 	 * @throws NoAnswerException     if no curves defined for this species.
 	 *
 	 * @remarks No assumption should be made about the ordering of the curves.
-	 * @remarks Orginally said to return SI_ERR_NO_ANS if no curves are defined for
-	 *          the species. I've added an additional check to see if it would
-	 *          return this and thrown the NoAnswerException there instead.
+	 * @remarks Orginally said to return SI_ERR_NO_ANS if no curves are defined for the species. I've added an
+	 *          additional check to see if it would return this and thrown the NoAnswerException there instead.
 	 */
 	public static short FirstCurve(short sp_index) {
 		if (sp_index < 0 || sp_index >= SI_MAX_SPECIES) {
@@ -2711,12 +2688,9 @@ public class Sindxdll {
 	 *
 	 * @return Integer curve index, for use in other Sindex functions.
 	 *
-	 * @throws SpeciesErrorException if input species is not a valid species index
-	 *                               or
-	 * @throws CurveErrorException   if input curve is not a valid curve index for
-	 *                               this species.
-	 * @throws NoAnswerException     if input parameter is last defined index for
-	 *                               this species.
+	 * @throws SpeciesErrorException if input species is not a valid species index or
+	 * @throws CurveErrorException   if input curve is not a valid curve index for this species.
+	 * @throws NoAnswerException     if input parameter is last defined index for this species.
 	 *
 	 * @remarks No assumption should be made about the ordering of the curves.
 	 */
@@ -3103,8 +3077,7 @@ public class Sindxdll {
 	}
 
 	/**
-	 * CurveName ================ Returns string containing author and date of
-	 * curve.
+	 * CurveName ================ Returns string containing author and date of curve.
 	 *
 	 * @param cu_index Integer curve index.
 	 * @return String containing curve author and date.
@@ -3122,17 +3095,15 @@ public class Sindxdll {
 	}
 
 	/**
-	 * CurveUse =============== Returns a code telling what functions are available
-	 * for a curve index.
+	 * CurveUse =============== Returns a code telling what functions are available for a curve index.
 	 *
 	 * @param cu_index Integer curve index.
 	 * @return Integer code.
 	 *
 	 * @throws CurveErrorException if input curve is not a valid curve index.
 	 *
-	 * @remarks Code bits are set as follows: 0001: ht = fn (si, age) 0010: si = fn
-	 *          (ht, age) 0100: y2bh = fn (si) 1000: si = fn (ht, age) growth
-	 *          intercept
+	 * @remarks Code bits are set as follows: 0001: ht = fn (si, age) 0010: si = fn (ht, age) 0100: y2bh = fn (si) 1000:
+	 *          si = fn (ht, age) growth intercept
 	 */
 	public static short CurveUse(short cu_index) {
 		if (cu_index >= 0 && cu_index < SI_MAX_CURVES) {
@@ -3143,32 +3114,24 @@ public class Sindxdll {
 
 //These all call other functions from other C files
 	/**
-	 * HtAgeToSI ================ Converts a Height and Age to a Site Index for a
-	 * particular Site Index Curve.
+	 * HtAgeToSI ================ Converts a Height and Age to a Site Index for a particular Site Index Curve.
 	 *
-	 * @param curve   Integer curve index. The particular site index curve to
-	 *                project the height and age along.
-	 * @param age     Floating point age. The age of the trees indicated by the
-	 *                curve selection. The interpretation of this age is modified by
-	 *                the 'ageType' parameter.
-	 * @param ageType Integer age type. Must be one of: SI_AT_TOTAL The age is the
-	 *                total age of the stand in years since planting. SI_AT_BREAST
-	 *                The age indicates the number of years since the stand reached
-	 *                breast height.
+	 * @param curve   Integer curve index. The particular site index curve to project the height and age along.
+	 * @param age     Floating point age. The age of the trees indicated by the curve selection. The interpretation of
+	 *                this age is modified by the 'ageType' parameter.
+	 * @param ageType Integer age type. Must be one of: SI_AT_TOTAL The age is the total age of the stand in years since
+	 *                planting. SI_AT_BREAST The age indicates the number of years since the stand reached breast
+	 *                height.
 	 * @param height  Floating point height. The height of the species in metres.
-	 * @param estType Integer estimate type. Must be one of: SI_EST_DIRECT Compute
-	 *                the site index based on direct equations if available. If the
-	 *                equations are not available, then automatically fall to the
-	 *                SI_EST_ITERATE method. SI_EST_ITERATE Compute the site index
-	 *                based on an iterative method which converges on the true site
-	 *                index.
-	 * @param site    Floating point site index. (computed) This value is computed
-	 *                from the other parameters. If an error condition occurs, the
-	 *                site index is set to the same as the return value.
+	 * @param estType Integer estimate type. Must be one of: SI_EST_DIRECT Compute the site index based on direct
+	 *                equations if available. If the equations are not available, then automatically fall to the
+	 *                SI_EST_ITERATE method. SI_EST_ITERATE Compute the site index based on an iterative method which
+	 *                converges on the true site index.
+	 * @param site    Floating point site index. (computed) This value is computed from the other parameters. If an
+	 *                error condition occurs, the site index is set to the same as the return value.
 	 * @return 0 or an exception
 	 *
-	 * @throws CurveErrorException                if input curve is not a valid
-	 *                                            curve index
+	 * @throws CurveErrorException                if input curve is not a valid curve index
 	 * @throws NoAnswerException                  if computed SI > 999
 	 * @throws GrowthInterceptMinimumException    if bhage < 0.5
 	 * @throws GrowthInterceptMaximumException    if bhage > GI range
@@ -3182,27 +3145,20 @@ public class Sindxdll {
 	}
 
 	/**
-	 * HtSIToAge ================ Converts a Height and Site Index to an Age for a
-	 * particular Site Index Curve.
+	 * HtSIToAge ================ Converts a Height and Site Index to an Age for a particular Site Index Curve.
 	 *
-	 * @param curve     Integer curve index. The particular site index curve to
-	 *                  project the height and age along.
+	 * @param curve     Integer curve index. The particular site index curve to project the height and age along.
 	 * @param height    Floating point height. The height of the species in meters.
-	 * @param ageType   Integer age type. Must be one of: SI_AT_TOTAL The age is the
-	 *                  total age of the stand in years since planting. SI_AT_BREAST
-	 *                  The age indicates the number of years since the stand
-	 *                  reached breast height.
-	 * @param siteIndex Floating point site index. The site index value of the
-	 *                  stand.
-	 * @param y2bh      Floating point y2bh. The number of years it takes the stand
-	 *                  to reach breast height.
-	 * @param age       Floating point age. (computed) This value is computed from
-	 *                  the other parameters. If an error condition occurs, the age
-	 *                  is set to the same as the return value.
+	 * @param ageType   Integer age type. Must be one of: SI_AT_TOTAL The age is the total age of the stand in years
+	 *                  since planting. SI_AT_BREAST The age indicates the number of years since the stand reached
+	 *                  breast height.
+	 * @param siteIndex Floating point site index. The site index value of the stand.
+	 * @param y2bh      Floating point y2bh. The number of years it takes the stand to reach breast height.
+	 * @param age       Floating point age. (computed) This value is computed from the other parameters. If an error
+	 *                  condition occurs, the age is set to the same as the return value.
 	 * @return 0, or an exception
 	 *
-	 * @throws CurveErrorException              if input curve is not a valid curve
-	 *                                          index
+	 * @throws CurveErrorException              if input curve is not a valid curve index
 	 * @throws GrowthInterceptMinimumException  if bhage < 0.5
 	 * @throws IGrowthInterceptMaximumException if bhage > GI range
 	 * @throws NoAnswerException                if computed SI > 999
@@ -3217,30 +3173,23 @@ public class Sindxdll {
 	}
 
 	/**
-	 * AgeSIToHt ================ Converts an Age and Site Index to a Height for a
-	 * particular Site Index Curve.
+	 * AgeSIToHt ================ Converts an Age and Site Index to a Height for a particular Site Index Curve.
 	 *
-	 * @param curve     Integer curve index. The particular site index curve to
-	 *                  project the height and age along.
-	 * @param age       Floating point age. The age of the trees indicated by the
-	 *                  curve selection. The interpretation of this age is modified
-	 *                  by the 'ageType' parameter.
-	 * @param ageType   Integer age type. Must be one of: SI_AT_TOTAL The age is the
-	 *                  total age of the stand in years since planting. SI_AT_BREAST
-	 *                  The age indicates the number of years since the stand
-	 *                  reached breast height.
-	 * @param siteIndex Floating point site index. The site index value of the
-	 *                  stand.
-	 * @param y2bh      Floating point years to breast height. The number of years
-	 *                  it takes the stand to reach breast height.
-	 * @param height    Floating point height. (computed) This value is computed
-	 *                  from the other parameters. If an error condition occurs, the
-	 *                  height is set to the same as the return value.
+	 * @param curve     Integer curve index. The particular site index curve to project the height and age along.
+	 * @param age       Floating point age. The age of the trees indicated by the curve selection. The interpretation of
+	 *                  this age is modified by the 'ageType' parameter.
+	 * @param ageType   Integer age type. Must be one of: SI_AT_TOTAL The age is the total age of the stand in years
+	 *                  since planting. SI_AT_BREAST The age indicates the number of years since the stand reached
+	 *                  breast height.
+	 * @param siteIndex Floating point site index. The site index value of the stand.
+	 * @param y2bh      Floating point years to breast height. The number of years it takes the stand to reach breast
+	 *                  height.
+	 * @param height    Floating point height. (computed) This value is computed from the other parameters. If an error
+	 *                  condition occurs, the height is set to the same as the return value.
 	 *
 	 * @return 0, or an exception
 	 *
-	 * @throws CurveErrorException             if input curve is not a valid curve
-	 *                                         index
+	 * @throws CurveErrorException             if input curve is not a valid curve index
 	 * @throws GrowthInterceptMinimumException if bhage < 0.5
 	 * @throws GrowthInterceptMaximumException if bhage > GI range
 	 * @throws NoAnswerException               if computed SI > 999
@@ -3255,36 +3204,27 @@ public class Sindxdll {
 	}
 
 	/**
-	 * AgeSIToHtSmooth ====================== Converts an Age and Site Index to a
-	 * Height for a particular Site Index Curve. This includes a smoothing equation
-	 * centered at breast-height age 0. Also, user can specify seedling age and
-	 * height.
+	 * AgeSIToHtSmooth ====================== Converts an Age and Site Index to a Height for a particular Site Index
+	 * Curve. This includes a smoothing equation centered at breast-height age 0. Also, user can specify seedling age
+	 * and height.
 	 *
-	 * @param curve        Integer curve index. The particular site index curve to
-	 *                     project the height and age along.
-	 * @param age          Floating point age. The age of the trees indicated by the
-	 *                     curve selection. The interpretation of this age is
-	 *                     modified by the 'ageType' parameter.
-	 * @param ageType      Integer age type. Must be one of: SI_AT_TOTAL The age is
-	 *                     the total age of the stand in years since planting.
-	 *                     SI_AT_BREAST The age indicates the number of years since
-	 *                     the stand reached breast height.
-	 * @param siteIndex    Floating point site index. The site index value of the
-	 *                     stand.
-	 * @param y2bh         Floating point years to breast height. The number of
-	 *                     years it takes the stand to reach breast height.
-	 * @param seedling_age Floating point seedling age. Average age(years) of
-	 *                     planted seedling stock (0 if not known).
-	 * @param seedling_ht  Floating point seedling height. Average height(m) of
-	 *                     planted seedling stock (0 if not known).
-	 * @param height       Floating point height. (computed) This value is computed
-	 *                     from the other parameters. If an error condition occurs,
-	 *                     the height is set to the same as the return value.
+	 * @param curve        Integer curve index. The particular site index curve to project the height and age along.
+	 * @param age          Floating point age. The age of the trees indicated by the curve selection. The interpretation
+	 *                     of this age is modified by the 'ageType' parameter.
+	 * @param ageType      Integer age type. Must be one of: SI_AT_TOTAL The age is the total age of the stand in years
+	 *                     since planting. SI_AT_BREAST The age indicates the number of years since the stand reached
+	 *                     breast height.
+	 * @param siteIndex    Floating point site index. The site index value of the stand.
+	 * @param y2bh         Floating point years to breast height. The number of years it takes the stand to reach breast
+	 *                     height.
+	 * @param seedling_age Floating point seedling age. Average age(years) of planted seedling stock (0 if not known).
+	 * @param seedling_ht  Floating point seedling height. Average height(m) of planted seedling stock (0 if not known).
+	 * @param height       Floating point height. (computed) This value is computed from the other parameters. If an
+	 *                     error condition occurs, the height is set to the same as the return value.
 	 *
 	 * @return 0 or an exception
 	 *
-	 * @throws CurveErrorException             if input curve is not a valid curve
-	 *                                         index
+	 * @throws CurveErrorException             if input curve is not a valid curve index
 	 * @throws GrowthInterceptMinimumException if bhage < 0.5
 	 * @throws GrowthInterceptMaximumException if bhage > GI range
 	 * @throws NoAnswerException               if computed SI > 999
@@ -3302,16 +3242,13 @@ public class Sindxdll {
 	}
 
 	/**
-	 * Y2BH05 ============= Calculates the number of years a stand takes to grow
-	 * from seed to breast height, in steps ending in 0.5 (i.e. 0.5, 1.5. 2.5, etc.)
+	 * Y2BH05 ============= Calculates the number of years a stand takes to grow from seed to breast height, in steps
+	 * ending in 0.5 (i.e. 0.5, 1.5. 2.5, etc.)
 	 *
-	 * @param curve     Integer curve index. The particular site index curve to
-	 *                  project the height and age along.
-	 * @param siteIndex Floating point site index. The site index value of the
-	 *                  stand.
-	 * @param y2bh      Floating point years to breast height. (computed) This value
-	 *                  is computed from the other parameters. If an error condition
-	 *                  occurs, the y2bh is set to the same as the return value.
+	 * @param curve     Integer curve index. The particular site index curve to project the height and age along.
+	 * @param siteIndex Floating point site index. The site index value of the stand.
+	 * @param y2bh      Floating point years to breast height. (computed) This value is computed from the other
+	 *                  parameters. If an error condition occurs, the y2bh is set to the same as the return value.
 	 *
 	 * @return 0, or an exception
 	 *
@@ -3326,16 +3263,12 @@ public class Sindxdll {
 	}
 
 	/**
-	 * Y2BH =========== Calculates the number of years a stand takes to grow from
-	 * seed to breast height.
+	 * Y2BH =========== Calculates the number of years a stand takes to grow from seed to breast height.
 	 *
-	 * @param curve     Integer curve index. The particular site index curve to
-	 *                  project the height and age along.
-	 * @param siteIndex Floating point site index. The site index value of the
-	 *                  stand.
-	 * @param y2bh      Floating point years to breast height. (computed) This value
-	 *                  is computed from the other parameters. If an error condition
-	 *                  occurs, the y2bh is set to the same as the return value.
+	 * @param curve     Integer curve index. The particular site index curve to project the height and age along.
+	 * @param siteIndex Floating point site index. The site index value of the stand.
+	 * @param y2bh      Floating point years to breast height. (computed) This value is computed from the other
+	 *                  parameters. If an error condition occurs, the y2bh is set to the same as the return value.
 	 *
 	 * @return 0 or an exception 0, or an error code under the following conditions:
 	 *
@@ -3398,14 +3331,12 @@ public class Sindxdll {
 	 *
 	 * @param sp_index Integer species index.
 	 * @param sitecl   Character site class ('G', 'M', 'P', 'L').
-	 * @param fiz      Character FIZ code (A,B,C)=coast,
-	 *                 (D,E,F,G,H,I,J,K,L)=interior.
+	 * @param fiz      Character FIZ code (A,B,C)=coast, (D,E,F,G,H,I,J,K,L)=interior.
 	 * @param site     Floating point site index. (computed)
 	 *
 	 * @return 0, or an exception
 	 *
-	 * @throws SpeciesErrorException        source species index is not valid, or no
-	 *                                      conversion
+	 * @throws SpeciesErrorException        source species index is not valid, or no conversion
 	 * @throws ClassErrorException          if site class is unknown
 	 * @throws ForestInventoryZoneException if FIZ code is unknown
 	 */
@@ -3427,8 +3358,7 @@ public class Sindxdll {
 	 *
 	 * @throws CodeErrorException if species code is unknown
 	 *
-	 * @remarks Species code string can be 1, 2, or 3 letters; upper/lower case is
-	 *          ignored.
+	 * @remarks Species code string can be 1, 2, or 3 letters; upper/lower case is ignored.
 	 */
 	public static short SpecMap(String sc) {
 		short speciesIndex = SpecRMap.species_map(sc);
@@ -3441,8 +3371,7 @@ public class Sindxdll {
 	 */
 	/**
 	 *
-	 * SpecRemap ================ Remap species to recommended species, and return
-	 * species index
+	 * SpecRemap ================ Remap species to recommended species, and return species index
 	 *
 	 * @param sc  Character string species code.
 	 * @param fiz Character FIZ code (A,B,C)=coast, (D,E,F,G,H,I,J,K,L)=interior.
@@ -3452,9 +3381,8 @@ public class Sindxdll {
 	 * @throws CodeErrorException           if species code is unknown
 	 * @throws ForestInventoryZoneException if FIZ code is unknown
 	 *
-	 * @remark Species code string can be 1, 2, or 3 letters; upper/lower case is
-	 *         ignored. FIZ is only used where needed, such as for species code
-	 *         "FD".
+	 * @remark Species code string can be 1, 2, or 3 letters; upper/lower case is ignored. FIZ is only used where
+	 *         needed, such as for species code "FD".
 	 */
 	public static short SpecRemap(String sc, char fiz) {
 		short speciesIndex = SpecRMap.species_remap(sc, fiz);
@@ -3472,8 +3400,7 @@ public class Sindxdll {
 	 *
 	 * @return A string containing publication citation.
 	 *
-	 * @throws IllegalArgumentException if input parameter is not a valid curve
-	 *                                  index
+	 * @throws IllegalArgumentException if input parameter is not a valid curve index
 	 */
 	public static String CurveSource(short cu_index) throws IllegalArgumentException {
 		if (cu_index < 0 || cu_index >= SI_MAX_CURVES) {
@@ -3556,8 +3483,7 @@ public class Sindxdll {
 	 *
 	 * @return String containing notes on use of curve.
 	 *
-	 * @throws IllegalArgumentException if input parameter is not a valid curve
-	 *                                  index
+	 * @throws IllegalArgumentException if input parameter is not a valid curve index
 	 */
 	public static String CurveNotes(short cu_index) throws IllegalArgumentException {
 		if (cu_index < 0 || cu_index >= SI_MAX_CURVES) {
@@ -3617,8 +3543,7 @@ public class Sindxdll {
 	 * convert age to other type
 	 */
 	/**
-	 * AgeToAge =============== Age conversion between age types (total vs breast
-	 * height)
+	 * AgeToAge =============== Age conversion between age types (total vs breast height)
 	 *
 	 * @param cu_index  Integer curve index.
 	 * @param age1      Floating point source age.
@@ -3629,8 +3554,7 @@ public class Sindxdll {
 	 *
 	 * @return 0 or an exception
 	 *
-	 * @throws CurveErrorException input curve is not a valid curve index for this
-	 *                             species
+	 * @throws CurveErrorException input curve is not a valid curve index for this species
 	 * @throw AgeTypeErrorException unknown age type.
 	 */
 	public static short
@@ -3644,15 +3568,13 @@ public class Sindxdll {
 	 * convert curve index to species index
 	 */
 	/**
-	 * CurveToSpecies ===================== Returns species index for a given curve
-	 * index.
+	 * CurveToSpecies ===================== Returns species index for a given curve index.
 	 *
 	 * @param cu_index Integer curve index.
 	 *
 	 * @return Integer species index, for use in other Sindex functions.
 	 *
-	 * @throws CurveErrorException if input curve is not a valid curve index for any
-	 *                             species.
+	 * @throws CurveErrorException if input curve is not a valid curve index for any species.
 	 */
 	public static short CurveToSpecies(short cu_index) {
 		if (cu_index < 0 || cu_index >= SI_MAX_CURVES) {

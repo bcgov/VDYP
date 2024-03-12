@@ -7,9 +7,7 @@ public class VdypPolygonDescription {
 	private final String description; // POLYDESC
 	private final Integer year; // derived - last four characters of POLYDESC
 
-	public VdypPolygonDescription(
-			String description, Integer year
-	) {
+	public VdypPolygonDescription(String description, Integer year) {
 		super();
 		this.description = description;
 		this.year = year;

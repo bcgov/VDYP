@@ -5,8 +5,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 /**
- * Base for support classes to make classes with complex constructors nicer to
- * work with.
+ * Base for support classes to make classes with complex constructors nicer to work with.
  */
 
 public abstract class ModelClassBuilder<T> {
@@ -25,9 +24,8 @@ public abstract class ModelClassBuilder<T> {
 	}
 
 	/**
-	 * Check that the required properties have been set. Adds a message to the
-	 * collection for each missing property. These will be joined together as the
-	 * message for an exception if any are missing.
+	 * Check that the required properties have been set. Adds a message to the collection for each missing property.
+	 * These will be joined together as the message for an exception if any are missing.
 	 *
 	 * @param errors Collection to add errors to if there are missing properties
 	 */

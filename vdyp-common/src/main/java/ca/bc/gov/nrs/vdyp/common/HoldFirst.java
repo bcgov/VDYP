@@ -4,8 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * A value that can be set once but not changed. Subsequent attempts to change
- * it are ignored silently.
+ * A value that can be set once but not changed. Subsequent attempts to change it are ignored silently.
  *
  * @author Kevin Smith, Vivid Solutions
  *
@@ -33,8 +32,7 @@ public class HoldFirst<T> {
 	}
 
 	/**
-	 * Sets the value by calling the supplier if it has not been set already.
-	 * Returns the value.
+	 * Sets the value by calling the supplier if it has not been set already. Returns the value.
 	 */
 	public T get(Supplier<T> source) {
 		if (value.isEmpty()) {

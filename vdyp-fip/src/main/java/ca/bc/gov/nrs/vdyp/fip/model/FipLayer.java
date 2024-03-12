@@ -116,8 +116,7 @@ public class FipLayer extends BaseVdypLayer<FipSpecies> {
 	 *
 	 * @param config The configuration function
 	 * @return The object built by the configured builder.
-	 * @throws IllegalStateException if any required properties have not been set by
-	 *                               the configuration function.
+	 * @throws IllegalStateException if any required properties have not been set by the configuration function.
 	 */
 	public static FipLayer build(Consumer<Builder> config) {
 		var builder = new Builder();
@@ -158,11 +157,10 @@ public class FipLayer extends BaseVdypLayer<FipSpecies> {
 		@Override
 		protected FipLayer doBuild() {
 			/*
-			 * public FipLayer( String polygonIdentifier, LayerType layer, Optional<Float>
-			 * ageTotal, Optional<Float> height, Optional<Float> yearsToBreastHeight,
-			 * Optional<Float> siteIndex, Optional<Integer> siteCurveNumber,
-			 * Optional<Integer> inventoryTypeGroup, Optional<String> siteGenus, float
-			 * crownClosure, String siteSpecies
+			 * public FipLayer( String polygonIdentifier, LayerType layer, Optional<Float> ageTotal, Optional<Float>
+			 * height, Optional<Float> yearsToBreastHeight, Optional<Float> siteIndex, Optional<Integer>
+			 * siteCurveNumber, Optional<Integer> inventoryTypeGroup, Optional<String> siteGenus, float crownClosure,
+			 * String siteSpecies
 			 */
 			return (new FipLayer(
 					polygonIdentifier.get(), //

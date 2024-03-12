@@ -17,19 +17,16 @@ import ca.bc.gov.nrs.vdyp.model.Coefficients;
 import ca.bc.gov.nrs.vdyp.model.ModelCoefficients;
 
 /**
- * Parses a mapping from a Basal Area Group number to a ModelCoefficients
- * instance. Each row contains
+ * Parses a mapping from a Basal Area Group number to a ModelCoefficients instance. Each row contains
  * <ol>
  * <li>(cols 0-1) int - Basal Area Group number</li>
  * <li>(cols 2-4) float - max. basal area for group</li>
  * <li>(cols 5-14, 15-24, 25-34) float - coefficients for group function</li>
  * </ol>
- * All lines are parsed. There is no provision for blank lines. If a value for a
- * given Basal Area Group is not included in the file, the values model value
- * and coefficients (0.0, 0.0, 0.0) are used.
+ * All lines are parsed. There is no provision for blank lines. If a value for a given Basal Area Group is not included
+ * in the file, the values model value and coefficients (0.0, 0.0, 0.0) are used.
  * <p>
- * The result of the parse is a map from a Basal Area Group number to
- * ModelCoefficients instance.
+ * The result of the parse is a map from a Basal Area Group number to ModelCoefficients instance.
  *
  * @author Michael Junkin, Vivid Solutions
  * @see ControlMapSubResourceParser

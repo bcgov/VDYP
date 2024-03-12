@@ -78,9 +78,8 @@ public class BecLookup {
 	}
 
 	/**
-	 * Find a set of BECs for the given scope. If the scope is blank, that's all
-	 * BECs, if it's a Region alias, it's all BECs for that region, otherwise its
-	 * treated as a BEC alias and the BEC matching it is returned.
+	 * Find a set of BECs for the given scope. If the scope is blank, that's all BECs, if it's a Region alias, it's all
+	 * BECs for that region, otherwise its treated as a BEC alias and the BEC matching it is returned.
 	 *
 	 * @param scope The scope to match
 	 * @return A collection of matching BECs, or the empty set if none match.

@@ -94,11 +94,9 @@ public abstract class BaseCoefficientParser<T extends Coefficients, W, M extends
 	 * @param length        length of the key in the file
 	 * @param name          name of the key
 	 * @param parser        Parser for the
-	 * @param range         Function that returns the set of values based on the
-	 *                      control map
-	 * @param errorTemplate Error message if the parsed value is not in the given
-	 *                      range, it will be formatted (see {@link String.format})
-	 *                      with the erroneous value as a parameter.
+	 * @param range         Function that returns the set of values based on the control map
+	 * @param errorTemplate Error message if the parsed value is not in the given range, it will be formatted (see
+	 *                      {@link String.format}) with the erroneous value as a parameter.
 	 * @return
 	 */
 	public <K> BaseCoefficientParser<T, W, M> key(

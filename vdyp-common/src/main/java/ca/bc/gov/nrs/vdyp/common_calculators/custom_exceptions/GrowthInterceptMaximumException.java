@@ -1,9 +1,8 @@
 package ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions;
 
 /**
- * The GrowthInterceptMaximumException exist to replace the SI_ERR_GI_MAX(-3)
- * error code found in the original C code This exception is generally thrown
- * when the growth intercept(GI) is above a threshold, this could manifest in
+ * The GrowthInterceptMaximumException exist to replace the SI_ERR_GI_MAX(-3) error code found in the original C code
+ * This exception is generally thrown when the growth intercept(GI) is above a threshold, this could manifest in
  * something like breast height age is greater than GI range
  */
 public class GrowthInterceptMaximumException extends RuntimeException {

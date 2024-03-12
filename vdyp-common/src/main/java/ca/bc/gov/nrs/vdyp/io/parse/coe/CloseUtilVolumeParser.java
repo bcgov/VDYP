@@ -13,14 +13,12 @@ import ca.bc.gov.nrs.vdyp.model.MatrixMap2;
  * <li>(cols 3-6) a Volume Group id</li>
  * <li>(cols 8-10) a breakage group identifier (1-180)</li>
  * </ol>
- * A line with a Volume Group id of 0 or one that's empty is considered blank
- * and is skipped.
+ * A line with a Volume Group id of 0 or one that's empty is considered blank and is skipped.
  * <p>
- * It is legal and expected that some of the key pairs will be missing from the
- * result (hence the use of OptionalCoefficientParser2).
+ * It is legal and expected that some of the key pairs will be missing from the result (hence the use of
+ * OptionalCoefficientParser2).
  * <p>
- * The result of the parse is a {@link MatrixMap2} of coefficients indexed first
- * by UC then Volume Group id.
+ * The result of the parse is a {@link MatrixMap2} of coefficients indexed first by UC then Volume Group id.
  * <p>
  * FIP Control index: 092
  * <p>

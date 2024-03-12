@@ -13,8 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * A mapping from the cartesian product of a set of arbitrary identifiers to a
- * value.
+ * A mapping from the cartesian product of a set of arbitrary identifiers to a value.
  *
  * @author Kevin Smith, Vivid Solutions
  *

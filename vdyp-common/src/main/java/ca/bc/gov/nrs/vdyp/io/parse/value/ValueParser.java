@@ -49,8 +49,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	/**
 	 * Adapts a parse method that throws NumerFormatException
 	 *
-	 * @param parser method that parses a string into the required type and throws
-	 *               NumerFormatException
+	 * @param parser method that parses a string into the required type and throws NumerFormatException
 	 * @param klazz  the type to parse into
 	 */
 	public static <U extends Number> ValueParser<U> numberParser(JavaNumberParser<U> parser, Class<U> klazz) {
@@ -138,8 +137,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	 * @param includeMin is the lower bound inclusive
 	 * @param max        the upper bound
 	 * @param includeMax is the upper bound inclusive
-	 * @param name       Name for the value to use in the parse error if it is out
-	 *                   of the range.
+	 * @param name       Name for the value to use in the parse error if it is out of the range.
 	 */
 	public static <T extends Comparable<T>> ValueParser<T>
 			range(ValueParser<T> parser, T min, boolean includeMin, T max, boolean includeMax, String name) {
@@ -168,8 +166,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	public static final ValueParser<Boolean> LOGICAL = s -> INTEGER.parse(s) != 0;
 
 	/**
-	 * Parser for integers as booleans restricted to the values 1 (true) and 0
-	 * (false)
+	 * Parser for integers as booleans restricted to the values 1 (true) and 0 (false)
 	 */
 	public static final ValueParser<Boolean> LOGICAL_0_1 = s -> {
 		int v = INTEGER.parse(s);
@@ -228,8 +225,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	 *
 	 * @param <U>
 	 * @param delegate
-	 * @param validator Function that returns an error string if the parsed value is
-	 *                  invalid
+	 * @param validator Function that returns an error string if the parsed value is invalid
 	 * @return
 	 */
 	public static <U> ValueParser<U> validate(ValueParser<U> delegate, Function<U, Optional<String>> validator) {
@@ -258,8 +254,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses if the string is not blank, and returns an empty
-	 * Optional otherwise.
+	 * Makes a parser that parses if the string is not blank, and returns an empty Optional otherwise.
 	 *
 	 * @param delegate Parser to use if the string is not blank
 	 */
@@ -268,8 +263,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses if the string passes the test, and returns an
-	 * empty Optional otherwise.
+	 * Makes a parser that parses if the string passes the test, and returns an empty Optional otherwise.
 	 *
 	 * @param delegate Parser to use if the string is not blank
 	 * @param test     Test to apply to the string
@@ -279,8 +273,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	}
 
 	/**
-	 * Makes a parser that parses the string, then tests it, and returns empty if it
-	 * fails.
+	 * Makes a parser that parses the string, then tests it, and returns empty if it fails.
 	 *
 	 * @param delegate Parser to use
 	 * @param test     Test to apply to the parsed result
@@ -313,12 +306,11 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	}
 
 	/**
-	 * Attempt to parse as a marker using markerParser. If it returns empty, parse
-	 * as a value with valueParser.
+	 * Attempt to parse as a marker using markerParser. If it returns empty, parse as a value with valueParser.
 	 *
 	 * @param valueParser  Parser from String to Value.
-	 * @param markerParser Parser from String to Optional<Marker>. This should
-	 *                     return empty if the string is not a marker.
+	 * @param markerParser Parser from String to Optional<Marker>. This should return empty if the string is not a
+	 *                     marker.
 	 * @return a ValueOrMarker
 	 */
 	public static <V, M> ValueParser<ValueOrMarker<V, M>>
@@ -377,8 +369,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	 * Make a list parser return a map
 	 *
 	 * @param parser        Parser for a list of values
-	 * @param defaultValues Map of default values. Keys with defaults must follow
-	 *                      those without.
+	 * @param defaultValues Map of default values. Keys with defaults must follow those without.
 	 * @param keys          Keys for each position in the list.
 	 */
 	@SafeVarargs
@@ -427,8 +418,7 @@ public interface ValueParser<T> extends ControlledValueParser<T> {
 	}
 
 	/**
-	 * Call the provided callback after parsing. This is meant for logging. It
-	 * should not be used for business logic.
+	 * Call the provided callback after parsing. This is meant for logging. It should not be used for business logic.
 	 *
 	 * @param delegate
 	 * @param callback

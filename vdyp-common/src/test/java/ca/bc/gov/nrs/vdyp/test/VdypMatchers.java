@@ -50,8 +50,7 @@ public class VdypMatchers {
 	static final float EPSILON = 0.001f;
 
 	/**
-	 * Matches a string if when parsed by the parser method it matches the given
-	 * matcher
+	 * Matches a string if when parsed by the parser method it matches the given matcher
 	 *
 	 * @param parsedMatcher matcher for the parsed value
 	 * @param parser        parser
@@ -302,9 +301,8 @@ public class VdypMatchers {
 	}
 
 	/**
-	 * Equivalent to {@link Matchers.hasEntry} with a simple equality check on the
-	 * key. Does not show the full map contents on a mismatch, just the requested
-	 * entry if it's present.
+	 * Equivalent to {@link Matchers.hasEntry} with a simple equality check on the key. Does not show the full map
+	 * contents on a mismatch, just the requested entry if it's present.
 	 */
 	public static <K, V> Matcher<Map<K, V>> hasSpecificEntry(K key, Matcher<V> valueMatcher) {
 		return new TypeSafeDiagnosingMatcher<Map<K, V>>() {
@@ -340,8 +338,7 @@ public class VdypMatchers {
 	}
 
 	/**
-	 * Matches a BecLookup that contains a bec with the specified alias that matches
-	 * the given matcher.
+	 * Matches a BecLookup that contains a bec with the specified alias that matches the given matcher.
 	 */
 	public static Matcher<BecLookup> hasBec(String alias, Matcher<Optional<BecDefinition>> valueMatcher) {
 		return new TypeSafeDiagnosingMatcher<BecLookup>() {

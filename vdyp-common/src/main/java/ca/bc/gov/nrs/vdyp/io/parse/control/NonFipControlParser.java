@@ -20,7 +20,7 @@ import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 public abstract class NonFipControlParser extends StartApplicationControlParser {
 
 	private static final Logger log = LoggerFactory.getLogger(NonFipControlParser.class);
-	
+
 	List<ControlMapModifier> nonFipStart = Arrays.asList(
 			// RD_E106
 			new BasalAreaYieldParser(),

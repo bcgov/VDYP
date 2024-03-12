@@ -54,7 +54,7 @@ public abstract class StartApplicationControlParser extends BaseControlParser {
 
 		List.of(basicDefinitions, groupDefinitions, siteCurves, coefficients, additionalModifiers)
 				.forEach(parserList::addAll);
-		
+
 		return parserList;
 	}
 

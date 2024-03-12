@@ -15,8 +15,7 @@ import ca.bc.gov.nrs.vdyp.model.Region;
 import ca.bc.gov.nrs.vdyp.test.TestUtils;
 
 /**
- * See {@link BasalAreaGrowthFiatParserTest} for other tests, the two parsers
- * being identical.
+ * See {@link BasalAreaGrowthFiatParserTest} for other tests, the two parsers being identical.
  *
  * @author Michael Junkin, Vivid Solutions
  */

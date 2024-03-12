@@ -22,8 +22,7 @@ import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
 
-public class VdypUtilizationParser
-		implements ControlMapValueReplacer<Object, String> {
+public class VdypUtilizationParser implements ControlMapValueReplacer<Object, String> {
 
 	private static final String DESCRIPTION = "DESCRIPTION"; // POLYDESC
 	private static final String LAYER_TYPE = "LAYER_TYPE"; // LAYERG

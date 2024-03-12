@@ -64,8 +64,8 @@ public class VriAdjustInputWriter implements Closeable {
 	static final String END_RECORD_FORMAT = POLY_IDENTIFIER_FORMAT + "  \n";
 
 	/**
-	 * Create a writer for VRI Adjust input files using provided OutputStreams. The
-	 * Streams will be closed when the writer is closed.
+	 * Create a writer for VRI Adjust input files using provided OutputStreams. The Streams will be closed when the
+	 * writer is closed.
 	 *
 	 * @param polygonFile
 	 * @param speciesFile
@@ -83,8 +83,7 @@ public class VriAdjustInputWriter implements Closeable {
 	}
 
 	/**
-	 * Create a writer for VRI Adjust input files configured using the given control
-	 * map.
+	 * Create a writer for VRI Adjust input files configured using the given control map.
 	 *
 	 * @param polygonFile
 	 * @param speciesFile
@@ -95,7 +94,8 @@ public class VriAdjustInputWriter implements Closeable {
 		this(
 				getOutputStream(controlMap, resolver, ControlKey.VRI_OUTPUT_VDYP_POLYGON.name()),
 				getOutputStream(controlMap, resolver, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SPECIES.name()),
-				getOutputStream(controlMap, resolver, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SP0_BY_UTIL.name()), controlMap
+				getOutputStream(controlMap, resolver, ControlKey.VRI_OUTPUT_VDYP_LAYER_BY_SP0_BY_UTIL.name()),
+				controlMap
 		);
 	}
 

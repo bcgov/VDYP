@@ -212,8 +212,8 @@ public class SpecRMap {
 		/*
 		 * short i, i2; char[] sc2 = new char[10];
 		 *
-		 * i2 = 0; for (i = 0; i < sc.length && i < 10; i++) { if (sc[i] != ' ') {
-		 * sc2[i2] = Character.toUpperCase(sc[i]); i2++; } } sc2[i2] = '\0';
+		 * i2 = 0; for (i = 0; i < sc.length && i < 10; i++) { if (sc[i] != ' ') { sc2[i2] =
+		 * Character.toUpperCase(sc[i]); i2++; } } sc2[i2] = '\0';
 		 */
 
 		// This could be improved with a switch statement or even an if/else. But I have
@@ -636,8 +636,8 @@ public class SpecRMap {
 		/*
 		 * short i, i2; char[] sc2 = new char[10];
 		 *
-		 * i2 = 0; for (i = 0; i < sc.length && i < 10; i++) { if (sc[i] != ' ') {
-		 * sc2[i2] = Character.toUpperCase(sc[i]); i2++; } } sc2[i2] = '\0';
+		 * i2 = 0; for (i = 0; i < sc.length && i < 10; i++) { if (sc[i] != ' ') { sc2[i2] =
+		 * Character.toUpperCase(sc[i]); i2++; } } sc2[i2] = '\0';
 		 */
 
 		if (sc2.equals("A")) {

@@ -51,11 +51,11 @@ class NonFipControlParserTest {
 	static final String CONTROL_FILE = "VRISTART.CTR";
 
 	private class TestNonFipControlParser extends NonFipControlParser {
-		
-		public TestNonFipControlParser() { 
+
+		public TestNonFipControlParser() {
 			initialize();
 		}
-		
+
 		@Override
 		protected List<ControlMapValueReplacer<Object, String>> inputFileParsers() {
 			return Collections.emptyList();

@@ -21,16 +21,14 @@ import ca.bc.gov.nrs.vdyp.model.MatrixMap2Impl;
 import ca.bc.gov.nrs.vdyp.model.Region;
 
 /**
- * Parses a mapping from a Species and Region to a list of three coefficients.
- * Each row contains
+ * Parses a mapping from a Species and Region to a list of three coefficients. Each row contains
  * <ol>
  * <li>(cols 0-1): a Species identifier</li>
  * <li>(col 3): a Region indicator ('C' or 'I') or a blank</li>
  * <li>(cols 4-13, 14-23, 24-33) - floats - coefficients</li>
  * </ol>
- * If the Region value is blank, the line is applied to both Regions. All lines
- * are read - no lines are skipped, except the last line in the file if empty.
- * All three coefficients must be present on each line.
+ * If the Region value is blank, the line is applied to both Regions. All lines are read - no lines are skipped, except
+ * the last line in the file if empty. All three coefficients must be present on each line.
  * <p>
  * FIP Control index: 097
  * <p>

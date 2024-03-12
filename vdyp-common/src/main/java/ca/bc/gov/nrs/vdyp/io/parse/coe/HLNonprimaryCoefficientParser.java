@@ -21,9 +21,8 @@ import ca.bc.gov.nrs.vdyp.model.Region;
 /**
  * Parses an HL Nonprimary Coefficient data file.
  *
- * This file contains a (possibly incomplete) mapping of species aliases
- * <b>x</b> species aliases <b>x</b> regions to a (one-based) list of two
- * coefficients. Each row contains:
+ * This file contains a (possibly incomplete) mapping of species aliases <b>x</b> species aliases <b>x</b> regions to a
+ * (one-based) list of two coefficients. Each row contains:
  * <ol>
  * <li>(cols 0-1) species alias #1</li>
  * <li>(cols 3-4) species alias #2</li>
@@ -31,11 +30,10 @@ import ca.bc.gov.nrs.vdyp.model.Region;
  * <li>(col 8) an equation number</li>
  * <li>(cols 9-18, 19-28) two coefficients</li>
  * </ol>
- * Lines where both Species aliases are empty are considered blank lines and are
- * skipped. All lines are read.
+ * Lines where both Species aliases are empty are considered blank lines and are skipped. All lines are read.
  * <p>
- * The result of the parse is a {@link MatrixMap3} of (Coefficients, equation
- * number) pairs indexed by species 1, species 2 and then region.
+ * The result of the parse is a {@link MatrixMap3} of (Coefficients, equation number) pairs indexed by species 1,
+ * species 2 and then region.
  * <p>
  * FIP Control index: 053
  * <p>

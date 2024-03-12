@@ -26,7 +26,7 @@ public abstract class GrowthFiatParser implements ControlMapSubResourceParser<Ma
 		this.lineParser = new LineParser() {
 			@Override
 			public boolean isStopLine(String line) {
-			    return Utils.nullOrPrefixBlank(line, 3);
+				return Utils.nullOrPrefixBlank(line, 3);
 			}
 		}.value(3, REGION_ID_KEY, ValueParser.INTEGER).multiValue(11, 6, COEFFICIENTS_KEY, ValueParser.FLOAT);
 	}
@@ -45,7 +45,8 @@ public abstract class GrowthFiatParser implements ControlMapSubResourceParser<Ma
 			if (regionId != 1 && regionId != 2) {
 				throw new ValueParseException(
 						MessageFormat.format(
-								"Line {0}: region id {1} is not recognized; the value must be 1 or 2", lineNumber, regionId
+								"Line {0}: region id {1} is not recognized; the value must be 1 or 2", lineNumber,
+								regionId
 						)
 				);
 			}

@@ -69,8 +69,7 @@ public class ValueOrMarker<Value, Marker> {
 	}
 
 	/**
-	 * Apply the value handler if a value, otherwise the marker handler, and return
-	 * the result
+	 * Apply the value handler if a value, otherwise the marker handler, and return the result
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T handle(Function<Value, T> valueHandler, Function<Marker, T> markerHandler) {
@@ -81,8 +80,7 @@ public class ValueOrMarker<Value, Marker> {
 	}
 
 	/**
-	 * Create a Builder to create ValueOrMarker instances for particular Value and
-	 * Marker types
+	 * Create a Builder to create ValueOrMarker instances for particular Value and Marker types
 	 *
 	 * @param vClazz Value class
 	 * @param mClazz Marker class
@@ -93,8 +91,7 @@ public class ValueOrMarker<Value, Marker> {
 	}
 
 	/**
-	 * Builder to create ValueOrMarker instances for particular Value and Marker
-	 * types
+	 * Builder to create ValueOrMarker instances for particular Value and Marker types
 	 *
 	 * @author Kevin Smith, Vivid Solutions
 	 *

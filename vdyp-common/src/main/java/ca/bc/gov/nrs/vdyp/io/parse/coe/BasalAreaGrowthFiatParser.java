@@ -13,13 +13,10 @@ import ca.bc.gov.nrs.vdyp.io.parse.coe.base.GrowthFiatParser;
  * <li>(cols 27-32, 33-38, 39-44, 45-50) float - coefficient values</li>
  * <li>(cols 51-56, 57-62, 63-68) float - mixed model coefficient values</li>
  * </ol>
- * The result of the parse is a {@link Map} from Region to a
- * {@link GrowthFaitDetails} instance.
+ * The result of the parse is a {@link Map} from Region to a {@link GrowthFaitDetails} instance.
  * <p>
- * Lines with a blank or empty region are ignored. There must be exactly one
- * line for region 1 (COASTAL) and one line for region 2 (INTERIOR). No other
- * region ids are supported. The age values must start with a value other than
- * 0.0.
+ * Lines with a blank or empty region are ignored. There must be exactly one line for region 1 (COASTAL) and one line
+ * for region 2 (INTERIOR). No other region ids are supported. The age values must start with a value other than 0.0.
  * <p>
  * Control index: 111
  * <p>

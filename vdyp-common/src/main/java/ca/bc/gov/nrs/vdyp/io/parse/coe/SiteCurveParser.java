@@ -17,24 +17,20 @@ import ca.bc.gov.nrs.vdyp.model.SiteCurve;
 /**
  * Parses a Site Curve data file.
  *
- * These files have multiple lines, each containing a key followed by two
- * integers. The key may a Species code or some other value. All 16 Species
- * codes are required. Any number, including zero, of additional codes are
- * permitted.
+ * These files have multiple lines, each containing a key followed by two integers. The key may a Species code or some
+ * other value. All 16 Species codes are required. Any number, including zero, of additional codes are permitted.
  * <ol>
  * <li>(cols 0-2) key - often, but not necessarily, a Species code.</li>
  * <li>(col 3-5) int - coastal site curve for given key</li>
  * <li>(col 6-8) int - interior site curve for given key</li>
  * </ol>
- * The result of the parse is a {@link Map} of keys (e.g., Species codes) to a
- * pair of site curve numbers, one for each region.
+ * The result of the parse is a {@link Map} of keys (e.g., Species codes) to a pair of site curve numbers, one for each
+ * region.
  * <p>
- * A line starting with ## terminates the parsing; anything can appear in lines
- * following this. Lines that are empty, contain only white space, or start with
- * "# " or " " are considered blank lines; in the latter case, any data
- * following these characters is ignored. Prior to "##" (or the end of the file,
- * if missing), there must be a definition for each of the 16 species. There
- * can't be more than 200 definitions in total.
+ * A line starting with ## terminates the parsing; anything can appear in lines following this. Lines that are empty,
+ * contain only white space, or start with "# " or " " are considered blank lines; in the latter case, any data
+ * following these characters is ignored. Prior to "##" (or the end of the file, if missing), there must be a definition
+ * for each of the 16 species. There can't be more than 200 definitions in total.
  * <p>
  * FIP Control index: 025
  * <p>

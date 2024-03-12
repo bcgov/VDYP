@@ -413,8 +413,8 @@ public class FipStart extends VdypApplication implements Closeable {
 			crownClosure = clamp(crownClosure, 0, 100);
 
 			/*
-			 * assume that CC occurs at age 25 and that most land goes to 90% occupancy but
-			 * that occupancy increases only 1% /yr with no increases after ages 25. });
+			 * assume that CC occurs at age 25 and that most land goes to 90% occupancy but that occupancy increases
+			 * only 1% /yr with no increases after ages 25. });
 			 */
 
 			// Obtain the percent yield (in comparison with CC = 90%)
@@ -1094,9 +1094,8 @@ public class FipStart extends VdypApplication implements Closeable {
 		/*
 		 * From VDYP7
 		 *
-		 * At this point we SHOULD invoke a root finding procedure sets species percents
-		 * and adjusts DQ by species. fills in main components, through whole-stem
-		 * volume INSTEAD, I will assume %volumes apply to % BA's
+		 * At this point we SHOULD invoke a root finding procedure sets species percents and adjusts DQ by species.
+		 * fills in main components, through whole-stem volume INSTEAD, I will assume %volumes apply to % BA's
 		 */
 
 		for (var vSpec : vdypSpecies.values()) {
@@ -1570,8 +1569,7 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Implements the three reconciliation modes for layer 1 as described in
-	 * ipsjf120.doc
+	 * Implements the three reconciliation modes for layer 1 as described in ipsjf120.doc
 	 *
 	 * @param baseAreaUtil
 	 * @param treesPerHectareUtil
@@ -1799,14 +1797,13 @@ public class FipStart extends VdypApplication implements Closeable {
 	) {
 
 		/*
-		 * Reconciliation mode 3 NOT IN THE ORIGINAL DESIGN The primary motivation for
-		 * this mode is an example where all trees were in a signle utilization class
-		 * and had a DQ of 12.4 cm. BUT the true DQ for the stand was slightly over
-		 * 12.5. In this case the best solution is to simply reassign all trees to the
-		 * single most appropriate class.
+		 * Reconciliation mode 3 NOT IN THE ORIGINAL DESIGN The primary motivation for this mode is an example where all
+		 * trees were in a signle utilization class and had a DQ of 12.4 cm. BUT the true DQ for the stand was slightly
+		 * over 12.5. In this case the best solution is to simply reassign all trees to the single most appropriate
+		 * class.
 		 *
-		 * Note, "original design" means something pre-VDYP 7. This was added to the
-		 * Fortran some time before the port to Java including the comment above.
+		 * Note, "original design" means something pre-VDYP 7. This was added to the Fortran some time before the port
+		 * to Java including the comment above.
 		 */
 		UTIL_CLASSES.forEach(uc -> {
 			baseAreaUtil.setCoe(uc.index, 0f);
@@ -1957,8 +1954,7 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Returns the primary, and secondary if present species records as a one or two
-	 * element list.
+	 * Returns the primary, and secondary if present species records as a one or two element list.
 	 */
 	// PRIMFIND
 	List<FipSpecies> findPrimarySpecies(Map<String, FipSpecies> allSpecies) {
@@ -2157,14 +2153,12 @@ public class FipStart extends VdypApplication implements Closeable {
 
 	// EMP050 Meth==1
 	/**
-	 * Return the lorey height of the primary species based on the dominant height
-	 * of the lead species.
+	 * Return the lorey height of the primary species based on the dominant height of the lead species.
 	 *
 	 * @param leadHeight             dominant height of the lead species
 	 * @param genus                  Primary species
 	 * @param region                 Region of the polygon
-	 * @param treesPerHectarePrimary trees per hectare >7.5 cm of the primary
-	 *                               species
+	 * @param treesPerHectarePrimary trees per hectare >7.5 cm of the primary species
 	 * @return
 	 */
 	float primaryHeightFromLeadHeight(float leadHeight, String genus, Region region, float treesPerHectarePrimary) {
@@ -2173,14 +2167,12 @@ public class FipStart extends VdypApplication implements Closeable {
 
 	// EMP050 Meth==2
 	/**
-	 * Return the dominant height of the lead species based on the lorey height of
-	 * the primary species.
+	 * Return the dominant height of the lead species based on the lorey height of the primary species.
 	 *
 	 * @param primaryHeight          lorey height of the primary species
 	 * @param genus                  Primary species
 	 * @param region                 Region of the polygon
-	 * @param treesPerHectarePrimary trees per hectare >7.5 cm of the primary
-	 *                               species
+	 * @param treesPerHectarePrimary trees per hectare >7.5 cm of the primary species
 	 * @return
 	 */
 	float leadHeightFromPrimaryHeight(float primaryHeight, String genus, Region region, float treesPerHectarePrimary) {
@@ -2189,8 +2181,7 @@ public class FipStart extends VdypApplication implements Closeable {
 
 	// EMP051
 	/**
-	 * Return the lorey height of the primary species based on the dominant height
-	 * of the lead species.
+	 * Return the lorey height of the primary species based on the dominant height of the lead species.
 	 *
 	 * @param leadHeight dominant height of the lead species
 	 * @param genus      Primary species
@@ -2206,21 +2197,18 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Accessor methods for utilization vectors, except for Lorey Height, on Layer
-	 * and Species objects.
+	 * Accessor methods for utilization vectors, except for Lorey Height, on Layer and Species objects.
 	 */
 	static final Collection<PropertyDescriptor> UTILIZATION_VECTOR_ACCESSORS;
 
 	/**
-	 * Accessor methods for utilization vectors, except for Lorey Height and
-	 * Quadratic Mean Diameter, on Layer and Species objects. These are properties
-	 * where the values for the layer are the sum of those for its species.
+	 * Accessor methods for utilization vectors, except for Lorey Height and Quadratic Mean Diameter, on Layer and
+	 * Species objects. These are properties where the values for the layer are the sum of those for its species.
 	 */
 	static final Collection<PropertyDescriptor> SUMMABLE_UTILIZATION_VECTOR_ACCESSORS;
 
 	/**
-	 * Accessor methods for utilization vectors, except for Lorey Height,and Volume
-	 * on Layer and Species objects.
+	 * Accessor methods for utilization vectors, except for Lorey Height,and Volume on Layer and Species objects.
 	 */
 	static final Collection<PropertyDescriptor> NON_VOLUME_UTILIZATION_VECTOR_ACCESSORS;
 
@@ -2336,10 +2324,9 @@ public class FipStart extends VdypApplication implements Closeable {
 	 *
 	 * @param input            source utilization
 	 * @param output           result utilization
-	 * @param utilizationClass the utilization class for which to do the
-	 *                         computation, UTIL_ALL for all of them.
-	 * @param processor        Given a utilization class, and the source utilization
-	 *                         for that class, return the result utilization
+	 * @param utilizationClass the utilization class for which to do the computation, UTIL_ALL for all of them.
+	 * @param processor        Given a utilization class, and the source utilization for that class, return the result
+	 *                         utilization
 	 * @throws ProcessingException
 	 */
 	static void estimateUtilization(
@@ -2353,13 +2340,11 @@ public class FipStart extends VdypApplication implements Closeable {
 	 *
 	 * @param input            source utilization
 	 * @param output           result utilization
-	 * @param utilizationClass the utilization class for which to do the
-	 *                         computation, UTIL_ALL for all of them.
-	 * @param processor        Given a utilization class, and the source utilization
-	 *                         for that class, return the result utilization
-	 * @param skip             a utilization class will be skipped and the result
-	 *                         set to the default value if this is true for the
-	 *                         value of the source utilization
+	 * @param utilizationClass the utilization class for which to do the computation, UTIL_ALL for all of them.
+	 * @param processor        Given a utilization class, and the source utilization for that class, return the result
+	 *                         utilization
+	 * @param skip             a utilization class will be skipped and the result set to the default value if this is
+	 *                         true for the value of the source utilization
 	 * @param defaultValue     the default value
 	 * @throws ProcessingException
 	 */
@@ -2495,8 +2480,8 @@ public class FipStart extends VdypApplication implements Closeable {
 					float result = closeUtilizationUtil.getCoe(i.index) * (1f - frd - frw);
 
 					/*
-					 * Check for an apply adjustments. This is done after computing the result above
-					 * to allow for clamping frw to frd
+					 * Check for an apply adjustments. This is done after computing the result above to allow for
+					 * clamping frw to frd
 					 */
 					if (aAdjust.getCoe(i.index) != 0f) {
 						var ratio = result / netDecay;
@@ -2567,8 +2552,7 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Sums the individual utilization components (1-4) and stores the results in
-	 * coefficient UTIL_ALL
+	 * Sums the individual utilization components (1-4) and stores the results in coefficient UTIL_ALL
 	 */
 	float storeSumUtilizationComponents(Coefficients components) {
 		var sum = sumUtilizationComponents(components);
@@ -2577,8 +2561,7 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Normalizes the utilization components 1-4 so they sum to the value of
-	 * component UTIL_ALL
+	 * Normalizes the utilization components 1-4 so they sum to the value of component UTIL_ALL
 	 *
 	 * @throws ProcessingException if the sum is not positive
 	 */
@@ -2859,15 +2842,12 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Create a coefficients object where its values are either a weighted sum of
-	 * those for each of the given entities, or the value from one arbitrarily chose
-	 * entity.
+	 * Create a coefficients object where its values are either a weighted sum of those for each of the given entities,
+	 * or the value from one arbitrarily chose entity.
 	 *
 	 * @param <T>             The type of entity
-	 * @param weighted        the indicies of the coefficients that should be
-	 *                        weighted sums, those that are not included are assumed
-	 *                        to be constant across all entities and one is choses
-	 *                        arbitrarily.
+	 * @param weighted        the indicies of the coefficients that should be weighted sums, those that are not included
+	 *                        are assumed to be constant across all entities and one is choses arbitrarily.
 	 * @param size            Size of the resulting coefficients object
 	 * @param indexFrom       index from of the resulting coefficients object
 	 * @param entities        the entities to do weighted sums over
@@ -3008,8 +2988,7 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * estimate mean volume per tree For a species, for trees with dbh >= 7.5 CM
-	 * Using eqn in jf117.doc
+	 * estimate mean volume per tree For a species, for trees with dbh >= 7.5 CM Using eqn in jf117.doc
 	 *
 	 * @param volumeGroup
 	 * @param loreyHeight
@@ -3357,8 +3336,8 @@ public class FipStart extends VdypApplication implements Closeable {
 	}
 
 	/**
-	 * Iterates over all but the last entry, passing them to the first consumer then
-	 * passes the last entry to the second consumer
+	 * Iterates over all but the last entry, passing them to the first consumer then passes the last entry to the second
+	 * consumer
 	 */
 	<T> void eachButLast(Collection<T> items, Consumer<T> body, Consumer<T> lastBody) {
 		var it = items.iterator();

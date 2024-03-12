@@ -5,8 +5,8 @@ import java.util.Map;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 
 /**
- * Replace a control map entry referencing a file with a parsed version of that
- * file if it was specified, otherwise initialize that entry with a default.
+ * Replace a control map entry referencing a file with a parsed version of that file if it was specified, otherwise
+ * initialize that entry with a default.
  *
  * @author Kevin Smith, Vivid Solutions
  *

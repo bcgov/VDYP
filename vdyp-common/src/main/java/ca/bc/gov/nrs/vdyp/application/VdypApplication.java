@@ -12,8 +12,8 @@ public abstract class VdypApplication extends VdypComponent {
 	public abstract VdypApplicationIdentifier getId();
 
 	/**
-	 * @returns the ordinal of the application's identifier. It will agree with the
-	 *          JPROGRAM values from the FORTRAN implementation.
+	 * @returns the ordinal of the application's identifier. It will agree with the JPROGRAM values from the FORTRAN
+	 *          implementation.
 	 */
 	public int getJProgramNumber() {
 		return getId().getJProgramNumber();

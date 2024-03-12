@@ -1,9 +1,8 @@
 package ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions;
 
 /**
- * The ForestInventoryZoneException exist to replace the SI_ERR_FIZ(-7) error
- * code found in the original C code This exception is generally thrown when
- * there is an issue with the FIZ code, such as it being unknown
+ * The ForestInventoryZoneException exist to replace the SI_ERR_FIZ(-7) error code found in the original C code This
+ * exception is generally thrown when there is an issue with the FIZ code, such as it being unknown
  */
 public class ForestInventoryZoneException extends RuntimeException {
 	private static final long serialVersionUID = 7385965541254190635L;

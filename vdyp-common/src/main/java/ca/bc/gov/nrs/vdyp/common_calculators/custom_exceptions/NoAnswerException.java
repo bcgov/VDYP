@@ -1,9 +1,8 @@
 package ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions;
 
 /**
- * The NoAnswerException exist to replace the SI_ERR_NO_ANS(-4) error code found
- * in the original C code This exception is generally thrown when some sort of
- * compute value is out bounds or not a valid answer
+ * The NoAnswerException exist to replace the SI_ERR_NO_ANS(-4) error code found in the original C code This exception
+ * is generally thrown when some sort of compute value is out bounds or not a valid answer
  */
 public class NoAnswerException extends RuntimeException {
 	private static final long serialVersionUID = -5193821896984760660L;

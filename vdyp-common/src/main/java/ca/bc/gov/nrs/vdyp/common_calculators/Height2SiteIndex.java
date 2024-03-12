@@ -933,9 +933,8 @@ public class Height2SiteIndex {
 					}
 					break;
 				/*
-				 * This section has been commented out since I cannot find the constant anywhere
-				 * and this was surronded by an ifdef statement I have thus assumed this code
-				 * should not trigger
+				 * This section has been commented out since I cannot find the constant anywhere and this was surronded
+				 * by an ifdef statement I have thus assumed this code should not trigger
 				 */
 				/*
 				 * case SI_PLI_NIGHGI: //later, we divide by age-0.5, so check it now
@@ -943,25 +942,21 @@ public class Height2SiteIndex {
 				/*
 				 * if (bhage < 0.5) { return SI_ERR_GI_MIN; }
 				 *
-				 * switch ((short) bhage) { case 1: x1 = 3.791; x2 = 0.4338; break; case 2: x1 =
-				 * 3.460; x2 = 0.4592; break; case 3: x1 = 3.440; x2 = 0.4615; break; case 4: x1
-				 * = 3.083; x2 = 0.4898; break; case 5: x1 = 2.902; x2 = 0.5054; break; case 6:
-				 * x1 = 2.962; x2 = 0.4989; break; case 7: x1 = 2.802; x2 = 0.5127; break; case
-				 * 8: x1 = 2.663; x2 = 0.5245; break; case 9: x1 = 2.608; x2 = 0.5288; break;
-				 * case 10: x1 = 2.534; x2 = 0.5357; break; case 11: x1 = 2.438; x2 = 0.5455;
-				 * break; case 12: x1 = 2.338; x2 = 0.5563; break; case 13: x1 = 2.232; x2 =
-				 * 0.5686; break; case 14: x1 = 2.133; x2 = 0.5808; break; case 15: x1 = 2.053;
-				 * x2 = 0.5912; break; case 16: x1 = 2.093; x2 = 0.5861; break; case 17: x1 =
-				 * 1.973; x2 = 0.6020; break; case 18: x1 = 1.867; x2 = 0.6170; break; case 19:
-				 * x1 = 1.769; x2 = 0.6317; break; case 20: x1 = 1.675; x2 = 0.6467; break; case
-				 * 21: x1 = 1.597; x2 = 0.6601; break; case 22: x1 = 1.522; x2 = 0.6738; break;
-				 * case 23: x1 = 1.460; x2 = 0.6859; break; case 24: x1 = 1.407; x2 = 0.6968;
-				 * break; case 25: x1 = 1.353; x2 = 0.7083; break; case 26: x1 = 1.299; x2 =
-				 * 0.7203; break; case 27: x1 = 1.242; x2 = 0.7334; break; case 28: x1 = 1.195;
-				 * x2 = 0.7450; break; case 29: x1 = 1.152; x2 = 0.7560; break; case 30: x1 =
-				 * 1.106; x2 = 0.7682; break; default: x1 = 0; x2 = 0; break; break; } if (x1 ==
-				 * 0) { index = SI_ERR_GI_MAX; } else { index = (height - 1.3) * 100 / (bhage -
-				 * 0.5); index = x1 * ppow(index, x2); } break;
+				 * switch ((short) bhage) { case 1: x1 = 3.791; x2 = 0.4338; break; case 2: x1 = 3.460; x2 = 0.4592;
+				 * break; case 3: x1 = 3.440; x2 = 0.4615; break; case 4: x1 = 3.083; x2 = 0.4898; break; case 5: x1 =
+				 * 2.902; x2 = 0.5054; break; case 6: x1 = 2.962; x2 = 0.4989; break; case 7: x1 = 2.802; x2 = 0.5127;
+				 * break; case 8: x1 = 2.663; x2 = 0.5245; break; case 9: x1 = 2.608; x2 = 0.5288; break; case 10: x1 =
+				 * 2.534; x2 = 0.5357; break; case 11: x1 = 2.438; x2 = 0.5455; break; case 12: x1 = 2.338; x2 = 0.5563;
+				 * break; case 13: x1 = 2.232; x2 = 0.5686; break; case 14: x1 = 2.133; x2 = 0.5808; break; case 15: x1
+				 * = 2.053; x2 = 0.5912; break; case 16: x1 = 2.093; x2 = 0.5861; break; case 17: x1 = 1.973; x2 =
+				 * 0.6020; break; case 18: x1 = 1.867; x2 = 0.6170; break; case 19: x1 = 1.769; x2 = 0.6317; break; case
+				 * 20: x1 = 1.675; x2 = 0.6467; break; case 21: x1 = 1.597; x2 = 0.6601; break; case 22: x1 = 1.522; x2
+				 * = 0.6738; break; case 23: x1 = 1.460; x2 = 0.6859; break; case 24: x1 = 1.407; x2 = 0.6968; break;
+				 * case 25: x1 = 1.353; x2 = 0.7083; break; case 26: x1 = 1.299; x2 = 0.7203; break; case 27: x1 =
+				 * 1.242; x2 = 0.7334; break; case 28: x1 = 1.195; x2 = 0.7450; break; case 29: x1 = 1.152; x2 = 0.7560;
+				 * break; case 30: x1 = 1.106; x2 = 0.7682; break; default: x1 = 0; x2 = 0; break; break; } if (x1 == 0)
+				 * { index = SI_ERR_GI_MAX; } else { index = (height - 1.3) * 100 / (bhage - 0.5); index = x1 *
+				 * ppow(index, x2); } break;
 				 */
 				case SI_SW_NIGHGI:
 					switch ((short) bhage) {
@@ -4008,9 +4003,8 @@ public class Height2SiteIndex {
 			}
 
 			/*
-			 * System.out.
-			 * printf("age=%.0f, height=%.1f, test_top=%.1f, site=%.2f, step=%.7f%n", age,
-			 * height, test_top, site, step);
+			 * System.out. printf("age=%.0f, height=%.1f, test_top=%.1f, site=%.2f, step=%.7f%n", age, height, test_top,
+			 * site, step);
 			 *
 			 */
 

@@ -75,13 +75,12 @@ public class VdypForwardControlParser extends BaseControlParser {
 
 	private static final Logger logger = LoggerFactory.getLogger(VdypForwardControlParser.class);
 
-	public VdypForwardControlParser()
-	{
+	public VdypForwardControlParser() {
 		initialize();
 
-		controlParser.record(ControlKey.VTROL, new VdypVtrolParser());	
+		controlParser.record(ControlKey.VTROL, new VdypVtrolParser());
 	}
-	
+
 	@Override
 	protected VdypApplicationIdentifier getProgramId() {
 		return VdypApplicationIdentifier.VDYP_FORWARD;
@@ -100,40 +99,44 @@ public class VdypForwardControlParser extends BaseControlParser {
 	@Override
 	protected ValueParser<Map<String, Float>> minimaParser() {
 		return ValueParser.callback(
-			ValueParser.toMap(
-					ValueParser.list(ValueParser.FLOAT), Collections.singletonMap(MINIMUM_VETERAN_HEIGHT, 10.0f),
-					MINIMUM_HEIGHT, MINIMUM_BASE_AREA, MINIMUM_PREDICTED_BASE_AREA, MINIMUM_VETERAN_HEIGHT
-			), minima ->
-				logger.atDebug().setMessage(
+				ValueParser.toMap(
+						ValueParser.list(ValueParser.FLOAT), Collections.singletonMap(MINIMUM_VETERAN_HEIGHT, 10.0f),
+						MINIMUM_HEIGHT, MINIMUM_BASE_AREA, MINIMUM_PREDICTED_BASE_AREA, MINIMUM_VETERAN_HEIGHT
+				),
+				minima -> logger.atDebug().setMessage(
 						"Minima read from VRISTART Control at line {}\n  Minimum Height: {}\n  Minimum BA: {}\n  Minimum Predicted BA: {}\n  Minimum Veteran Height: {}"
 				) //
-				.addArgument(ControlKey.MINIMA.sequence.map(i -> Integer.toString(i)).orElse("N/A"))
-				.addArgument(minima.get(MINIMUM_HEIGHT)) //
-				.addArgument(minima.get(MINIMUM_BASE_AREA)) //
-				.addArgument(minima.get(MINIMUM_PREDICTED_BASE_AREA)) //
-				.addArgument(minima.get(MINIMUM_VETERAN_HEIGHT))
+						.addArgument(ControlKey.MINIMA.sequence.map(i -> Integer.toString(i)).orElse("N/A"))
+						.addArgument(minima.get(MINIMUM_HEIGHT)) //
+						.addArgument(minima.get(MINIMUM_BASE_AREA)) //
+						.addArgument(minima.get(MINIMUM_PREDICTED_BASE_AREA)) //
+						.addArgument(minima.get(MINIMUM_VETERAN_HEIGHT))
 		);
 	}
 
 	private final List<ControlKey> orderedControlKeys = new ArrayList<>();
-	
-	private final Map<ControlKey, ControlMapValueReplacer<Object, String>> vdypForwardInputParsers = new EnumMap<>(ControlKey.class);
-	
+
+	private final Map<ControlKey, ControlMapValueReplacer<Object, String>> vdypForwardInputParsers = new EnumMap<>(
+			ControlKey.class
+	);
+
 	private void addInputParser(ControlMapValueReplacer<Object, String> parser) {
 		vdypForwardInputParsers.put(parser.getControlKey(), parser);
 		orderedControlKeys.add(parser.getControlKey());
 	}
-	
-	private final Map<ControlKey, ResourceControlMapModifier> vdypForwardConfigurationParsers = new EnumMap<>(ControlKey.class);
-		
+
+	private final Map<ControlKey, ResourceControlMapModifier> vdypForwardConfigurationParsers = new EnumMap<>(
+			ControlKey.class
+	);
+
 	private void addConfigurationParser(ResourceControlMapModifier parser) {
 		vdypForwardConfigurationParsers.put(parser.getControlKey(), parser);
 		orderedControlKeys.add(parser.getControlKey());
 	}
-	
+
 	@Override
 	protected void initialize() {
-		
+
 		// RD_BECD - 09
 		addConfigurationParser(new BecDefinitionParser());
 
@@ -141,7 +144,7 @@ public class VdypForwardControlParser extends BaseControlParser {
 
 		// RD_SP0 - 10
 		addConfigurationParser(new GenusDefinitionParser());
-		
+
 		// RD_VGRP - 20
 		addConfigurationParser(new VolumeEquationGroupParser());
 		// RD_DGRP - 21
@@ -157,7 +160,7 @@ public class VdypForwardControlParser extends BaseControlParser {
 		addConfigurationParser(new SiteCurveParser());
 
 		// RD_E026: Max tot ages to apply site curves (by SC)
-		addConfigurationParser(new SiteCurveAgeMaximumParser()); 
+		addConfigurationParser(new SiteCurveAgeMaximumParser());
 
 		// RD_E028
 		addConfigurationParser(new CompVarAdjustmentsParser());
@@ -176,7 +179,7 @@ public class VdypForwardControlParser extends BaseControlParser {
 		addConfigurationParser(new BySpeciesDqCoefficientParser());
 
 		// Min and max DQ by species
-		
+
 		// RD_E061
 		addConfigurationParser(new ComponentSizeParser());
 		// RD_UBA1 - 70
@@ -213,7 +216,7 @@ public class VdypForwardControlParser extends BaseControlParser {
 		addConfigurationParser(new BreakageParser());
 
 		// Veterans
-		
+
 		// RD_YVVET - 96
 		addConfigurationParser(new VeteranLayerVolumeAdjustParser());
 		// RD_YDQV - 97
@@ -254,21 +257,20 @@ public class VdypForwardControlParser extends BaseControlParser {
 		// V7O_VIU - 13
 		addInputParser(new VdypUtilizationParser());
 		// V7O_VI7 - 14
-		addInputParser(new VdypPolygonDescriptionParser());		
+		addInputParser(new VdypPolygonDescriptionParser());
 
 		// 101 - a literal value of type VdypGrowthDetails
 		orderedControlKeys.add(ControlKey.VTROL);
 
 		// 199 - debug switches
 		orderedControlKeys.add(ControlKey.DEBUG_SWITCHES);
-		
+
 		// 1 - MAX_NUM_POLY
 		orderedControlKeys.add(ControlKey.MAX_NUM_POLY);
-		
-		
+
 		super.initialize();
 	}
-	
+
 	@Override
 	protected List<ResourceControlMapModifier> configurationFileParsers() {
 		return new ArrayList<>(vdypForwardConfigurationParsers.values());
@@ -277,34 +279,45 @@ public class VdypForwardControlParser extends BaseControlParser {
 	@Override
 	protected void applyAllModifiers(Map<String, Object> map, FileResolver fileResolver)
 			throws ResourceParseException, IOException {
-		
-		for (ControlKey key: orderedControlKeys) {
-			
+
+		for (ControlKey key : orderedControlKeys) {
+
 			ResourceControlMapModifier m = vdypForwardConfigurationParsers.get(key);
 			if (m != null) {
 				// m is a configuration file parser.
-				logger.debug("Parsing configuration file {}[{}] using {}", m.getControlKeyName(), key.sequence.get(), m.getClass().getName());
+				logger.debug(
+						"Parsing configuration file {}[{}] using {}", m.getControlKeyName(), key.sequence.get(),
+						m.getClass().getName()
+				);
 				m.modify(map, fileResolver);
 			}
-			
+
 			ControlMapValueReplacer<?, ?> r = vdypForwardInputParsers.get(key);
 			if (r != null) {
 				// r is an input file parser.
-				logger.debug("Parsing input file {}[{}] using {}", r.getControlKeyName(), key.sequence.get(), r.getClass().getName());
+				logger.debug(
+						"Parsing input file {}[{}] using {}", r.getControlKeyName(), key.sequence.get(),
+						r.getClass().getName()
+				);
 				r.modify(map, fileResolver);
 			}
 		}
-		
+
 		// Report any control map items that are a) not included in orderedControlKeys or b) for which
 		// not parser was registered.
-		
+
 		// a
-		Set<ControlKey> parsersNotExecuted = new HashSet<>(map.keySet().stream().filter(ControlKey::isControlKey)
-				.map(ControlKey::valueOf).filter(k -> k.sequence.isPresent()).toList());
+		Set<ControlKey> parsersNotExecuted = new HashSet<>(
+				map.keySet().stream().filter(ControlKey::isControlKey).map(ControlKey::valueOf)
+						.filter(k -> k.sequence.isPresent()).toList()
+		);
 		parsersNotExecuted.removeAll(orderedControlKeys);
-		parsersNotExecuted.stream().forEach(e -> logger.warn("{}[{}] was present in the configuration file but not read", e, e.sequence.get()));
-		
+		parsersNotExecuted.stream().forEach(
+				e -> logger.warn("{}[{}] was present in the configuration file but not read", e, e.sequence.get())
+		);
+
 		// b
-		map.keySet().stream().filter(k -> !ControlKey.isControlKey(k)).forEach(k -> logger.warn("{} was present in the configuration file but no parser was registered", k));
+		map.keySet().stream().filter(k -> !ControlKey.isControlKey(k))
+				.forEach(k -> logger.warn("{} was present in the configuration file but no parser was registered", k));
 	}
 }

@@ -18,22 +18,20 @@ import ca.bc.gov.nrs.vdyp.model.BecLookup;
 import ca.bc.gov.nrs.vdyp.model.Region;
 
 /**
- * Parser for a BEC Definition data file. These files contain a list of lines,
- * each of which defines one BEC Zone: an alias (2 - 4 characters), a space, a
- * one character region indicator
+ * Parser for a BEC Definition data file. These files contain a list of lines, each of which defines one BEC Zone: an
+ * alias (2 - 4 characters), a space, a one character region indicator
  * <ol>
  * <li>(cols 0-3) BEC Zone alias</li>
  * <li>(col 5) region ('C' (coastal) or 'I' (interior), or 'Z' (see below)</li>
  * <li>(cols 7-56) BEC Zone name</li>
  * </ol>
- * The file is terminated by a line containing a Z in the region indicator
- * column. All lines up to that point are parsed - there are no blank lines.
+ * The file is terminated by a line containing a Z in the region indicator column. All lines up to that point are parsed
+ * - there are no blank lines.
  * <p>
  * The "default" BEC Zone is ESSF (Englemann Sruce -SubAlpine Fir (sic)).
  * <p>
- * In addition, this parser determines whether each BEC Zone is a growth, decay
- * or volume BEC Zone. All are growth zones except AT and BG. All are volume
- * zones except BG. All are decay zones.
+ * In addition, this parser determines whether each BEC Zone is a growth, decay or volume BEC Zone. All are growth zones
+ * except AT and BG. All are volume zones except BG. All are decay zones.
  * <p>
  * FIP Control index: 009
  * <p>

@@ -23,12 +23,10 @@ import ca.bc.gov.nrs.vdyp.model.Region;
  * <li>(cols 0-1) - a species code</li>
  * <li>(col 3) - a region indicator ('C' or 'I')</li>
  * <li>(col 4-10) - float - percentage value for BA (Basal Area)</li>
- * <li>(col 11-16) - float - percentage value for DQ (Quadratic Mean
- * Diameter)</li>
+ * <li>(col 11-16) - float - percentage value for DQ (Quadratic Mean Diameter)</li>
  * </ol>
- * The result of the parse is a {@link MatrixMap3} indexed by Species Code, then
- * Region, then either one (BA percentage) or two (DQ percentage). Multiple
- * lines with the same indices are legal, with the last entry winning.
+ * The result of the parse is a {@link MatrixMap3} indexed by Species Code, then Region, then either one (BA percentage)
+ * or two (DQ percentage). Multiple lines with the same indices are legal, with the last entry winning.
  * <p>
  * FIP Control index: 043
  * <p>

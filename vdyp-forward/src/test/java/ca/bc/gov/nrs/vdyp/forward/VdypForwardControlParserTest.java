@@ -502,7 +502,10 @@ class VdypForwardControlParserTest {
 		var parser = new VdypForwardControlParser();
 		var result = parse(parser, "VDYP.CTR");
 		assertThat(
-				result, (Matcher) controlMapHasEntry(ControlKey.FORWARD_INPUT_VDYP_POLY, instanceOf(StreamingParserFactory.class))
+				result,
+				(Matcher) controlMapHasEntry(
+						ControlKey.FORWARD_INPUT_VDYP_POLY, instanceOf(StreamingParserFactory.class)
+				)
 		);
 	}
 
@@ -524,7 +527,9 @@ class VdypForwardControlParserTest {
 		var result = parse(parser, "VDYP.CTR");
 		assertThat(
 				result,
-				(Matcher) controlMapHasEntry(ControlKey.FORWARD_INPUT_VDYP_LAYER_BY_SPECIES, instanceOf(StreamingParserFactory.class))
+				(Matcher) controlMapHasEntry(
+						ControlKey.FORWARD_INPUT_VDYP_LAYER_BY_SPECIES, instanceOf(StreamingParserFactory.class)
+				)
 		);
 	}
 
