@@ -2,6 +2,7 @@ package ca.bc.gov.nrs.vdyp.forward;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.bc.gov.nrs.vdyp.application.ProcessingException;
 import ca.bc.gov.nrs.vdyp.common.ControlKey;
-import ca.bc.gov.nrs.vdyp.common.GenusDefinitionMap;
 import ca.bc.gov.nrs.vdyp.forward.model.VdypLayerSpecies;
 import ca.bc.gov.nrs.vdyp.forward.model.VdypPolygon;
 import ca.bc.gov.nrs.vdyp.forward.model.VdypPolygonDescription;
@@ -23,7 +23,6 @@ import ca.bc.gov.nrs.vdyp.forward.model.VdypSpeciesUtilization;
 import ca.bc.gov.nrs.vdyp.io.parse.common.ResourceParseException;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParser;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParserFactory;
-import ca.bc.gov.nrs.vdyp.model.GenusDefinition;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
 
@@ -31,15 +30,12 @@ public class ForwardDataStreamReader {
 
 	private static final Logger logger = LoggerFactory.getLogger(ForwardDataStreamReader.class);
 
-	private final GenusDefinitionMap genusDefinitionMap;
-
 	private final StreamingParser<VdypPolygon> polygonStream;
 	private final StreamingParser<Collection<VdypLayerSpecies>> layerSpeciesStream;
 	private final StreamingParser<Collection<VdypSpeciesUtilization>> speciesUtilizationStream;
 
 	@SuppressWarnings("unchecked")
 	public ForwardDataStreamReader(Map<String, Object> controlMap) throws IOException {
-		genusDefinitionMap = new GenusDefinitionMap((List<GenusDefinition>) controlMap.get(ControlKey.SP0_DEF.name()));
 
 		var polygonStreamFactory = controlMap.get(ControlKey.FORWARD_INPUT_VDYP_POLY.name());
 		polygonStream = ((StreamingParserFactory<VdypPolygon>) polygonStreamFactory).get();
@@ -77,8 +73,8 @@ public class ForwardDataStreamReader {
 				}
 
 				var speciesCollection = layerSpeciesStream.next();
-				var primarySpecies = new HashMap<GenusDefinition, VdypLayerSpecies>();
-				var veteranSpecies = new HashMap<GenusDefinition, VdypLayerSpecies>();
+				var primarySpecies = new HashMap<Integer, VdypLayerSpecies>();
+				var veteranSpecies = new HashMap<Integer, VdypLayerSpecies>();
 				for (var species : speciesCollection) {
 					logger.trace("Saw species {}", species);
 
@@ -95,20 +91,10 @@ public class ForwardDataStreamReader {
 						species.setUtilizations(Optional.empty());
 					}
 
-					GenusDefinition genus = genusDefinitionMap.get(
-							species.getGenus().orElseThrow(
-									() -> new ProcessingException(
-											MessageFormat.format(
-													"Genus missing for species {} of polygon {}",
-													species.getGenusIndex(), polygon.getDescription()
-											)
-									)
-							)
-					);
 					if (LayerType.PRIMARY.equals(species.getLayerType())) {
-						primarySpecies.put(genus, species);
+						primarySpecies.put(species.getGenusIndex(), species);
 					} else if (LayerType.VETERAN.equals(species.getLayerType())) {
-						veteranSpecies.put(genus, species);
+						veteranSpecies.put(species.getGenusIndex(), species);
 					} else {
 						throw new IllegalStateException(
 								MessageFormat.format(
@@ -130,7 +116,6 @@ public class ForwardDataStreamReader {
 							LayerType.PRIMARY, polygon, primarySpecies, Optional.ofNullable(defaultSpeciesUtilization)
 					);
 
-					polygon.setPrimaryLayer(primaryLayer);
 					for (VdypLayerSpecies v : primarySpecies.values()) {
 						v.setParent(primaryLayer);
 					}
@@ -147,16 +132,17 @@ public class ForwardDataStreamReader {
 							LayerType.VETERAN, polygon, veteranSpecies, Optional.ofNullable(defaultSpeciesUtilization)
 					);
 
-					polygon.setVeteranLayer(Optional.of(veteranLayer));
 					for (VdypLayerSpecies v : veteranSpecies.values()) {
 						v.setParent(veteranLayer);
 					}
-				} else {
-					polygon.setVeteranLayer(Optional.empty());
 				}
+
+				polygon.setLayers(primaryLayer, veteranLayer);
 
 				if (polygonDescription.equals(polygon.getDescription())) {
 					thePolygon = Optional.of(polygon);
+
+					adjustUtilizations(polygon);
 				}
 			}
 		} catch (ResourceParseException | IOException e) {
@@ -170,6 +156,41 @@ public class ForwardDataStreamReader {
 		}
 
 		return thePolygon.get();
+	}
+
+	/** 
+	 * Both scale the per-hectare values of all the utilizations of the primary
+	 * layer of the given polygon, and for all utilizations of both the primary and
+	 * veteran layer (if present) of the polygon,
+	 * 1. Adjust the basal area to be within bounds of the utilization class, and
+	 * 2. Calculate the quad-mean-diameter value from the basal area and trees per hectare.
+	 * 
+	 * @param polygon
+	 */
+	private void adjustUtilizations(VdypPolygon polygon) throws ProcessingException {
+
+		float percentForestedLand = polygon.getPercentForestLand();
+		assert !Float.isNaN(percentForestedLand);
+		float scalingFactor = 100.0f / percentForestedLand;
+
+		List<VdypSpeciesUtilization> utilizationsToAdjust = new ArrayList<>();
+
+		for (VdypPolygonLayer l : polygon.getLayers()) {
+
+			l.getDefaultUtilizationMap().ifPresent(m -> utilizationsToAdjust.addAll(m.values()));
+
+			l.getGenera().values().stream()
+					.forEach(s -> s.getUtilizations().ifPresent(m -> utilizationsToAdjust.addAll(m.values())));
+		}
+
+		for (VdypSpeciesUtilization u : utilizationsToAdjust) {
+
+			if (percentForestedLand > 0.0f && percentForestedLand < 100.0f) {
+				u.scale(scalingFactor);
+			}
+
+			u.doPostCreateAdjustments();
+		}
 	}
 
 	private class UtilizationBySpeciesKey {

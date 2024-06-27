@@ -14,6 +14,12 @@ import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexSpecie
 import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexSpecies.SI_SPEC_SS;
 import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexSpecies.SI_SPEC_SW;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexSpecies;
 
 /**
@@ -428,7 +434,7 @@ public class SiteIndexNames {
 			"Other conifer",
 
 			// SI_SPEC_ZH
-			"Other hardwood", };
+			"Other hardwood" };
 
 	public static String[] siCurveName = {
 			// SI_ACB_HUANG
@@ -864,7 +870,7 @@ public class SiteIndexNames {
 			"Nigh (2015)",
 
 			// SI_CWC_NIGH
-			"Nigh (2016)", };
+			"Nigh (2016)" };
 
 	/**
 	 * Site index conversion between species. Here's how to use the following array: The four elements are: reference
@@ -873,40 +879,81 @@ public class SiteIndexNames {
 	 * Target_SI = coeff_a + coeff_b * Reference_SI
 	 */
 
-	public record SpeciesConversionParametersDetails(
+	public record SpeciesConversionParamsDetails(
 			SiteIndexSpecies sourceSpecies, SiteIndexSpecies targetSpecies, double param1, double param2
 	) {
 	}
 
-	public static final SpeciesConversionParametersDetails[] siSpeciesConversionParameters = {
-			new SpeciesConversionParametersDetails(SI_SPEC_AT, SI_SPEC_SW, 3.804, 0.7978), //
-			new SpeciesConversionParametersDetails(SI_SPEC_BA, SI_SPEC_HWC, 2.005, 1.014), //
-			new SpeciesConversionParametersDetails(SI_SPEC_CWC, SI_SPEC_HWC, 1.256, 1.048), //
-			new SpeciesConversionParametersDetails(SI_SPEC_FDC, SI_SPEC_HWC, -0.432, 0.899), //
-			new SpeciesConversionParametersDetails(SI_SPEC_HWC, SI_SPEC_BA, -1.97731755, 0.98619329), //
-			new SpeciesConversionParametersDetails(SI_SPEC_HWC, SI_SPEC_CWC, -1.19847328, 0.95419847), //
-			new SpeciesConversionParametersDetails(SI_SPEC_HWC, SI_SPEC_FDC, 0.48053393, 1.11234705), //
-			new SpeciesConversionParametersDetails(SI_SPEC_HWC, SI_SPEC_SS, -4.94382022, 1.24843945), //
-			new SpeciesConversionParametersDetails(SI_SPEC_HWI, SI_SPEC_FDI, 4.56, 0.887), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SS, SI_SPEC_HWC, 3.96, 0.801), //
-			new SpeciesConversionParametersDetails(SI_SPEC_PLI, SI_SPEC_SW, -2.14130435, 1.08695652), //
-			new SpeciesConversionParametersDetails(SI_SPEC_PLI, SI_SPEC_FDI, 0.70841121, 0.93457944), //
-			new SpeciesConversionParametersDetails(SI_SPEC_PLI, SI_SPEC_BL, 0.47431193, 0.91743119), //
-			new SpeciesConversionParametersDetails(SI_SPEC_PLI, SI_SPEC_LW, 1.92307692, 0.96153846), //
-			new SpeciesConversionParametersDetails(SI_SPEC_PLI, SI_SPEC_SB, 2.76436782, 0.6385696), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SB, SI_SPEC_PLI, -4.329, 1.566), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SW, SI_SPEC_AT, -4.768112309, 1.253446979), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SW, SI_SPEC_PLI, 1.97, 0.92), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SW, SI_SPEC_FDI, 4.75, 0.737), //
-			new SpeciesConversionParametersDetails(SI_SPEC_SW, SI_SPEC_BL, 1.68, 0.86), //
-			new SpeciesConversionParametersDetails(SI_SPEC_FDI, SI_SPEC_PLI, -0.758, 1.07), //
-			new SpeciesConversionParametersDetails(SI_SPEC_FDI, SI_SPEC_SW, -6.44504749, 1.3568521), //
-			new SpeciesConversionParametersDetails(SI_SPEC_FDI, SI_SPEC_HWI, -5.14092446, 1.12739572), //
-			new SpeciesConversionParametersDetails(SI_SPEC_FDI, SI_SPEC_LW, 0.70193286, 1.017294), //
-			new SpeciesConversionParametersDetails(SI_SPEC_BL, SI_SPEC_PLI, -0.517, 1.09), //
-			new SpeciesConversionParametersDetails(SI_SPEC_BL, SI_SPEC_SW, -1.95348837, 1.1627907), //
-			new SpeciesConversionParametersDetails(SI_SPEC_LW, SI_SPEC_PLI, -2, 1.04), //
-			new SpeciesConversionParametersDetails(SI_SPEC_LW, SI_SPEC_FDI, -0.69, 0.983) };
+	private static final Map<Pair<SiteIndexSpecies, SiteIndexSpecies>, SpeciesConversionParamsDetails> siSpeciesConversionParams = new HashMap<>();
+
+	public static SpeciesConversionParamsDetails
+			getSpeciesConversionParams(SiteIndexSpecies spIndex1, SiteIndexSpecies spIndex2) {
+		var key = new ImmutablePair<>(spIndex1, spIndex2);
+		return siSpeciesConversionParams.get(key);
+	}
+
+	private static void addSpeciesConversionParamsDetails(SpeciesConversionParamsDetails details) {
+		siSpeciesConversionParams.put(new ImmutablePair<>(details.sourceSpecies, details.targetSpecies), details);
+	}
+
+	static {
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_AT, SI_SPEC_SW, 3.804, 0.7978));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_BA, SI_SPEC_HWC, 2.005, 1.014));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_CWC, SI_SPEC_HWC, 1.256, 1.048));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_FDC, SI_SPEC_HWC, -0.432, 0.899));
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_HWC, SI_SPEC_BA, -1.97731755, 0.98619329)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_HWC, SI_SPEC_CWC, -1.19847328, 0.95419847)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_HWC, SI_SPEC_FDC, 0.48053393, 1.11234705)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_HWC, SI_SPEC_SS, -4.94382022, 1.24843945)
+		);
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_HWI, SI_SPEC_FDI, 4.56, 0.887));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_SS, SI_SPEC_HWC, 3.96, 0.801));
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_PLI, SI_SPEC_SW, -2.14130435, 1.08695652)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_PLI, SI_SPEC_FDI, 0.70841121, 0.93457944)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_PLI, SI_SPEC_BL, 0.47431193, 0.91743119)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_PLI, SI_SPEC_LW, 1.92307692, 0.96153846)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_PLI, SI_SPEC_SB, 2.76436782, 0.6385696)
+		);
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_SB, SI_SPEC_PLI, -4.329, 1.566));
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_SW, SI_SPEC_AT, -4.768112309, 1.253446979)
+		);
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_SW, SI_SPEC_PLI, 1.97, 0.92));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_SW, SI_SPEC_FDI, 4.75, 0.737));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_SW, SI_SPEC_BL, 1.68, 0.86));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_FDI, SI_SPEC_PLI, -0.758, 1.07));
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_FDI, SI_SPEC_SW, -6.44504749, 1.3568521)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_FDI, SI_SPEC_HWI, -5.14092446, 1.12739572)
+		);
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_FDI, SI_SPEC_LW, 0.70193286, 1.017294)
+		);
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_BL, SI_SPEC_PLI, -0.517, 1.09));
+		addSpeciesConversionParamsDetails(
+				new SpeciesConversionParamsDetails(SI_SPEC_BL, SI_SPEC_SW, -1.95348837, 1.1627907)
+		);
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_LW, SI_SPEC_PLI, -2, 1.04));
+		addSpeciesConversionParamsDetails(new SpeciesConversionParamsDetails(SI_SPEC_LW, SI_SPEC_FDI, -0.69, 0.983));
+	}
 
 	/**
 	 * Indicates what equations are available (these are additive):
@@ -1351,9 +1398,7 @@ public class SiteIndexNames {
 			5,
 
 			// SI_CWC_NIGH
-			5,
-
-	};
+			5 };
 
 	/**
 	 * Height(m) of breast height (typically 1.3, 1.37, 1.3716).

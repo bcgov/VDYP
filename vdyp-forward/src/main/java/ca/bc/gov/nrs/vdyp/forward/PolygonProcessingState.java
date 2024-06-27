@@ -1,303 +1,410 @@
 package ca.bc.gov.nrs.vdyp.forward;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.bc.gov.nrs.vdyp.common.GenusDefinitionMap;
-import ca.bc.gov.nrs.vdyp.forward.model.VdypLayerSpecies;
+import ca.bc.gov.nrs.vdyp.common.ControlKey;
+import ca.bc.gov.nrs.vdyp.common.Utils;
+import ca.bc.gov.nrs.vdyp.forward.model.VdypEntity;
+import ca.bc.gov.nrs.vdyp.forward.model.VdypGrowthDetails;
+import ca.bc.gov.nrs.vdyp.forward.model.VdypPolygon;
 import ca.bc.gov.nrs.vdyp.forward.model.VdypPolygonLayer;
-import ca.bc.gov.nrs.vdyp.forward.model.VdypSpeciesUtilization;
-import ca.bc.gov.nrs.vdyp.model.GenusDefinition;
-import ca.bc.gov.nrs.vdyp.model.GenusDistributionSet;
+import ca.bc.gov.nrs.vdyp.model.BecDefinition;
+import ca.bc.gov.nrs.vdyp.model.Coefficients;
+import ca.bc.gov.nrs.vdyp.model.LayerType;
+import ca.bc.gov.nrs.vdyp.model.MatrixMap2;
+import ca.bc.gov.nrs.vdyp.model.MatrixMap3;
+import ca.bc.gov.nrs.vdyp.model.Region;
+import ca.bc.gov.nrs.vdyp.model.SmallUtilizationClassVariable;
 import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
+import ca.bc.gov.nrs.vdyp.model.VolumeVariable;
 
 class PolygonProcessingState {
+
+	private static final String COMPATIBILITY_VARIABLES_SET_CAN_BE_SET_ONCE_ONLY = "CompatibilityVariablesSet can be set once only";
+	private static final String PRIMARY_SPECIES_DETAILS_CAN_BE_SET_ONCE_ONLY = "PrimarySpeciesDetails can be set once only";
+	private static final String SITE_CURVE_NUMBERS_CAN_BE_SET_ONCE_ONLY = "SiteCurveNumbers can be set once only";
+	private static final String SPECIES_RANKING_DETAILS_CAN_BE_SET_ONCE_ONLY = "SpeciesRankingDetails can be set once only";
+
+	private static final String UNSET_PRIMARY_SPECIES_AGE_TO_BREAST_HEIGHT = "unset primarySpeciesAgeToBreastHeight";
+	private static final String UNSET_PRIMARY_SPECIES_AGE_AT_BREAST_HEIGHT = "unset primarySpeciesAgeAtBreastHeight";
+	private static final String UNSET_PRIMARY_SPECIES_DOMINANT_HEIGHT = "unset primarySpeciesDominantHeight";
+	private static final String UNSET_CV_VOLUMES = "unset cvVolumes";
+	private static final String UNSET_CV_BASAL_AREAS = "unset cvBasalAreas";
+	private static final String UNSET_RANKING_DETAILS = "unset rankingDetails";
+	private static final String UNSET_SITE_CURVE_NUMBERS = "unset siteCurveNumbers";
+	private static final String UNSET_INVENTORY_TYPE_GROUP = "unset inventoryTypeGroup";
 
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(PolygonProcessingState.class);
 
-	/**
-	 * The number of species in the state. Note that all arrays have one more element in them; the element at index 0 is
-	 * unused for the species values and contains the default utilization in the Utilization values.
-	 */
-	private int nSpecies; // BANK1 NSPB
+	/** The containing ForwardProcessingState */
+	private final ForwardProcessingState fps;
 
-	// Species information
+	/** Polygon on which the processor is operating */
+	private final VdypPolygon polygon;
 
-	public String speciesName[/* nSpecies + 1 */]; // BANK2 SP0B
-	public GenusDistributionSet sp64Distribution[/* nSpecies + 1 */]; // BANK2 SP64DISTB
-	public float siteIndex[/* nSpecies + 1 */]; // BANK3 SIB
-	public float dominantHeight[/* nSpecies + 1 */]; // BANK3 HDB
-	public float ageTotal[/* nSpecies + 1 */]; // BANK3 AGETOTB
-	public float ageBreastHeight[/* nSpecies + 1 */]; // BANK3 AGEBHB
-	public float yearsToBreastHeight[/* nSpecies + 1 */]; // BANK3 YTBHB
-	public int siteCurveNumber[/* nSpecies + 1 */]; // BANK3 SCNB
-	public int speciesIndex[/* nSpecies + 1 */]; // BANK1 ISPB
-	public float percentForestedLand[/* nSpecies + 1 */]; // BANK1 PCTB
+	// L1COM1, L1COM4 and L1COM5 - these common blocks mirror BANK1, BANK2 and BANK3 and are initialized
+	// when copied to "active" in ForwardProcessingEngine.
+	Bank wallet;
 
-	// Utilization information, per Species
+	// L1COM2 - equation groups. From the configuration, narrowed to the
+	// polygon's BEC zone.
 
-	public float basalArea[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 BAB
-	public float closeUtilizationVolume[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 VOLCUB
-	public float cuVolumeMinusDecay[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 VOL_DB
-	public float cuVolumeMinusDecayWastage[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 VOL_DW_B
-	public float loreyHeight[/* nSpecies + 1, including 0 */][/* uc -1 and 0 only */]; // BANK1 HLB
-	public float quadMeanDiameter[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 DQB
-	public float treesPerHectare[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 TPHB
-	public float wholeStemVolume[/* nSpecies + 1, including 0 */][/* all ucs */]; // BANK1 VOLWSB
+	int[] volumeEquationGroups;
+	int[] decayEquationGroups;
+	int[] breakageEquationGroups;
 
-	public PolygonProcessingState(GenusDefinitionMap genusDefinitionMap, VdypPolygonLayer layer) {
+	// L1COM3 - just shadows of fields of L1COM5
+	// AGETOTL1 = wallet.ageTotals[primarySpeciesIndex]
+	// AGEBHL1 = wallet.yearsAtBreastHeight[primarySpeciesIndex]
+	// YTBHL1 = wallet.yearsToBreastHeight[primarySpeciesIndex]
+	// HDL1 = wallet.dominantHeights[primarySpeciesIndex]
 
-		this.nSpecies = genusDefinitionMap.getNSpecies();
+	// Calculated data - this data is calculated after construction during processing.
 
-		// In the following, index 0 is unused
-		speciesName = new String[getNSpecies() + 1];
-		sp64Distribution = new GenusDistributionSet[getNSpecies() + 1];
-		siteIndex = new float[getNSpecies() + 1];
-		dominantHeight = new float[getNSpecies() + 1];
-		ageTotal = new float[getNSpecies() + 1];
-		ageBreastHeight = new float[getNSpecies() + 1];
-		yearsToBreastHeight = new float[getNSpecies() + 1];
-		siteCurveNumber = new int[getNSpecies() + 1];
-		speciesIndex = new int[getNSpecies() + 1];
-		percentForestedLand = new float[getNSpecies() + 1];
+	// Ranking Details - encompasses INXXL1 and INXL1
+	private boolean areRankingDetailsSet = false;
 
-		int nUtilizationClasses = UtilizationClass.values().length;
+	// INXXL1
+	private int primarySpeciesIndex; // IPOSP
 
-		// In the following, index 0 is used for the default species utilization
-		basalArea = new float[getNSpecies() + 1][nUtilizationClasses];
-		closeUtilizationVolume = new float[getNSpecies() + 1][nUtilizationClasses];
-		cuVolumeMinusDecay = new float[getNSpecies() + 1][nUtilizationClasses];
-		cuVolumeMinusDecayWastage = new float[getNSpecies() + 1][nUtilizationClasses];
-		loreyHeight = new float[getNSpecies() + 1][2];
-		quadMeanDiameter = new float[getNSpecies() + 1][nUtilizationClasses];
-		treesPerHectare = new float[getNSpecies() + 1][nUtilizationClasses];
-		wholeStemVolume = new float[getNSpecies() + 1][nUtilizationClasses];
+	// INXL1
+	// ISPP = wallet.speciesIndices[primarySpeciesIndex]
+	// PCTP = wallet.percentagesOfForestedLand[primarySpeciesIndex]
+	private Optional<Integer> secondarySpeciesIndex; // => ISPS (species name) and PCTS (percentage)
+	private int inventoryTypeGroup; // ITG
+	@SuppressWarnings("unused")
+	private int primarySpeciesGroupNumber; // GRPBA1
+	@SuppressWarnings("unused")
+	private int primarySpeciesStratumNumber; // GRPBA3
 
-		if (layer.getDefaultUtilizationMap().isPresent()) {
-			recordUtilizations(0, layer.getDefaultUtilizationMap().get());
-		}
+	// Site Curve Numbers - encompasses INXSCV
+	private boolean areSiteCurveNumbersSet = false;
 
-		for (var ge : layer.getGenus().entrySet()) {
-			int spIndex = genusDefinitionMap.getIndex(ge.getKey().getAlias());
-			recordSpecies(spIndex, ge.getKey(), ge.getValue());
+	// INXSC
+	private int[] siteCurveNumbers; // INXSCV
+
+	// Primary Species Details - encompasses L1COM6
+	private boolean arePrimarySpeciesDetailsSet = false;
+
+	// L1COM6
+	private float primarySpeciesDominantHeight; // HD
+	private float primarySpeciesSiteIndex; // SI
+	private float primarySpeciesTotalAge; // AGETOTP
+	private float primarySpeciesAgeAtBreastHeight; // AGEBHP
+	private float primarySpeciesAgeToBreastHeight; // YTBHP
+
+	// Compatibility Variables - LCV1 & LCVS
+	private boolean areCompatibilityVariablesSet = false;
+
+	private MatrixMap3<UtilizationClass, VolumeVariable, LayerType, Float>[] cvVolume;
+	private MatrixMap2<UtilizationClass, LayerType, Float>[] cvBasalArea;
+	private MatrixMap2<UtilizationClass, LayerType, Float>[] cvQuadraticMeanDiameter;
+	private Map<SmallUtilizationClassVariable, Float>[] cvPrimaryLayerSmall;
+
+	// FRBASP0 - FR
+	// TODO
+
+	// MNSP - MSPL1, MSPLV
+	// TODO
+
+	public PolygonProcessingState(
+			ForwardProcessingState fps, VdypPolygon polygon, Bank bank, Map<String, Object> controlMap
+	) {
+
+		this.fps = fps;
+		this.polygon = polygon;
+
+		this.wallet = bank.copy();
+
+		var volumeEquationGroupMatrix = Utils.<MatrixMap2<String, String, Integer>>expectParsedControl(
+				controlMap, ControlKey.VOLUME_EQN_GROUPS, MatrixMap2.class
+		);
+		var decayEquationGroupMatrix = Utils.<MatrixMap2<String, String, Integer>>expectParsedControl(
+				controlMap, ControlKey.DECAY_GROUPS, MatrixMap2.class
+		);
+		var breakageEquationGroupMatrix = Utils.<MatrixMap2<String, String, Integer>>expectParsedControl(
+				controlMap, ControlKey.BREAKAGE_GROUPS, MatrixMap2.class
+		);
+
+		this.volumeEquationGroups = new int[this.wallet.getNSpecies() + 1];
+		this.decayEquationGroups = new int[this.wallet.getNSpecies() + 1];
+		this.breakageEquationGroups = new int[this.wallet.getNSpecies() + 1];
+
+		this.volumeEquationGroups[0] = VdypEntity.MISSING_INTEGER_VALUE;
+		this.decayEquationGroups[0] = VdypEntity.MISSING_INTEGER_VALUE;
+		this.breakageEquationGroups[0] = VdypEntity.MISSING_INTEGER_VALUE;
+
+		String becZoneAlias = this.getBecZone().getAlias();
+		for (int i = 1; i < this.wallet.getNSpecies() + 1; i++) {
+			String speciesName = this.wallet.speciesNames[i];
+			this.volumeEquationGroups[i] = volumeEquationGroupMatrix.get(speciesName, becZoneAlias);
+			// From VGRPFIND, volumeEquationGroup 10 is mapped to 11.
+			if (this.volumeEquationGroups[i] == 10) {
+				this.volumeEquationGroups[i] = 11;
+			}
+			this.decayEquationGroups[i] = decayEquationGroupMatrix.get(speciesName, becZoneAlias);
+			this.breakageEquationGroups[i] = breakageEquationGroupMatrix.get(speciesName, becZoneAlias);
 		}
 	}
 
-	public PolygonProcessingState(PolygonProcessingState s) {
-
-		this.nSpecies = s.getNSpecies();
-
-		this.ageBreastHeight = copy(s.ageBreastHeight);
-		this.ageTotal = copy(s.ageTotal);
-		this.basalArea = copy(s.basalArea);
-		this.closeUtilizationVolume = copy(s.closeUtilizationVolume);
-		this.cuVolumeMinusDecay = copy(s.cuVolumeMinusDecay);
-		this.cuVolumeMinusDecayWastage = copy(s.cuVolumeMinusDecayWastage);
-		this.dominantHeight = copy(s.dominantHeight);
-		this.loreyHeight = copy(s.loreyHeight);
-		this.percentForestedLand = copy(s.percentForestedLand);
-		this.quadMeanDiameter = copy(s.quadMeanDiameter);
-		this.siteIndex = copy(s.siteIndex);
-		this.siteCurveNumber = copy(s.siteCurveNumber);
-		this.sp64Distribution = copy(s.sp64Distribution);
-		this.speciesIndex = copy(s.speciesIndex);
-		this.speciesName = copy(s.speciesName);
-		this.treesPerHectare = copy(s.treesPerHectare);
-		this.wholeStemVolume = copy(s.wholeStemVolume);
-		this.yearsToBreastHeight = copy(s.yearsToBreastHeight);
+	public VdypPolygon getPolygon() {
+		return polygon;
 	}
 
 	public int getNSpecies() {
-		return nSpecies;
+		return wallet.getNSpecies();
 	}
 
-	private void recordSpecies(int spIndex, GenusDefinition key, VdypLayerSpecies species) {
+	public int[] getIndices() {
+		return wallet.getIndices();
+	}
 
-		speciesName[spIndex] = key.getName();
-		sp64Distribution[spIndex] = species.getSpeciesDistributions();
-		siteIndex[spIndex] = species.getSiteIndex();
-		dominantHeight[spIndex] = species.getDominantHeight();
-		ageTotal[spIndex] = species.getAgeTotal();
-		ageBreastHeight[spIndex] = species.getAgeAtBreastHeight();
-		yearsToBreastHeight[spIndex] = species.getYearsToBreastHeight();
-		siteCurveNumber[spIndex] = species.getSiteCurveNumber();
-		speciesIndex[spIndex] = species.getGenusIndex();
-		// percentForestedLand is output-only and so not assigned here.
+	public BecDefinition getBecZone() {
+		return wallet.getBecZone();
+	}
 
-		if (species.getUtilizations().isPresent()) {
-			recordUtilizations(spIndex, species.getUtilizations().get());
+	public VdypPolygonLayer getLayer() {
+		return wallet.getLayer();
+	}
+
+	public VdypGrowthDetails getVdypGrowthDetails() {
+		return fps.vdypGrowthDetails;
+	}
+
+	public MatrixMap2<Integer, Integer, Optional<Coefficients>> getNetDecayCoeMap() {
+		return fps.netDecayCoeMap;
+	}
+
+	public Map<String, Coefficients> getNetDecayWasteCoeMap() {
+		return fps.netDecayWasteCoeMap;
+	}
+
+	public MatrixMap2<String, Region, Float> getWasteModifierMap() {
+		return fps.wasteModifierMap;
+	}
+
+	public MatrixMap2<String, Region, Float> getDecayModifierMap() {
+		return fps.decayModifierMap;
+	}
+
+	public MatrixMap2<Integer, Integer, Optional<Coefficients>> getCloseUtilizationCoeMap() {
+		return fps.closeUtilizationCoeMap;
+	}
+
+	public Map<Integer, Coefficients> getTotalStandWholeStepVolumeCoeMap() {
+		return fps.totalStandWholeStepVolumeCoeMap;
+	}
+
+	public MatrixMap2<Integer, Integer, Optional<Coefficients>> getWholeStemUtilizationComponentMap() {
+		return fps.wholeStemUtilizationComponentMap;
+	}
+
+	public MatrixMap3<Integer, String, String, Coefficients> getQuadMeanDiameterUtilizationComponentMap() {
+		return fps.quadMeanDiameterUtilizationComponentMap;
+	}
+
+	public MatrixMap3<Integer, String, String, Coefficients> getBasalAreaUtilizationComponentMap() {
+		return fps.basalAreaDiameterUtilizationComponentMap;
+	}
+
+	public Map<String, Coefficients> getSmallComponentWholeStemVolumeCoefficients() {
+		return fps.smallComponentWholeStemVolumeCoefficients;
+	}
+
+	public Map<String, Coefficients> getSmallComponentLoreyHeightCoefficients() {
+		return fps.smallComponentLoreyHeightCoefficients;
+	}
+
+	public Map<String, Coefficients> getSmallComponentQuadMeanDiameterCoefficients() {
+		return fps.smallComponentQuadMeanDiameterCoefficients;
+	}
+
+	public Map<String, Coefficients> getSmallComponentBasalAreaCoefficients() {
+		return fps.smallComponentBasalAreaCoefficients;
+	}
+
+	public Map<String, Coefficients> getSmallComponentProbabilityCoefficients() {
+		return fps.smallComponentProbabilityCoefficients;
+	}
+
+	public int getPrimarySpeciesIndex() {
+		if (!areRankingDetailsSet) {
+			throw new IllegalStateException("unset primarySpeciesIndex");
 		}
+		return primarySpeciesIndex;
 	}
 
-	private void recordUtilizations(int speciesIndex, Map<UtilizationClass, VdypSpeciesUtilization> m) {
+	public boolean hasSecondarySpeciesIndex() {
+		return secondarySpeciesIndex.isPresent();
+	}
 
-		for (var su : m.entrySet()) {
-			int ucIndex = su.getKey().ordinal();
-			basalArea[speciesIndex][ucIndex] = su.getValue().getBasalArea();
-			closeUtilizationVolume[speciesIndex][ucIndex] = su.getValue().getCloseUtilizationVolume();
-			cuVolumeMinusDecay[speciesIndex][ucIndex] = su.getValue().getCuVolumeMinusDecay();
-			cuVolumeMinusDecayWastage[speciesIndex][ucIndex] = su.getValue().getCuVolumeMinusDecayWastage();
-			if (ucIndex < 2 /* only uc 0 and 1 have a lorey height */) {
-				loreyHeight[speciesIndex][ucIndex] = su.getValue().getLoreyHeight();
+	public int getSecondarySpeciesIndex() {
+		return secondarySpeciesIndex.orElseThrow(() -> new IllegalStateException("unset secondarySpeciesIndex"));
+	}
+
+	public int getInventoryTypeGroup() {
+		if (!areRankingDetailsSet) {
+			throw new IllegalStateException(UNSET_INVENTORY_TYPE_GROUP);
+		}
+		return inventoryTypeGroup;
+	}
+
+	public int getSiteCurveNumber(int n) {
+		if (!areSiteCurveNumbersSet) {
+			throw new IllegalStateException(UNSET_SITE_CURVE_NUMBERS);
+		}
+		if (n == 0) {
+			// Take this opportunity to initialize siteCurveNumbers[0] from that of the primary species.
+			if (!areRankingDetailsSet) {
+				throw new IllegalStateException(UNSET_RANKING_DETAILS);
 			}
-			quadMeanDiameter[speciesIndex][ucIndex] = su.getValue().getQuadraticMeanDiameterAtBH();
-			treesPerHectare[speciesIndex][ucIndex] = su.getValue().getLiveTreesPerHectare();
-			wholeStemVolume[speciesIndex][ucIndex] = su.getValue().getWholeStemVolume();
+			siteCurveNumbers[0] = siteCurveNumbers[primarySpeciesIndex];
 		}
+		return siteCurveNumbers[n];
 	}
 
-	public PolygonProcessingState copy() {
-
-		return new PolygonProcessingState(this);
+	public float getPrimarySpeciesDominantHeight() {
+		if (!arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(UNSET_PRIMARY_SPECIES_DOMINANT_HEIGHT);
+		}
+		return primarySpeciesDominantHeight;
 	}
 
-	private GenusDistributionSet[] copy(GenusDistributionSet[] a) {
-		GenusDistributionSet[] t = new GenusDistributionSet[a.length];
-
-		for (int i = 0; i < a.length; i++)
-			if (a[i] != null) {
-				t[i] = a[i].copy();
-			}
-
-		return t;
+	public float getPrimarySpeciesSiteIndex() {
+		if (!arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(UNSET_PRIMARY_SPECIES_DOMINANT_HEIGHT);
+		}
+		return primarySpeciesSiteIndex;
 	}
 
-	private String[] copy(String[] a) {
-		String[] t = new String[a.length];
-
-		for (int i = 0; i < a.length; i++)
-			if (a[i] != null) {
-				t[i] = a[i];
-			}
-		return t;
+	public float getPrimarySpeciesTotalAge() {
+		if (!arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(UNSET_PRIMARY_SPECIES_DOMINANT_HEIGHT);
+		}
+		return primarySpeciesTotalAge;
 	}
 
-	private int[] copy(int[] a) {
-		int[] t = new int[a.length];
-
-		System.arraycopy(a, 0, t, 0, a.length);
-
-		return t;
+	public float getPrimarySpeciesAgeAtBreastHeight() {
+		if (!arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(UNSET_PRIMARY_SPECIES_AGE_AT_BREAST_HEIGHT);
+		}
+		return primarySpeciesAgeAtBreastHeight;
 	}
 
-	private float[] copy(float[] a) {
-		float[] t = new float[a.length];
-
-		System.arraycopy(a, 0, t, 0, a.length);
-
-		return t;
+	public float getPrimarySpeciesAgeToBreastHeight() {
+		if (!arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(UNSET_PRIMARY_SPECIES_AGE_TO_BREAST_HEIGHT);
+		}
+		return primarySpeciesAgeToBreastHeight;
 	}
 
-	private float[][] copy(float[][] a) {
-		float[][] t = new float[a.length][];
-
-		for (int i = 0; i < a.length; i++) {
-			t[i] = new float[a[i].length];
-			for (int j = 0; j < a[i].length; j++)
-				t[i][j] = a[i][j];
+	public void setSpeciesRankingDetails(SpeciesRankingDetails rankingDetails) {
+		if (this.areRankingDetailsSet) {
+			throw new IllegalStateException(SPECIES_RANKING_DETAILS_CAN_BE_SET_ONCE_ONLY);
 		}
 
-		return t;
+		this.primarySpeciesIndex = rankingDetails.primarySpeciesIndex();
+		this.secondarySpeciesIndex = rankingDetails.secondarySpeciesIndex();
+		this.inventoryTypeGroup = rankingDetails.inventoryTypeGroup();
+
+		this.areRankingDetailsSet = true;
 	}
 
-	/**
-	 * Replace species at index <code>i</code> with that at index <code>j</code>, i < j.
-	 *
-	 * @param toIndex   the index of the species to remove, i >= 1
-	 * @param fromIndex the index of the species to replace it with, j >= i and j <= nSpecies
-	 */
-	private void move(int toIndex, int fromIndex) {
-		if (toIndex > fromIndex || toIndex < 1 || fromIndex > getNSpecies()) {
-			throw new IllegalArgumentException(
-					MessageFormat.format(
-							"PolygonProcessingState.replace - illegal arguments i = {0}, j = {1}, nSpecies = {2}",
-							toIndex, fromIndex, getNSpecies()
-					)
-			);
+	public void setSiteCurveNumbers(int[] siteCurveNumbers) {
+		if (this.areSiteCurveNumbersSet) {
+			throw new IllegalStateException(SITE_CURVE_NUMBERS_CAN_BE_SET_ONCE_ONLY);
 		}
 
-		if (toIndex < fromIndex) {
+		this.siteCurveNumbers = Arrays.copyOf(siteCurveNumbers, siteCurveNumbers.length);
 
-			speciesName[toIndex] = speciesName[fromIndex];
-			sp64Distribution[toIndex] = sp64Distribution[fromIndex];
-			siteIndex[toIndex] = siteIndex[fromIndex];
-			dominantHeight[toIndex] = dominantHeight[fromIndex];
-			ageTotal[toIndex] = ageTotal[fromIndex];
-			ageBreastHeight[toIndex] = ageBreastHeight[fromIndex];
-			yearsToBreastHeight[toIndex] = yearsToBreastHeight[fromIndex];
-			siteCurveNumber[toIndex] = siteCurveNumber[fromIndex];
-			speciesIndex[toIndex] = speciesIndex[fromIndex];
-			percentForestedLand[toIndex] = percentForestedLand[fromIndex];
-
-			basalArea[toIndex] = basalArea[fromIndex];
-			closeUtilizationVolume[toIndex] = closeUtilizationVolume[fromIndex];
-			cuVolumeMinusDecay[toIndex] = cuVolumeMinusDecay[fromIndex];
-			cuVolumeMinusDecayWastage[toIndex] = cuVolumeMinusDecayWastage[fromIndex];
-			loreyHeight[toIndex] = loreyHeight[fromIndex];
-			quadMeanDiameter[toIndex] = quadMeanDiameter[fromIndex];
-			treesPerHectare[toIndex] = treesPerHectare[fromIndex];
-			wholeStemVolume[toIndex] = wholeStemVolume[fromIndex];
-		}
+		areSiteCurveNumbersSet = true;
 	}
 
-	private void retainOnly(Set<Integer> speciesToRetainByIndexSet) {
-
-		var speciesToRetainByIndex = new ArrayList<>(speciesToRetainByIndexSet);
-
-		speciesToRetainByIndex.sort(Integer::compareTo);
-
-		int nextAvailableSlot = 1;
-		for (int index : speciesToRetainByIndex) {
-			if (nextAvailableSlot != index) {
-				move(nextAvailableSlot, index);
-			}
-			nextAvailableSlot += 1;
+	public void setPrimarySpeciesDetails(PrimarySpeciesDetails details) {
+		if (this.arePrimarySpeciesDetailsSet) {
+			throw new IllegalStateException(PRIMARY_SPECIES_DETAILS_CAN_BE_SET_ONCE_ONLY);
 		}
 
-		if (nextAvailableSlot > 1) {
-			nSpecies = speciesToRetainByIndex.size();
-			int nElements = nSpecies + 1;
+		this.primarySpeciesDominantHeight = details.primarySpeciesDominantHeight();
+		this.primarySpeciesSiteIndex = details.primarySpeciesSiteIndex();
+		this.primarySpeciesTotalAge = details.primarySpeciesTotalAge();
+		this.primarySpeciesAgeAtBreastHeight = details.primarySpeciesAgeAtBreastHeight();
+		this.primarySpeciesAgeToBreastHeight = details.primarySpeciesAgeToBreastHeight();
 
-			speciesName = Arrays.copyOf(speciesName, nElements);
-			sp64Distribution = Arrays.copyOf(sp64Distribution, nElements);
-			siteIndex = Arrays.copyOf(siteIndex, nElements);
-			dominantHeight = Arrays.copyOf(dominantHeight, nElements);
-			ageTotal = Arrays.copyOf(ageTotal, nElements);
-			ageBreastHeight = Arrays.copyOf(ageBreastHeight, nElements);
-			yearsToBreastHeight = Arrays.copyOf(yearsToBreastHeight, nElements);
-			siteCurveNumber = Arrays.copyOf(siteCurveNumber, nElements);
-			speciesIndex = Arrays.copyOf(speciesIndex, nElements);
-			percentForestedLand = Arrays.copyOf(percentForestedLand, nElements);
-
-			basalArea = Arrays.copyOf(basalArea, nElements);
-			closeUtilizationVolume = Arrays.copyOf(closeUtilizationVolume, nElements);
-			cuVolumeMinusDecay = Arrays.copyOf(cuVolumeMinusDecay, nElements);
-			cuVolumeMinusDecayWastage = Arrays.copyOf(cuVolumeMinusDecayWastage, nElements);
-			loreyHeight = Arrays.copyOf(loreyHeight, nElements);
-			quadMeanDiameter = Arrays.copyOf(quadMeanDiameter, nElements);
-			treesPerHectare = Arrays.copyOf(treesPerHectare, nElements);
-			wholeStemVolume = Arrays.copyOf(wholeStemVolume, nElements);
+		// Store these values into the wallet - VHDOM1 lines 182 - 186
+		if (wallet.dominantHeights[primarySpeciesIndex] <= 0.0) {
+			wallet.dominantHeights[primarySpeciesIndex] = this.primarySpeciesDominantHeight;
 		}
+		if (wallet.siteIndices[primarySpeciesIndex] <= 0.0) {
+			wallet.siteIndices[primarySpeciesIndex] = this.primarySpeciesSiteIndex;
+		}
+		if (wallet.ageTotals[primarySpeciesIndex] <= 0.0) {
+			wallet.ageTotals[primarySpeciesIndex] = this.primarySpeciesTotalAge;
+		}
+		if (wallet.yearsAtBreastHeight[primarySpeciesIndex] <= 0.0) {
+			wallet.yearsAtBreastHeight[primarySpeciesIndex] = this.primarySpeciesAgeAtBreastHeight;
+		}
+		if (wallet.yearsAtBreastHeight[primarySpeciesIndex] <= 0.0) {
+			wallet.yearsAtBreastHeight[primarySpeciesIndex] = this.primarySpeciesAgeToBreastHeight;
+		}
+
+		this.arePrimarySpeciesDetailsSet = true;
 	}
 
-	public void removeSpecies(Predicate<Integer> removeCriteria) {
-
-		Set<Integer> speciesToRetainByIndex = new HashSet<>();
-		for (int i = 1; i <= getNSpecies(); i++) {
-			if (!removeCriteria.test(i)) {
-				speciesToRetainByIndex.add(i);
-			}
+	public void setCompatibilityVariableDetails(
+			MatrixMap3<UtilizationClass, VolumeVariable, LayerType, Float>[] cvVolume,
+			MatrixMap2<UtilizationClass, LayerType, Float>[] cvBasalArea,
+			MatrixMap2<UtilizationClass, LayerType, Float>[] cvQuadraticMeanDiameter,
+			Map<SmallUtilizationClassVariable, Float>[] cvPrimaryLayerSmall
+	) {
+		if (this.areCompatibilityVariablesSet) {
+			throw new IllegalStateException(COMPATIBILITY_VARIABLES_SET_CAN_BE_SET_ONCE_ONLY);
 		}
 
-		retainOnly(speciesToRetainByIndex);
+		this.cvVolume = cvVolume;
+		this.cvBasalArea = cvBasalArea;
+		this.cvQuadraticMeanDiameter = cvQuadraticMeanDiameter;
+		this.cvPrimaryLayerSmall = cvPrimaryLayerSmall;
+
+		this.areCompatibilityVariablesSet = true;
+	}
+
+	public float
+			getCVVolume(int speciesIndex, UtilizationClass uc, VolumeVariable volumeVariable, LayerType layerType) {
+		if (!this.areCompatibilityVariablesSet) {
+			throw new IllegalStateException(UNSET_CV_VOLUMES);
+		}
+
+		return cvVolume[speciesIndex].get(uc, volumeVariable, layerType);
+	}
+
+	public float getCVBasalArea(int speciesIndex, UtilizationClass uc, LayerType layerType) {
+		if (!this.areCompatibilityVariablesSet) {
+			throw new IllegalStateException(UNSET_CV_BASAL_AREAS);
+		}
+
+		return cvBasalArea[speciesIndex].get(uc, layerType);
+	}
+
+	public float getCVQuadraticMeanDiameter(int speciesIndex, UtilizationClass uc, LayerType layerType) {
+		if (!this.areCompatibilityVariablesSet) {
+			throw new IllegalStateException(UNSET_CV_BASAL_AREAS);
+		}
+
+		return cvQuadraticMeanDiameter[speciesIndex].get(uc, layerType);
+	}
+
+	public float getCVSmall(int speciesIndex, SmallUtilizationClassVariable variable) {
+		if (!this.areCompatibilityVariablesSet) {
+			throw new IllegalStateException(UNSET_CV_BASAL_AREAS);
+		}
+
+		return cvPrimaryLayerSmall[speciesIndex].get(variable);
 	}
 }

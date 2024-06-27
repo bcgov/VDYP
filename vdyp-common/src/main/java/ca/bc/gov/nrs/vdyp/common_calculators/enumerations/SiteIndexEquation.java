@@ -157,7 +157,9 @@ public enum SiteIndexEquation {
 		}
 
 		if (e == null) {
-			throw new IllegalArgumentException(MessageFormat.format("Index {} doesn't exist in SiteIndexEquation", n));
+			throw new IllegalArgumentException(
+					MessageFormat.format("Index {0} doesn''t exist in SiteIndexEquation", n)
+			);
 		} else {
 			return e;
 		}

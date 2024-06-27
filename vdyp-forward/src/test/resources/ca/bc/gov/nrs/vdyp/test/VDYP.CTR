@@ -24,7 +24,6 @@
 022 coe/BGRP.DAT                                      Defines Breakage Groups   RD_BGRP      IPSJF157
 
 025 coe/SIEQN.PRM                                     Site Curve Numbers assigned
-025                                                   Nullifies above siteCurve #
 026 coe/SIAGEMAX.PRM                                  MAXIMUM AGES FOR HT INCR, BY SITE CURVE NUMBER (SIAGEMAX.prm=140)
 028 coe/CVADJ.PRM                                     CV adjustment and relalted parameters
 

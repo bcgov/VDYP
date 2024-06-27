@@ -152,7 +152,7 @@ class VdypForwardControlParserTest {
 	@Test
 	void testParseE025Empty() throws Exception {
 		var parser = new ForwardControlParser();
-		var result = VdypForwardTestUtils.parse(parser, "VDYP.CTR");
+		var result = VdypForwardTestUtils.parse(parser, "VDYP-NoSiteCurves.CTR");
 		assertThat(result, (Matcher) controlMapHasEntry(ControlKey.SITE_CURVE_NUMBERS, mmEmpty()));
 	}
 
@@ -546,8 +546,7 @@ class VdypForwardControlParserTest {
 
 	static InputStream addToEnd(InputStream is, String... lines) {
 		var appendix = new ByteArrayInputStream(String.join("\r\n", lines).getBytes(StandardCharsets.US_ASCII));
-		var result = new SequenceInputStream(is, appendix);
-		return result;
+		return new SequenceInputStream(is, appendix);
 	}
 
 	static Map<String, ?> parseWithAppendix(ForwardControlParser parser, String... lines)

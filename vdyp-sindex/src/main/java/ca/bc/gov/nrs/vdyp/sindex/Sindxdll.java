@@ -253,8 +253,6 @@ public class Sindxdll {
 	 *
 	 * When looping through the array, reject entries that have 0 for both reference and target species.
 	 */
-	private static final int SI_MAX_CONVERT = 28;
-
 	private static final SiteIndexEquation SI_A_START = SI_NO_EQUATION;
 	private static final SiteIndexEquation SI_ABAL_START = SI_NO_EQUATION;
 	private static final SiteIndexEquation SI_ABCO_START = SI_NO_EQUATION;
@@ -2930,7 +2928,6 @@ public class Sindxdll {
 	public static int
 			SIToSI(SiteIndexSpecies spIndex1, double siteIndex, SiteIndexSpecies spIndex2, Reference<Double> result)
 					throws SpeciesErrorException, NoAnswerException {
-		int i;
 
 		if (spIndex1 == null) {
 			result.set(Double.valueOf(SI_ERR_SPEC));
@@ -2942,19 +2939,19 @@ public class Sindxdll {
 			throw new SpeciesErrorException("Source or target species index is not valid" + spIndex2);
 		}
 
-		for (i = 0; i < SI_MAX_CONVERT; i++) {
-			if (SiteIndexNames.siSpeciesConversionParameters[i].sourceSpecies() == spIndex1
-					&& SiteIndexNames.siSpeciesConversionParameters[i].targetSpecies() == spIndex2) {
-				result.set(
-						SiteIndexNames.siSpeciesConversionParameters[i].param1()
-								+ SiteIndexNames.siSpeciesConversionParameters[i].param2() * siteIndex
-				);
-				return 0;
+		if (spIndex1.equals(spIndex2)) {
+			result.set(siteIndex);
+		} else {
+			var params = SiteIndexNames.getSpeciesConversionParams(spIndex1, spIndex2);
+			if (params != null) {
+				result.set(params.param1() + params.param2() * siteIndex);
+			} else {
+				result.set(Double.valueOf(SI_ERR_NO_ANS));
+				throw new NoAnswerException("There is no conversion defined");
 			}
 		}
 
-		result.set(Double.valueOf(SI_ERR_NO_ANS));
-		throw new NoAnswerException("There is no conversion defined");
+		return 0;
 	}
 
 	/**

@@ -252,7 +252,8 @@ public class VdypMethods {
 	 *
 	 * @param sp64Name the species short ("code") name such as "ABAL"
 	 * @param region   the region under consideration
-	 * @return The Site Index curve type to use for this species. -1 if the species or region was not recognized.
+	 * @return The Site Index curve type to use for this species. SI_NO_EQUATION is returned if the species or region
+	 *         was not recognized.
 	 */
 	public static SiteIndexEquation getCurrentSICurve(String sp64Name, SpeciesRegion region) {
 

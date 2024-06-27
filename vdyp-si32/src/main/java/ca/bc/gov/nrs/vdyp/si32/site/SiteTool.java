@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.CommonCalculatorException;
 import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.CurveErrorException;
+import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.NoAnswerException;
+import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.SpeciesErrorException;
 import ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexAgeType;
 import ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexEquation;
 import ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexEstimationType;
@@ -502,6 +504,44 @@ public class SiteTool {
 	}
 
 	/**
+	 * Converts <code>siteIndex1</code> from <code>siteCurve1</code> to <code>siteCurve2</code>.
+	 *
+	 * @param siteCurve1 source site curve
+	 * @param siteIndex1 source site index
+	 * @param siteCurve2 target site curve
+	 * @return the calculated site index, as described.
+	 * @throws CurveErrorException   when either siteCurve1 or siteCurve2 is not a recognized site curve.
+	 * @throws SpeciesErrorException when either source or target species, as derived siteCurve1 and siteCurve2,
+	 *                               respectively, is not valid
+	 * @throws NoAnswerException     when there is no conversion defined
+	 */
+	public static double
+			convertSiteIndexBetweenCurves(SiteIndexEquation siteCurve1, double siteIndex1, SiteIndexEquation siteCurve2)
+					throws CurveErrorException, SpeciesErrorException, NoAnswerException {
+		if (siteCurve1 == null) {
+			throw new IllegalArgumentException("convertSiteIndexBetweenCurves.siteCurve1");
+		}
+		if (siteCurve2 == null) {
+			throw new IllegalArgumentException("convertSiteIndexBetweenCurves.siteCurve2");
+		}
+
+		SiteIndexSpecies speciesIndex1 = VdypMethods.getSICurveSpeciesIndex(siteCurve1);
+		SiteIndexSpecies speciesIndex2 = VdypMethods.getSICurveSpeciesIndex(siteCurve2);
+
+		if (speciesIndex1 == SiteIndexSpecies.SI_NO_SPECIES || speciesIndex2 == SiteIndexSpecies.SI_NO_SPECIES) {
+			throw new CurveErrorException(
+					MessageFormat.format(
+							"Either or both of {} and {} are not recognized Site Curves", siteCurve1, siteCurve2
+					)
+			);
+		}
+
+		Reference<Double> rSiteIndex2 = new Reference<>();
+		Sindxdll.SIToSI(speciesIndex1, siteIndex1, speciesIndex2, rSiteIndex2);
+		return rSiteIndex2.get();
+	}
+
+	/**
 	 * Sets the Site Index curve to use for a particular species.
 	 *
 	 * @param sp64CodeName the short ("code") name of the species.
@@ -521,7 +561,8 @@ public class SiteTool {
 	 *
 	 * @param sp64CodeName the species short ("code") name.
 	 * @param isCoastal    <code>true</code> if coastal, <code>false</code> if interior.
-	 * @return the SI Curve number for the species, or -1 if the species was not recognized.
+	 * @return the SiteIndexEquation number for the species, or SiteIndexEquation.SI_NO_EQUATION if the species was not
+	 *         recognized.
 	 */
 	public static SiteIndexEquation getSICurve(String sp64CodeName, boolean isCoastal) {
 

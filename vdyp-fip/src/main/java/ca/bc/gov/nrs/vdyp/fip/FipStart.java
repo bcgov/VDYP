@@ -5,7 +5,6 @@ import static ca.bc.gov.nrs.vdyp.math.FloatMath.clamp;
 import static ca.bc.gov.nrs.vdyp.math.FloatMath.exp;
 import static ca.bc.gov.nrs.vdyp.math.FloatMath.log;
 import static ca.bc.gov.nrs.vdyp.math.FloatMath.pow;
-import static ca.bc.gov.nrs.vdyp.math.FloatMath.ratio;
 import static ca.bc.gov.nrs.vdyp.math.FloatMath.sqrt;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -29,7 +28,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +50,9 @@ import ca.bc.gov.nrs.vdyp.application.StandProcessingException;
 import ca.bc.gov.nrs.vdyp.application.VdypApplicationIdentifier;
 import ca.bc.gov.nrs.vdyp.application.VdypStartApplication;
 import ca.bc.gov.nrs.vdyp.common.ControlKey;
+import ca.bc.gov.nrs.vdyp.common.EstimationMethods;
 import ca.bc.gov.nrs.vdyp.common.IndexedFloatBinaryOperator;
+import ca.bc.gov.nrs.vdyp.common.ReconcilationMethods;
 import ca.bc.gov.nrs.vdyp.common.Utils;
 import ca.bc.gov.nrs.vdyp.common.ValueOrMarker;
 import ca.bc.gov.nrs.vdyp.common_calculators.BaseAreaTreeDensityDiameter;
@@ -63,19 +63,21 @@ import ca.bc.gov.nrs.vdyp.fip.model.FipSite;
 import ca.bc.gov.nrs.vdyp.fip.model.FipSpecies;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.BecDefinitionParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.GenusDefinitionParser;
-import ca.bc.gov.nrs.vdyp.io.parse.coe.ModifierParser;
 import ca.bc.gov.nrs.vdyp.io.parse.common.ResourceParseException;
 import ca.bc.gov.nrs.vdyp.io.parse.control.BaseControlParser;
 import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParser;
+import ca.bc.gov.nrs.vdyp.model.BaseVdypLayer;
+import ca.bc.gov.nrs.vdyp.model.BaseVdypPolygon;
+import ca.bc.gov.nrs.vdyp.model.BaseVdypSite;
 import ca.bc.gov.nrs.vdyp.model.BaseVdypSpecies;
 import ca.bc.gov.nrs.vdyp.model.BecDefinition;
 import ca.bc.gov.nrs.vdyp.model.Coefficients;
-import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap2;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap3;
 import ca.bc.gov.nrs.vdyp.model.NonprimaryHLCoefficients;
+import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 import ca.bc.gov.nrs.vdyp.model.Region;
 import ca.bc.gov.nrs.vdyp.model.StockingClassFactor;
 import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
@@ -89,17 +91,13 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 	public static final Comparator<FipSpecies> PERCENT_GENUS_DESCENDING = Utils
 			.compareUsing(FipSpecies::getPercentGenus).reversed();
 
-	private static final Logger log = LoggerFactory.getLogger(FipStart.class);
+	public static final Logger log = LoggerFactory.getLogger(FipStart.class);
 
 	public static final int UTIL_ALL = UtilizationClass.ALL.index;
 	public static final int UTIL_LARGEST = UtilizationClass.OVER225.index;
 	public static final int UTIL_SMALL = UtilizationClass.SMALL.index;
 
 	public static final float TOLERANCE = 2.0e-3f;
-
-	static final Collection<UtilizationClass> UTIL_CLASSES = List.of(
-			UtilizationClass.U75TO125, UtilizationClass.U125TO175, UtilizationClass.U175TO225, UtilizationClass.OVER225
-	);
 
 	public static void main(final String... args) throws IOException {
 
@@ -576,8 +574,8 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		for (var spec : result.getSpecies().values()) {
 			// EMP090
 			var wholeStemVolume = spec.getTreesPerHectareByUtilization().getCoe(UTIL_ALL)
-					* estimateWholeStemVolumePerTree(
-							spec.getVolumeGroup(), spec.getLoreyHeightByUtilization().getCoe(UTIL_ALL),
+					* EstimationMethods.estimateWholeStemVolumePerTree(
+							controlMap, spec.getVolumeGroup(), spec.getLoreyHeightByUtilization().getCoe(UTIL_ALL),
 							spec.getQuadraticMeanDiameterByUtilization().getCoe(UTIL_ALL)
 					);
 			spec.getWholeStemVolumeByUtilization().setCoe(UTIL_ALL, wholeStemVolume);
@@ -773,26 +771,6 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		);
 
 		return coeMap.get(genus, region);
-	}
-
-	// EMP090
-	private float estimateWholeStemVolumePerTree(int volumeGroup, float loreyHeight, float quadMeanDiameter) {
-		var coeMap = Utils.<Map<Integer, Coefficients>>expectParsedControl(
-				controlMap, ControlKey.TOTAL_STAND_WHOLE_STEM_VOL, Map.class
-		);
-		var coe = coeMap.get(volumeGroup).reindex(0);
-
-		var logMeanVolume = coe.getCoe(UTIL_ALL) + //
-				coe.getCoe(1) * log(quadMeanDiameter) + //
-				coe.getCoe(2) * log(loreyHeight) + //
-				coe.getCoe(3) * quadMeanDiameter + //
-				coe.getCoe(4) / quadMeanDiameter + //
-				coe.getCoe(5) * loreyHeight + //
-				coe.getCoe(6) * quadMeanDiameter * quadMeanDiameter + //
-				coe.getCoe(7) * loreyHeight * quadMeanDiameter //
-				+ coe.getCoe(8) * loreyHeight / quadMeanDiameter;
-
-		return exp(logMeanVolume);
 	}
 
 	// EMP053 Using eqns N1 and N2 from ipsjf124.doc
@@ -1032,13 +1010,16 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			var adjustDecayWasteUtil = Utils.utilizationVector(); // ADJVDW
 
 			// EMP071
-			estimateQuadMeanDiameterByUtilization(bec, quadMeanDiameterUtil, spec);
+			EstimationMethods
+					.estimateQuadMeanDiameterByUtilization(controlMap, bec, quadMeanDiameterUtil, spec.getGenus());
 
 			// EMP070
-			estimateBaseAreaByUtilization(bec, quadMeanDiameterUtil, baseAreaUtil, spec);
+			EstimationMethods.estimateBaseAreaByUtilization(
+					controlMap, bec, quadMeanDiameterUtil, baseAreaUtil, spec.getGenus()
+			);
 
 			// Calculate tree density components
-			for (var uc : UTIL_CLASSES) {
+			for (var uc : UtilizationClass.UTIL_CLASSES) {
 				treesPerHectareUtil.setCoe(
 						uc.index,
 						BaseAreaTreeDensityDiameter
@@ -1049,7 +1030,7 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			// reconcile components with totals
 
 			// YUC1R
-			reconcileComponents(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
+			ReconcilationMethods.reconcileComponents(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
 
 			if (compatibilityVariableMode != CompatibilityVariableMode.NONE) {
 				throw new UnsupportedOperationException("TODO");
@@ -1057,7 +1038,7 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 
 			// Recalculate TPH's
 
-			for (var uc : UTIL_CLASSES) {
+			for (var uc : UtilizationClass.UTIL_CLASSES) {
 				treesPerHectareUtil.setCoe(
 						uc.index,
 						BaseAreaTreeDensityDiameter
@@ -1069,16 +1050,16 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			// Seems this might only be needed when compatibilityVariableMode is not NONE?
 
 			// YUC1R
-			reconcileComponents(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
+			ReconcilationMethods.reconcileComponents(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
 
 			if (volumeComputeMode == VolumeComputeMode.ZERO) {
 				throw new UnsupportedOperationException("TODO");
 			} else {
 
 				// EMP091
-				estimateWholeStemVolume(
-						UtilizationClass.ALL, adjustCloseUtil.getCoe(4), spec.getVolumeGroup(), loreyHeightSpec,
-						quadMeanDiameterUtil, baseAreaUtil, wholeStemVolumeUtil
+				EstimationMethods.estimateWholeStemVolume(
+						controlMap, UtilizationClass.ALL, adjustCloseUtil.getCoe(4), spec.getVolumeGroup(),
+						loreyHeightSpec, quadMeanDiameterUtil, baseAreaUtil, wholeStemVolumeUtil
 				);
 
 				if (compatibilityVariableMode == CompatibilityVariableMode.ALL) {
@@ -1092,30 +1073,30 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 				}
 
 				// EMP092
-				estimateCloseUtilizationVolume(
-						UtilizationClass.ALL, adjustCloseUtil, spec.getVolumeGroup(), loreyHeightSpec,
+				EstimationMethods.estimateCloseUtilizationVolume(
+						controlMap, UtilizationClass.ALL, adjustCloseUtil, spec.getVolumeGroup(), loreyHeightSpec,
 						quadMeanDiameterUtil, wholeStemVolumeUtil, closeVolumeUtil
 				);
 
 				// EMP093
-				estimateNetDecayVolume(
-						spec.getGenus(), bec.getRegion(), UtilizationClass.ALL, adjustCloseUtil, spec.getDecayGroup(),
-						loreyHeightSpec, vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil,
+				EstimationMethods.estimateNetDecayVolume(
+						controlMap, spec.getGenus(), bec.getRegion(), UtilizationClass.ALL, adjustCloseUtil,
+						spec.getDecayGroup(), vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil,
 						closeVolumeUtil, closeVolumeNetDecayUtil
 				);
 
 				// EMP094
-				estimateNetDecayAndWasteVolume(
-						bec.getRegion(), UtilizationClass.ALL, adjustCloseUtil, spec.getGenus(), loreyHeightSpec,
-						vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil, closeVolumeUtil,
-						closeVolumeNetDecayUtil, closeVolumeNetDecayWasteUtil
+				EstimationMethods.estimateNetDecayAndWasteVolume(
+						controlMap, bec.getRegion(), UtilizationClass.ALL, adjustCloseUtil, spec.getGenus(),
+						loreyHeightSpec, quadMeanDiameterUtil, closeVolumeUtil, closeVolumeNetDecayUtil,
+						closeVolumeNetDecayWasteUtil
 				);
 
 				if (getId().isStart()) {
 					// EMP095
-					estimateNetDecayWasteAndBreakageVolume(
-							UtilizationClass.ALL, spec.getBreakageGroup(), quadMeanDiameterUtil, closeVolumeUtil,
-							closeVolumeNetDecayWasteUtil, closeVolumeNetDecayWasteBreakUtil
+					EstimationMethods.estimateNetDecayWasteAndBreakageVolume(
+							controlMap, UtilizationClass.ALL, spec.getBreakageGroup(), quadMeanDiameterUtil,
+							closeVolumeUtil, closeVolumeNetDecayWasteUtil, closeVolumeNetDecayWasteBreakUtil
 					);
 				}
 			}
@@ -1242,38 +1223,44 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 				var adjust = new Coefficients(new float[] { 0f, 0f, 0f, 0f }, 1);
 
 				// EMP091
-				estimateWholeStemVolume(
-						utilizationClass, volumeAdjustCoe.getCoe(1), vdypSpecies.getVolumeGroup(), hlSp,
+				EstimationMethods.estimateWholeStemVolume(
+						controlMap, utilizationClass, volumeAdjustCoe.getCoe(1), vdypSpecies.getVolumeGroup(), hlSp,
 						quadMeanDiameterUtil, baseAreaUtil, wholeStemVolumeUtil
 				);
 
 				adjust.setCoe(4, volumeAdjustCoe.getCoe(2));
 				// EMP092
-				estimateCloseUtilizationVolume(
-						utilizationClass, adjust, vdypSpecies.getVolumeGroup(), hlSp, quadMeanDiameterUtil,
+				EstimationMethods.estimateCloseUtilizationVolume(
+						controlMap, utilizationClass, adjust, vdypSpecies.getVolumeGroup(), hlSp, quadMeanDiameterUtil,
 						wholeStemVolumeUtil, closeUtilizationVolumeUtil
 				);
 
 				adjust.setCoe(4, volumeAdjustCoe.getCoe(3));
 				// EMP093
-				estimateNetDecayVolume(
-						vdypSpecies.getGenus(), bec.getRegion(), utilizationClass, adjust, vdypSpecies.getDecayGroup(),
-						hlSp, vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil,
+				EstimationMethods.estimateNetDecayVolume(
+						controlMap, vdypSpecies.getGenus(), bec.getRegion(), utilizationClass, adjust,
+						vdypSpecies.getDecayGroup(), vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil,
 						closeUtilizationVolumeUtil, closeUtilizationNetOfDecayUtil
 				);
 
 				adjust.setCoe(4, volumeAdjustCoe.getCoe(4));
 				// EMP094
-				estimateNetDecayAndWasteVolume(
-						bec.getRegion(), utilizationClass, adjust, vdypSpecies.getGenus(), hlSp,
-						vdypLayer.getBreastHeightAge().orElse(0f), quadMeanDiameterUtil, closeUtilizationVolumeUtil,
+				final var netDecayCoeMap = Utils.<Map<String, Coefficients>>expectParsedControl(
+						controlMap, ControlKey.VOLUME_NET_DECAY_WASTE, Map.class
+				);
+				final var wasteModifierMap = Utils.<MatrixMap2<String, Region, Float>>expectParsedControl(
+						controlMap, ControlKey.WASTE_MODIFIERS, MatrixMap2.class
+				);
+				EstimationMethods.estimateNetDecayAndWasteVolume(
+						bec.getRegion(), utilizationClass, adjust, vdypSpecies.getGenus(), hlSp, netDecayCoeMap,
+						wasteModifierMap, quadMeanDiameterUtil, closeUtilizationVolumeUtil,
 						closeUtilizationNetOfDecayUtil, closeUtilizationNetOfDecayAndWasteUtil
 				);
 
 				if (getId().isStart()) {
 					// EMP095
-					estimateNetDecayWasteAndBreakageVolume(
-							utilizationClass, vdypSpecies.getBreakageGroup(), quadMeanDiameterUtil,
+					EstimationMethods.estimateNetDecayWasteAndBreakageVolume(
+							controlMap, utilizationClass, vdypSpecies.getBreakageGroup(), quadMeanDiameterUtil,
 							closeUtilizationVolumeUtil, closeUtilizationNetOfDecayAndWasteUtil,
 							closeUtilizationNetOfDecayWasteAndBreakageUtil
 					);
@@ -1371,391 +1358,6 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		}
 	}
 
-	/**
-	 * Implements the three reconciliation modes for layer 1 as described in ipsjf120.doc
-	 *
-	 * @param baseAreaUtil
-	 * @param treesPerHectareUtil
-	 * @param quadMeanDiameterUtil
-	 * @throws ProcessingException
-	 */
-	// YUC1R
-	void reconcileComponents(
-			Coefficients baseAreaUtil, Coefficients treesPerHectareUtil, Coefficients quadMeanDiameterUtil
-	) throws ProcessingException {
-		if (baseAreaUtil.getCoe(UTIL_ALL) == 0f) {
-			UTIL_CLASSES.forEach(uc -> {
-				treesPerHectareUtil.setCoe(uc.index, 0f);
-				baseAreaUtil.setCoe(uc.index, 0f);
-			});
-			return;
-		}
-
-		@SuppressWarnings("unused")
-		float tphSum = 0f;
-		float baSum = 0f;
-		for (var uc : UTIL_CLASSES) {
-			tphSum += treesPerHectareUtil.getCoe(uc.index);
-			baSum += baseAreaUtil.getCoe(uc.index);
-		}
-
-		if (abs(baSum - baseAreaUtil.getCoe(UTIL_ALL)) / baSum > 0.00003) {
-			throw new ProcessingException("Computed base areas for 7.5+ components do not sum to expected total");
-		}
-
-		float dq0 = BaseAreaTreeDensityDiameter
-				.quadMeanDiameter(baseAreaUtil.getCoe(UTIL_ALL), treesPerHectareUtil.getCoe(UTIL_ALL));
-
-		if (dq0 < 7.5f) {
-			throw new ProcessingException(
-					"Quadratic mean diameter computed from total base area and trees per hectare is less than 7.5 cm"
-			);
-		}
-
-		float tphSumHigh = (float) UTIL_CLASSES.stream()
-				.mapToDouble(
-						uc -> BaseAreaTreeDensityDiameter.treesPerHectare(baseAreaUtil.getCoe(uc.index), uc.lowBound)
-				).sum();
-
-		if (tphSumHigh < treesPerHectareUtil.getCoe(UTIL_ALL)) {
-			reconcileComponentsMode1(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil, tphSumHigh);
-		} else {
-			reconcileComponentsMode2Check(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
-		}
-
-	}
-
-	private static final List<UtilizationClass> MODE_1_RECONCILE_AVAILABILITY_CLASSES = List
-			.of(UtilizationClass.OVER225, UtilizationClass.U175TO225, UtilizationClass.U125TO175);
-
-	@SuppressWarnings("java:S3655")
-	void reconcileComponentsMode1(
-			Coefficients baseAreaUtil, Coefficients treesPerHectareUtil, Coefficients quadMeanDiameterUtil,
-			float tphSumHigh
-	) {
-		// MODE 1
-
-		// the high sum of TPH's is too low. Need MODE 1 reconciliation MUST set DQU's
-		// to lowest allowable values AND must move BA from upper classes to lower
-		// classes.
-
-		float tphNeed = treesPerHectareUtil.getCoe(UTIL_ALL) - tphSumHigh;
-
-		UTIL_CLASSES.forEach(uc -> quadMeanDiameterUtil.setCoe(uc.index, uc.lowBound));
-
-		for (var uc : MODE_1_RECONCILE_AVAILABILITY_CLASSES) {
-			float tphAvail = BaseAreaTreeDensityDiameter
-					.treesPerHectare(baseAreaUtil.getCoe(uc.index), uc.previous().get().lowBound)
-					- BaseAreaTreeDensityDiameter.treesPerHectare(baseAreaUtil.getCoe(uc.index), uc.lowBound);
-
-			if (tphAvail < tphNeed) {
-				baseAreaUtil.scalarInPlace(uc.previous().get().index, x -> x + baseAreaUtil.getCoe(uc.index));
-				baseAreaUtil.setCoe(uc.index, 0f);
-				tphNeed -= tphAvail;
-			} else {
-				float baseAreaMove = baseAreaUtil.getCoe(uc.index) * tphNeed / tphAvail;
-				baseAreaUtil.scalarInPlace(uc.previous().get().index, x -> x + baseAreaMove);
-				baseAreaUtil.scalarInPlace(uc.index, x -> x - baseAreaMove);
-				break;
-			}
-		}
-		UTIL_CLASSES.forEach(
-				uc -> treesPerHectareUtil.setCoe(
-						uc.index,
-						BaseAreaTreeDensityDiameter
-								.treesPerHectare(baseAreaUtil.getCoe(uc.index), quadMeanDiameterUtil.getCoe(uc.index))
-				)
-		);
-	}
-
-	void reconcileComponentsMode2Check(
-			Coefficients baseAreaUtil, Coefficients treesPerHectareUtil, Coefficients quadMeanDiameterUtil
-	) throws ProcessingException {
-		// Before entering mode 2, check to see if reconciliation is already adequate
-
-		float tphSum = (float) UTIL_CLASSES.stream().mapToDouble(uc -> treesPerHectareUtil.getCoe(uc.index)).sum();
-
-		if (abs(tphSum - treesPerHectareUtil.getCoe(UTIL_ALL)) / tphSum > 0.00001) {
-			reconcileComponentsMode2(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
-			return;
-		}
-		for (var uc : UTIL_CLASSES) {
-			if (baseAreaUtil.getCoe(uc.index) > 0f) {
-				if (treesPerHectareUtil.getCoe(uc.index) <= 0f) {
-					reconcileComponentsMode2(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
-					return;
-				}
-				float dWant = BaseAreaTreeDensityDiameter
-						.quadMeanDiameter(baseAreaUtil.getCoe(uc.index), treesPerHectareUtil.getCoe(uc.index));
-				float dqI = quadMeanDiameterUtil.getCoe(uc.index);
-				if (dqI >= uc.lowBound && dqI <= uc.highBound && abs(dWant - dqI) < 0.00001) {
-					return;
-				}
-			}
-		}
-
-	}
-
-	private void reconcileComponentsMode2(
-			Coefficients baseAreaUtil, Coefficients treesPerHectareUtil, Coefficients quadMeanDiameterUtil
-	) throws ProcessingException {
-		int n = 0;
-		float baseAreaFixed = 0f;
-		float treesPerHectareFixed = 0f;
-		var quadMeanDiameterLimit = new boolean[] { false, false, false, false, false };
-		Coefficients dqTrial = Utils.utilizationVector();
-
-		while (true) {
-			n++;
-
-			if (n > 4) {
-				throw new ProcessingException("Mode 2 component reconciliation iterations exceeded 4");
-			}
-
-			float sum = (float) UTIL_CLASSES.stream().mapToDouble(uc -> {
-				float baI = baseAreaUtil.getCoe(uc.index);
-				float dqI = quadMeanDiameterUtil.getCoe(uc.index);
-				if (baI != 0 && !quadMeanDiameterLimit[uc.index]) {
-					return baI / (dqI * dqI);
-				}
-				return 0;
-			}).sum();
-
-			float baAll = baseAreaUtil.getCoe(UTIL_ALL) - baseAreaFixed;
-			float tphAll = treesPerHectareUtil.getCoe(UTIL_ALL) - treesPerHectareFixed;
-
-			if (baAll <= 0f || tphAll <= 0f) {
-				reconcileComponentsMode3(baseAreaUtil, treesPerHectareUtil, quadMeanDiameterUtil);
-				return;
-			}
-
-			float dqAll = BaseAreaTreeDensityDiameter.quadMeanDiameter(baAll, tphAll);
-
-			float k = dqAll * dqAll / baAll * sum;
-			float sqrtK = sqrt(k);
-
-			for (var uc : UTIL_CLASSES) {
-				if (!quadMeanDiameterLimit[uc.index] && baseAreaUtil.getCoe(uc.index) > 0f) {
-					dqTrial.setCoe(uc.index, quadMeanDiameterUtil.getCoe(uc.index) * sqrtK);
-				}
-			}
-
-			UtilizationClass violateClass = null;
-			float violate = 0f;
-			boolean violateLow = false;
-
-			for (var uc : UTIL_CLASSES) {
-				if (baseAreaUtil.getCoe(uc.index) > 0f && dqTrial.getCoe(uc.index) < uc.lowBound) {
-					float vi = 1f - dqTrial.getCoe(uc.index) / uc.lowBound;
-					if (vi > violate) {
-						violate = vi;
-						violateClass = uc;
-						violateLow = true;
-
-					}
-				}
-				if (dqTrial.getCoe(uc.index) > uc.highBound) {
-					float vi = dqTrial.getCoe(uc.index) / uc.highBound - 1f;
-					if (vi > violate) {
-						violate = vi;
-						violateClass = uc;
-						violateLow = false;
-					}
-				}
-			}
-			if (violateClass == null)
-				break;
-			// Move the worst offending DQ to its limit
-			dqTrial.setCoe(violateClass.index, violateLow ? violateClass.lowBound : violateClass.highBound);
-
-			quadMeanDiameterLimit[violateClass.index] = true;
-			baseAreaFixed += baseAreaUtil.getCoe(violateClass.index);
-			treesPerHectareFixed += BaseAreaTreeDensityDiameter
-					.treesPerHectare(baseAreaUtil.getCoe(violateClass.index), dqTrial.getCoe(violateClass.index));
-		}
-
-		// Make BA's agree with DQ's and TPH's
-		for (var uc : UTIL_CLASSES) {
-			quadMeanDiameterUtil.setCoe(uc.index, dqTrial.getCoe(uc.index));
-			treesPerHectareUtil.setCoe(
-					uc.index,
-					BaseAreaTreeDensityDiameter
-							.treesPerHectare(baseAreaUtil.getCoe(uc.index), quadMeanDiameterUtil.getCoe(uc.index))
-			);
-		}
-		// RE VERIFY That sums are correct
-		float baSum = (float) UTIL_CLASSES.stream().mapToDouble(uc -> baseAreaUtil.getCoe(uc.index)).sum();
-		float tphSum = (float) UTIL_CLASSES.stream().mapToDouble(uc -> treesPerHectareUtil.getCoe(uc.index)).sum();
-		if (abs(baSum - baseAreaUtil.getCoe(UTIL_ALL)) / baSum > 0.0002) {
-			throw new ProcessingException("Failed to reconcile Base Area");
-		}
-		if (abs(tphSum - treesPerHectareUtil.getCoe(UTIL_ALL)) / tphSum > 0.0002) {
-			throw new ProcessingException("Failed to reconcile Trees per Hectare");
-		}
-	}
-
-	@SuppressWarnings("java:S3655")
-	void reconcileComponentsMode3(
-			Coefficients baseAreaUtil, Coefficients treesPerHectareUtil, Coefficients quadMeanDiameterUtil
-	) {
-
-		/*
-		 * Reconciliation mode 3 NOT IN THE ORIGINAL DESIGN The primary motivation for this mode is an example where all
-		 * trees were in a signle utilization class and had a DQ of 12.4 cm. BUT the true DQ for the stand was slightly
-		 * over 12.5. In this case the best solution is to simply reassign all trees to the single most appropriate
-		 * class.
-		 *
-		 * Note, "original design" means something pre-VDYP 7. This was added to the Fortran some time before the port
-		 * to Java including the comment above.
-		 */
-		UTIL_CLASSES.forEach(uc -> {
-			baseAreaUtil.setCoe(uc.index, 0f);
-			treesPerHectareUtil.setCoe(uc.index, 0f);
-			quadMeanDiameterUtil.setCoe(uc.index, uc.lowBound + 2.5f);
-		});
-
-		var ucToUpdate = UTIL_CLASSES.stream().filter(uc -> quadMeanDiameterUtil.getCoe(UTIL_ALL) < uc.highBound)
-				.findFirst().get();
-
-		baseAreaUtil.setCoe(ucToUpdate.index, baseAreaUtil.getCoe(UTIL_ALL));
-		treesPerHectareUtil.setCoe(ucToUpdate.index, treesPerHectareUtil.getCoe(UTIL_ALL));
-		quadMeanDiameterUtil.setCoe(ucToUpdate.index, quadMeanDiameterUtil.getCoe(UTIL_ALL));
-	}
-
-	// EMP070
-	void estimateBaseAreaByUtilization(
-			BecDefinition bec, Coefficients quadMeanDiameterUtil, Coefficients baseAreaUtil, VdypSpecies spec
-	) throws ProcessingException {
-		final var coeMap = Utils.<MatrixMap3<Integer, String, String, Coefficients>>expectParsedControl(
-				controlMap, ControlKey.UTIL_COMP_BA, MatrixMap3.class
-		);
-
-		float dq = quadMeanDiameterUtil.getCoe(UTIL_ALL);
-		var b = Utils.utilizationVector();
-		b.setCoe(0, baseAreaUtil.getCoe(UTIL_ALL));
-		for (int i = 1; i < UTIL_LARGEST; i++) {
-			var coe = coeMap.get(i, spec.getGenus(), bec.getGrowthBec().getAlias());
-
-			float a0 = coe.getCoe(1);
-			float a1 = coe.getCoe(2);
-
-			float logit;
-			if (i == 1) {
-				logit = a0 + a1 * pow(dq, 0.25f);
-			} else {
-				logit = a0 + a1 * dq;
-			}
-			b.setCoe(i, b.getCoe(i - 1) * exponentRatio(logit));
-			if (i == 1 && quadMeanDiameterUtil.getCoe(UTIL_ALL) < 12.5f) {
-				float ba12Max = (1f - pow(
-						(quadMeanDiameterUtil.getCoe(1) - 7.4f) / (quadMeanDiameterUtil.getCoe(UTIL_ALL) - 7.4f), 2f
-				)) * b.getCoe(0);
-				b.scalarInPlace(1, x -> min(x, ba12Max));
-			}
-		}
-
-		baseAreaUtil.setCoe(1, baseAreaUtil.getCoe(UTIL_ALL) - b.getCoe(1));
-		baseAreaUtil.setCoe(2, b.getCoe(1) - b.getCoe(2));
-		baseAreaUtil.setCoe(3, b.getCoe(2) - b.getCoe(3));
-		baseAreaUtil.setCoe(4, b.getCoe(3));
-	}
-
-	/**
-	 * Estimate DQ by utilization class, see ipsjf120.doc
-	 *
-	 * @param bec
-	 * @param quadMeanDiameterUtil
-	 * @param spec
-	 * @throws ProcessingException
-	 */
-	// EMP071
-	void estimateQuadMeanDiameterByUtilization(BecDefinition bec, Coefficients quadMeanDiameterUtil, VdypSpecies spec)
-			throws ProcessingException {
-		log.atTrace().setMessage("Estimate DQ by utilization class for {} in BEC {}.  DQ for all >7.5 is {}")
-				.addArgument(spec.getGenus()).addArgument(bec.getName())
-				.addArgument(quadMeanDiameterUtil.getCoe(UTIL_ALL));
-
-		float quadMeanDiameter07 = quadMeanDiameterUtil.getCoe(UTIL_ALL);
-
-		for (var uc : UTIL_CLASSES) {
-			log.atDebug().setMessage("For util level {}").addArgument(uc.className);
-			final var coeMap = Utils.<MatrixMap3<Integer, String, String, Coefficients>>expectParsedControl(
-					controlMap, ControlKey.UTIL_COMP_DQ, MatrixMap3.class
-			);
-			var coe = coeMap.get(uc.index, spec.getGenus(), bec.getGrowthBec().getAlias());
-
-			float a0 = coe.getCoe(1);
-			float a1 = coe.getCoe(2);
-			float a2 = coe.getCoe(3);
-
-			log.atDebug().setMessage("a0={}, a1={}, a3={}").addArgument(a0).addArgument(a1).addArgument(a2);
-
-			float logit;
-
-			switch (uc) {
-			case U75TO125:
-				if (quadMeanDiameter07 < 7.5001f) {
-					quadMeanDiameterUtil.setCoe(UTIL_ALL, 7.5f);
-				} else {
-					log.atDebug().setMessage("DQ = 7.5 + a0 * (1 - exp(a1 / a0*(DQ07 - 7.5) ))**a2' )");
-
-					logit = a1 / a0 * (quadMeanDiameter07 - 7.5f);
-
-					quadMeanDiameterUtil
-							.setCoe(uc.index, min(7.5f + a0 * pow(1 - safeExponent(logit), a2), quadMeanDiameter07));
-				}
-				break;
-			case U125TO175, U175TO225:
-				log.atDebug().setMessage(
-						"LOGIT = a0 + a1*(SQ07 / 7.5)**a2,  DQ = (12.5 or 17.5) + 5 * exp(LOGIT) / (1 + exp(LOGIT))"
-				);
-				logit = a0 + a1 * pow(quadMeanDiameter07 / 7.5f, a2);
-
-				quadMeanDiameterUtil.setCoe(uc.index, uc.lowBound + 5f * exponentRatio(logit));
-				break;
-			case OVER225:
-				float a3 = coe.getCoe(4);
-
-				log.atDebug().setMessage(
-						"Coeff A3 {}, LOGIT = a2 + a1*DQ07**a3,  DQ = DQ07 + a0 * (1 - exp(LOGIT) / (1 + exp(LOGIT)) )"
-				);
-
-				logit = a2 + a1 * pow(quadMeanDiameter07, a3);
-
-				quadMeanDiameterUtil
-						.setCoe(uc.index, max(22.5f, quadMeanDiameter07 + a0 * (1f - exponentRatio(logit))));
-				break;
-			case ALL, SMALL:
-				throw new IllegalStateException(
-						"Should not be attempting to process small component or all large components"
-				);
-			default:
-				throw new IllegalStateException("Unknown utilization class " + uc);
-			}
-
-			log.atDebug().setMessage("Util DQ for class {} is {}").addArgument(uc.className)
-					.addArgument(quadMeanDiameterUtil.getCoe(uc.index));
-		}
-
-		log.atTrace().setMessage("Estimated Diameters {}").addArgument(
-				() -> UTIL_CLASSES.stream()
-						.map(uc -> String.format("%s: %d", uc.className, quadMeanDiameterUtil.getCoe(uc.index)))
-		);
-
-	}
-
-	static float exponentRatio(float logit) throws ProcessingException {
-		float exp = safeExponent(logit);
-		return exp / (1f + exp);
-	}
-
-	static float safeExponent(float logit) throws ProcessingException {
-		if (logit > 88f) {
-			throw new ProcessingException("logit " + logit + " exceeds 88");
-		}
-		return exp(logit);
-	}
-
 	private float heightMultiplier(String genus, Region region, float treesPerHectarePrimary) {
 		final var coeMap = Utils.<MatrixMap2<String, Region, Coefficients>>expectParsedControl(
 				controlMap, ControlKey.HL_PRIMARY_SP_EQN_P1, MatrixMap2.class
@@ -1842,348 +1444,6 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 
 		NON_VOLUME_UTILIZATION_VECTOR_ACCESSORS = UTILIZATION_VECTOR_ACCESSORS.stream()
 				.filter(x -> !x.getName().contains("Volume")).toList();
-	}
-
-	// EMP091
-	/**
-	 * Updates wholeStemVolumeUtil with estimated values.
-	 */
-	void estimateWholeStemVolume(
-			UtilizationClass utilizationClass, float adjustCloseUtil, int volumeGroup, Float hlSp,
-			Coefficients quadMeanDiameterUtil, Coefficients baseAreaUtil, Coefficients wholeStemVolumeUtil
-	) throws ProcessingException {
-		var dqSp = quadMeanDiameterUtil.getCoe(UTIL_ALL);
-		final var wholeStemUtilizationComponentMap = Utils
-				.<MatrixMap2<Integer, Integer, Optional<Coefficients>>>expectParsedControl(
-						controlMap, ControlKey.UTIL_COMP_WS_VOLUME, MatrixMap2.class
-				);
-		estimateUtilization(baseAreaUtil, wholeStemVolumeUtil, utilizationClass, (uc, ba) -> {
-			Coefficients wholeStemCoe = wholeStemUtilizationComponentMap.get(uc.index, volumeGroup).orElseThrow(
-					() -> new ProcessingException(
-							"Could not find whole stem utilization coefficients for group " + volumeGroup
-					)
-			);
-
-			// Fortran code uses 1 index into array when reading it here, but 0 index when
-			// writing into it in the parser. I use 0 for both.
-			var a0 = wholeStemCoe.getCoe(0);
-			var a1 = wholeStemCoe.getCoe(1);
-			var a2 = wholeStemCoe.getCoe(2);
-			var a3 = wholeStemCoe.getCoe(3);
-
-			var arg = a0 + a1 * log(hlSp) + a2 * log(quadMeanDiameterUtil.getCoe(uc.index))
-					+ ( (uc != UtilizationClass.OVER225) ? a3 * log(dqSp) : a3 * dqSp);
-
-			if (uc == utilizationClass) {
-				arg += adjustCloseUtil;
-			}
-
-			var vbaruc = exp(arg); // volume base area ?? utilization class?
-
-			return ba * vbaruc;
-		}, x -> x < 0f, 0f);
-
-		if (utilizationClass == UtilizationClass.ALL) {
-			normalizeUtilizationComponents(wholeStemVolumeUtil);
-		}
-
-	}
-
-	// EMP092
-	/**
-	 * Updates closeUtilizationVolumeUtil with estimated values.
-	 *
-	 * @throws ProcessingException
-	 */
-	void estimateCloseUtilizationVolume(
-			UtilizationClass utilizationClass, Coefficients aAdjust, int volumeGroup, float hlSp,
-			Coefficients quadMeanDiameterUtil, Coefficients wholeStemVolumeUtil, Coefficients closeUtilizationVolumeUtil
-	) throws ProcessingException {
-		final var closeUtilizationCoeMap = Utils
-				.<MatrixMap2<Integer, Integer, Optional<Coefficients>>>expectParsedControl(
-						controlMap, ControlKey.CLOSE_UTIL_VOLUME, MatrixMap2.class
-				);
-		estimateUtilization(wholeStemVolumeUtil, closeUtilizationVolumeUtil, utilizationClass, (uc, ws) -> {
-			Coefficients closeUtilCoe = closeUtilizationCoeMap.get(uc.index, volumeGroup).orElseThrow(
-					() -> new ProcessingException(
-							"Could not find whole stem utilization coefficients for group " + volumeGroup
-					)
-			);
-			var a0 = closeUtilCoe.getCoe(1);
-			var a1 = closeUtilCoe.getCoe(2);
-			var a2 = closeUtilCoe.getCoe(3);
-
-			var arg = a0 + a1 * quadMeanDiameterUtil.getCoe(uc.index) + a2 * hlSp + aAdjust.getCoe(uc.index);
-
-			float ratio = ratio(arg, 7.0f);
-
-			return ws * ratio;
-		});
-
-		if (utilizationClass == UtilizationClass.ALL) {
-			storeSumUtilizationComponents(closeUtilizationVolumeUtil);
-		}
-	}
-
-	@FunctionalInterface
-	static interface UtilizationProcessor {
-		float apply(UtilizationClass utilizationClass, float inputValue) throws ProcessingException;
-	}
-
-	/**
-	 * Estimate values for one utilization vector from another
-	 *
-	 * @param input            source utilization
-	 * @param output           result utilization
-	 * @param utilizationClass the utilization class for which to do the computation, UTIL_ALL for all of them.
-	 * @param processor        Given a utilization class, and the source utilization for that class, return the result
-	 *                         utilization
-	 * @throws ProcessingException
-	 */
-	static void estimateUtilization(
-			Coefficients input, Coefficients output, UtilizationClass utilizationClass, UtilizationProcessor processor
-	) throws ProcessingException {
-		estimateUtilization(input, output, utilizationClass, processor, x -> false, 0f);
-	}
-
-	/**
-	 * Estimate values for one utilization vector from another
-	 *
-	 * @param input            source utilization
-	 * @param output           result utilization
-	 * @param utilizationClass the utilization class for which to do the computation, UTIL_ALL for all of them.
-	 * @param processor        Given a utilization class, and the source utilization for that class, return the result
-	 *                         utilization
-	 * @param skip             a utilization class will be skipped and the result set to the default value if this is
-	 *                         true for the value of the source utilization
-	 * @param defaultValue     the default value
-	 * @throws ProcessingException
-	 */
-	static void estimateUtilization(
-			Coefficients input, Coefficients output, UtilizationClass utilizationClass, UtilizationProcessor processor,
-			Predicate<Float> skip, float defaultValue
-	) throws ProcessingException {
-		for (var uc : UTIL_CLASSES) {
-			var inputValue = input.getCoe(uc.index);
-
-			// it seems like this should be done after checking i against utilizationClass,
-			// which could just be done as part of the processor definition, but this is how
-			// VDYP7 did it.
-			if (skip.test(inputValue)) {
-				output.setCoe(uc.index, defaultValue);
-				continue;
-			}
-
-			if (utilizationClass != UtilizationClass.ALL && utilizationClass != uc) {
-				continue;
-			}
-
-			var result = processor.apply(uc, input.getCoe(uc.index));
-			output.setCoe(uc.index, result);
-		}
-	}
-
-	/**
-	 * Estimate volume NET OF DECAY by (DBH) utilization classes
-	 *
-	 * @param utilizationClass
-	 * @param aAdjust
-	 * @param decayGroup
-	 * @param lorieHeight
-	 * @param ageBreastHeight
-	 * @param quadMeanDiameterUtil
-	 * @param closeUtilizationUtil
-	 * @param closeUtilizationNetOfDecayUtil
-	 * @throws ProcessingException
-	 */
-	// EMP093
-	void estimateNetDecayVolume(
-			String genus, Region region, UtilizationClass utilizationClass, Coefficients aAdjust, int decayGroup,
-			float lorieHeight, float ageBreastHeight, Coefficients quadMeanDiameterUtil,
-			Coefficients closeUtilizationUtil, Coefficients closeUtilizationNetOfDecayUtil
-	) throws ProcessingException {
-		var dqSp = quadMeanDiameterUtil.getCoe(UTIL_ALL);
-		final var netDecayCoeMap = Utils.<MatrixMap2<Integer, Integer, Optional<Coefficients>>>expectParsedControl(
-				controlMap, ControlKey.VOLUME_NET_DECAY, MatrixMap2.class
-		);
-		final var decayModifierMap = Utils.<MatrixMap2<String, Region, Float>>expectParsedControl(
-				controlMap, ModifierParser.CONTROL_KEY_MOD301_DECAY, MatrixMap2.class
-		);
-
-		final var ageTr = (float) Math.log(Math.max(20.0, ageBreastHeight));
-
-		estimateUtilization(closeUtilizationUtil, closeUtilizationNetOfDecayUtil, utilizationClass, (uc, cu) -> {
-			Coefficients netDecayCoe = netDecayCoeMap.get(uc.index, decayGroup).orElseThrow(
-					() -> new ProcessingException("Could not find net decay coefficients for group " + decayGroup)
-			);
-			var a0 = netDecayCoe.getCoe(1);
-			var a1 = netDecayCoe.getCoe(2);
-			var a2 = netDecayCoe.getCoe(3);
-
-			float arg;
-			if (uc != UtilizationClass.OVER225) {
-				arg = a0 + a1 * log(dqSp) + a2 * ageTr;
-			} else {
-				arg = a0 + a1 * log(quadMeanDiameterUtil.getCoe(uc.index)) + a2 * ageTr;
-			}
-
-			arg += aAdjust.getCoe(uc.index) + decayModifierMap.get(genus, region);
-
-			float ratio = ratio(arg, 8.0f);
-
-			return cu * ratio;
-		});
-
-		if (utilizationClass == UtilizationClass.ALL) {
-			storeSumUtilizationComponents(closeUtilizationNetOfDecayUtil);
-		}
-	}
-
-	/**
-	 * Estimate utilization net of decay and waste
-	 */
-	// EMP094
-	void estimateNetDecayAndWasteVolume(
-			Region region, UtilizationClass utilizationClass, Coefficients aAdjust, String genus, float lorieHeight,
-			float ageBreastHeight, Coefficients quadMeanDiameterUtil, Coefficients closeUtilizationUtil,
-			Coefficients closeUtilizationNetOfDecayUtil, Coefficients closeUtilizationNetOfDecayAndWasteUtil
-	) throws ProcessingException {
-		final var netDecayCoeMap = Utils.<Map<String, Coefficients>>expectParsedControl(
-				controlMap, ControlKey.VOLUME_NET_DECAY_WASTE, Map.class
-		);
-		final var wasteModifierMap = Utils.<MatrixMap2<String, Region, Float>>expectParsedControl(
-				controlMap, ControlKey.WASTE_MODIFIERS, MatrixMap2.class
-		);
-
-		estimateUtilization(
-				closeUtilizationNetOfDecayUtil, closeUtilizationNetOfDecayAndWasteUtil, utilizationClass,
-				(i, netDecay) -> {
-					if (Float.isNaN(netDecay) || netDecay <= 0f) {
-						return 0f;
-					}
-
-					Coefficients netWasteCoe = netDecayCoeMap.get(genus);
-					if (netWasteCoe == null) {
-						throw new ProcessingException("Could not find net waste coefficients for genus " + genus);
-					}
-
-					var a0 = netWasteCoe.getCoe(0);
-					var a1 = netWasteCoe.getCoe(1);
-					var a2 = netWasteCoe.getCoe(2);
-					var a3 = netWasteCoe.getCoe(3);
-					var a4 = netWasteCoe.getCoe(4);
-					var a5 = netWasteCoe.getCoe(5);
-
-					if (i == UtilizationClass.OVER225) {
-						a0 += a5;
-					}
-					var frd = 1.0f - netDecay / closeUtilizationUtil.getCoe(i.index);
-
-					float arg = a0 + a1 * frd + a3 * log(quadMeanDiameterUtil.getCoe(i.index)) + a4 * log(lorieHeight);
-
-					arg += wasteModifierMap.get(genus, region);
-
-					arg = clamp(arg, -10f, 10f);
-
-					var frw = (1.0f - exp(a2 * frd)) * exp(arg) / (1f + exp(arg)) * (1f - frd);
-					frw = min(frd, frw);
-
-					float result = closeUtilizationUtil.getCoe(i.index) * (1f - frd - frw);
-
-					/*
-					 * Check for an apply adjustments. This is done after computing the result above to allow for
-					 * clamping frw to frd
-					 */
-					if (aAdjust.getCoe(i.index) != 0f) {
-						var ratio = result / netDecay;
-						if (ratio < 1f && ratio > 0f) {
-							arg = log(ratio / (1f - ratio));
-							arg += aAdjust.getCoe(i.index);
-							arg = clamp(arg, -10f, 10f);
-							result = exp(arg) / (1f + exp(arg)) * netDecay;
-						}
-					}
-
-					return result;
-				}
-		);
-
-		if (utilizationClass == UtilizationClass.ALL) {
-			storeSumUtilizationComponents(closeUtilizationNetOfDecayAndWasteUtil);
-		}
-	}
-
-	/**
-	 * Estimate utilization net of decay, waste, and breakage
-	 *
-	 * @throws ProcessingException
-	 */
-	void estimateNetDecayWasteAndBreakageVolume(
-			UtilizationClass utilizationClass, int breakageGroup, Coefficients quadMeanDiameterUtil,
-			Coefficients closeUtilizationUtil, Coefficients closeUtilizationNetOfDecayAndWasteUtil,
-			Coefficients closeUtilizationNetOfDecayWasteAndBreakageUtil
-	) throws ProcessingException {
-		final var netBreakageCoeMap = Utils
-				.<Map<Integer, Coefficients>>expectParsedControl(controlMap, ControlKey.BREAKAGE, Map.class);
-		final var coefficients = netBreakageCoeMap.get(breakageGroup);
-		if (coefficients == null) {
-			throw new ProcessingException("Could not find net breakage coefficients for group " + breakageGroup);
-		}
-
-		final var a1 = coefficients.getCoe(1);
-		final var a2 = coefficients.getCoe(2);
-		final var a3 = coefficients.getCoe(3);
-		final var a4 = coefficients.getCoe(4);
-
-		estimateUtilization(
-				closeUtilizationNetOfDecayAndWasteUtil, closeUtilizationNetOfDecayWasteAndBreakageUtil,
-				utilizationClass, (uc, netWaste) -> {
-
-					if (netWaste <= 0f) {
-						return 0f;
-					}
-					var percentBroken = a1 + a2 * log(quadMeanDiameterUtil.getCoe(uc.index));
-					percentBroken = clamp(percentBroken, a3, a4);
-					var broken = min(percentBroken / 100 * closeUtilizationUtil.getCoe(uc.index), netWaste);
-					return netWaste - broken;
-				}
-		);
-
-		if (utilizationClass == UtilizationClass.ALL) {
-			storeSumUtilizationComponents(closeUtilizationNetOfDecayWasteAndBreakageUtil);
-		}
-
-	}
-
-	/**
-	 * Sums the individual utilization components (1-4)
-	 */
-	float sumUtilizationComponents(Coefficients components) {
-		return (float) UTIL_CLASSES.stream().mapToInt(x -> x.index).mapToDouble(components::getCoe).sum();
-	}
-
-	/**
-	 * Sums the individual utilization components (1-4) and stores the results in coefficient UTIL_ALL
-	 */
-	float storeSumUtilizationComponents(Coefficients components) {
-		var sum = sumUtilizationComponents(components);
-		components.setCoe(UTIL_ALL, sum);
-		return sum;
-	}
-
-	/**
-	 * Normalizes the utilization components 1-4 so they sum to the value of component UTIL_ALL
-	 *
-	 * @throws ProcessingException if the sum is not positive
-	 */
-	float normalizeUtilizationComponents(Coefficients components) throws ProcessingException {
-		var sum = sumUtilizationComponents(components);
-		var k = components.getCoe(UTIL_ALL) / sum;
-		if (sum <= 0f) {
-			throw new ProcessingException("Total volume " + sum + " was not positive.");
-		}
-		UTIL_CLASSES.forEach(uc -> components.setCoe(uc.index, components.getCoe(uc.index) * k));
-		return k;
 	}
 
 	int getGroup(FipPolygon fipPolygon, MatrixMap2<String, String, Integer> volumeGroupMap, String genus) {
@@ -2463,13 +1723,15 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 	 *
 	 * @throws ProcessingException
 	 */
-	public void estimateSmallComponents(FipPolygon fPoly, VdypLayer layer) throws ProcessingException {
+	public <L extends BaseVdypLayer<SP, SI>, SP extends BaseVdypSpecies, SI extends BaseVdypSite> void
+			estimateSmallComponents(BaseVdypPolygon<L, Optional<Float>, SP, SI> polygon, VdypLayer layer)
+					throws ProcessingException {
 		float loreyHeightSum = 0f;
 		float baseAreaSum = 0f;
 		float treesPerHectareSum = 0f;
 		float volumeSum = 0f;
 
-		Region region = Utils.getBec(fPoly.getBiogeoclimaticZone(), controlMap).getRegion();
+		Region region = Utils.getBec(polygon.getBiogeoclimaticZone(), controlMap).getRegion();
 
 		for (VdypSpecies spec : layer.getSpecies().values()) {
 			@SuppressWarnings("unused")
@@ -2482,7 +1744,7 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			float smallComponentProbability = smallComponentProbability(layer, spec, region); // PROBsp
 
 			// this WHOLE operation on Actual BA's, not 100% occupancy.
-			float fractionAvailable = fPoly.getPercentAvailable().map(p -> p / 100f).orElse(1f);
+			float fractionAvailable = polygon.getPercentAvailable().map(p -> p / 100f).orElse(1f);
 			baseAreaSpec *= fractionAvailable;
 			// EMP081
 			float conditionalExpectedBaseArea = conditionalExpectedBaseArea(spec, baseAreaSpec, region); // BACONDsp

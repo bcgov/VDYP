@@ -20,7 +20,7 @@ import ca.bc.gov.nrs.vdyp.forward.parsers.VdypPolygonDescriptionParser;
 import ca.bc.gov.nrs.vdyp.forward.parsers.VdypPolygonParser;
 import ca.bc.gov.nrs.vdyp.forward.parsers.VdypSpeciesParser;
 import ca.bc.gov.nrs.vdyp.forward.parsers.VdypUtilizationParser;
-import ca.bc.gov.nrs.vdyp.forward.parsers.VdypVtrolParser;
+import ca.bc.gov.nrs.vdyp.forward.parsers.VdypControlVariableParser;
 import ca.bc.gov.nrs.vdyp.io.FileResolver;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.BasalAreaGrowthEmpiricalParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.BasalAreaGrowthFiatParser;
@@ -85,7 +85,7 @@ public class ForwardControlParser extends BaseControlParser {
 	public ForwardControlParser() {
 		initialize();
 
-		controlParser.record(ControlKey.VTROL, new VdypVtrolParser());
+		controlParser.record(ControlKey.VTROL, new VdypControlVariableParser());
 	}
 
 	@Override

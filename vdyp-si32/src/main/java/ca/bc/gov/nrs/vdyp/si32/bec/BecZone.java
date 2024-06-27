@@ -16,7 +16,20 @@ import ca.bc.gov.nrs.vdyp.si32.enumerations.SI32Enum;
 public enum BecZone implements SI32Enum<BecZone> {
 	UNKNOWN(-1),
 
-	AT(0), BG(1), BWBS(2), CDF(3), CWH(4), ESSF(5), ICH(6), IDF(7), MH(8), MS(9), PP(10), SBPS(11), SBS(12), SWB(13);
+	AT(0), //
+	BG(1), //
+	BWBS(2), //
+	CDF(3), //
+	CWH(4), //
+	ESSF(5), //
+	ICH(6), //
+	IDF(7), //
+	MH(8), //
+	MS(9), //
+	PP(10), //
+	SBPS(11), //
+	SBS(12), //
+	SWB(13); //
 
 	private static Map<Integer, BecZone> index2EnumMap = null;
 

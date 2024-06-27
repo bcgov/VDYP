@@ -3377,17 +3377,17 @@ class SindxdllTest {
 		@Test
 		void testHtSIToAgeValid() throws CommonCalculatorException {
 			Reference<Double> site = new Reference<>();
-			double site_height = 1.5;
-			double site_index = 25.0;
+			double siteHeight = 1.5;
+			double siteIndex = 25.0;
 
-			double y2bh = 13.25 - site_index / 6.096;
-			double x1 = site_index / 30.48;
+			double y2bh = 13.25 - siteIndex / 6.096;
+			double x1 = siteIndex / 30.48;
 			double x2 = -0.477762 + x1 * (-0.894427 + x1 * (0.793548 - x1 * 0.171666));
 			double x3 = SiteIndexUtilities.ppow(50.0 + y2bh, x2);
-			double x4 = SiteIndexUtilities.llog(1.372 / site_index) / (SiteIndexUtilities.ppow(y2bh, x2) - x3);
-			x1 = SiteIndexUtilities.llog(site_height / site_index) / x4 + x3;
+			double x4 = SiteIndexUtilities.llog(1.372 / siteIndex) / (SiteIndexUtilities.ppow(y2bh, x2) - x3);
+			x1 = SiteIndexUtilities.llog(siteHeight / siteIndex) / x4 + x3;
 
-			double actualResult = Sindxdll.HtSIToAge(SI_FDC_BRUCE, site_height, SI_AT_BREAST, site_index, 12.0, site);
+			double actualResult = Sindxdll.HtSIToAge(SI_FDC_BRUCE, siteHeight, SI_AT_BREAST, siteIndex, 12.0, site);
 			double expectedSiteValue = (SiteIndexUtilities.ppow(x1, 1 / x2)) - y2bh;
 			double expectedResult = 0;
 
@@ -3457,10 +3457,10 @@ class SindxdllTest {
 		void testY2BHValid() throws CommonCalculatorException {
 			Reference<Double> y2bh = new Reference<>();
 			SiteIndexEquation cuIndex = SI_FDC_BRUCE;
-			double site_index = 1.3;// normal case
+			double siteIndex = 1.3;// normal case
 
-			double expectedY2BHValue = 13.25 - site_index / 6.096;
-			double actualResult = Sindxdll.Y2BH(cuIndex, site_index, y2bh);
+			double expectedY2BHValue = 13.25 - siteIndex / 6.096;
+			double actualResult = Sindxdll.Y2BH(cuIndex, siteIndex, y2bh);
 			double expectedResult = 0;
 
 			assertEquals(actualResult, expectedResult);
@@ -3477,10 +3477,10 @@ class SindxdllTest {
 		void testY2BH05Valid() throws CommonCalculatorException {
 			Reference<Double> y2bh = new Reference<>();
 			SiteIndexEquation cuIndex = SI_PW_CURTIS;
-			double site_index = 3.5;
+			double siteIndex = 3.5;
 
-			double expectedY2BHValue = ((int) (2.0 + 2.1578 + 110.76 / site_index)) + 0.5;
-			double actualResult = Sindxdll.Y2BH05(cuIndex, site_index, y2bh);
+			double expectedY2BHValue = ((int) (2.0 + 2.1578 + 110.76 / siteIndex)) + 0.5;
+			double actualResult = Sindxdll.Y2BH05(cuIndex, siteIndex, y2bh);
 			double expectedResult = 0;
 
 			assertEquals(actualResult, expectedResult);
@@ -3531,10 +3531,8 @@ class SindxdllTest {
 		@Test
 		void testNoConversionDefined() throws CommonCalculatorException {
 			Reference<Double> resultSiteIndex = new Reference<>();
-			assertThrows(NoAnswerException.class, () -> {
-				Sindxdll.SIToSI(SI_SPEC_AT, 10.0, SI_SPEC_AT, resultSiteIndex);
-			});
-			assertEquals(SI_NO_EQUATION.n(), resultSiteIndex.get());
+			Sindxdll.SIToSI(SI_SPEC_AT, 10.0, SI_SPEC_AT, resultSiteIndex);
+			assertEquals(10.0f, resultSiteIndex.get());
 		}
 	}
 
@@ -3619,37 +3617,37 @@ class SindxdllTest {
 
 		@Test
 		void testSI_AT_HUANG() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_AT_HUANG, SI_SB_HUANG, SI_FDI_HUANG_PLA, SI_FDI_HUANG_NAT,
+			SiteIndexEquation[] cuIndices = { SI_AT_HUANG, SI_SB_HUANG, SI_FDI_HUANG_PLA, SI_FDI_HUANG_NAT,
 					SI_PLI_HUANG_PLA, SI_PLI_HUANG_NAT, SI_SW_HUANG_PLA, SI_SW_HUANG_NAT };
 			SiteIndexEquation cuIndex = SI_ACB_HUANG;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
 
 		@Test
 		void testSI_PLI_CIESZEWSKI_SI_SB_CIESZEWSKI_SI_SW_CIESZEWSKI() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_PLI_CIESZEWSKI, SI_SB_CIESZEWSKI, SI_SW_CIESZEWSKI };
+			SiteIndexEquation[] cuIndices = { SI_PLI_CIESZEWSKI, SI_SB_CIESZEWSKI, SI_SW_CIESZEWSKI };
 			SiteIndexEquation cuIndex = SI_AT_CIESZEWSKI;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
 
 		@Test
 		void testSI_PLI_DEMPSTER_SB_DEMPSTER_SW_DEMPSTER() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_PLI_DEMPSTER, SI_SB_DEMPSTER, SI_SW_DEMPSTER };
+			SiteIndexEquation[] cuIndices = { SI_PLI_DEMPSTER, SI_SB_DEMPSTER, SI_SW_DEMPSTER };
 			SiteIndexEquation cuIndex = SI_AT_GOUDIE;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
 
 		@Test
 		void testSI_SW_KER_PLA_SW_KER_NAT() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_SW_KER_PLA, SI_SW_KER_NAT };
+			SiteIndexEquation[] cuIndices = { SI_SW_KER_PLA, SI_SW_KER_NAT };
 			SiteIndexEquation cuIndex = SI_SB_KER;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
@@ -3663,18 +3661,18 @@ class SindxdllTest {
 
 		@Test
 		void testSI_HWC_BARKER_SS_BARKER() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_HWC_BARKER, SI_SS_BARKER };
+			SiteIndexEquation[] cuIndices = { SI_HWC_BARKER, SI_SS_BARKER };
 			SiteIndexEquation cuIndex = SI_CWC_BARKER;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
 
 		@Test
 		void testSI_LW_MILNER_PLI_MILNER_PY_MILNER() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_LW_MILNER, SI_PLI_MILNER, SI_PY_MILNER };
+			SiteIndexEquation[] cuIndices = { SI_LW_MILNER, SI_PLI_MILNER, SI_PY_MILNER };
 			SiteIndexEquation cuIndex = SI_FDI_MILNER;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
@@ -3688,9 +3686,9 @@ class SindxdllTest {
 
 		@Test
 		void testSI_FDI_MONS_GF_FDI_MONS_WRC_FDI_MONS_WH_FDI_MONS_SAF() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_FDI_MONS_GF, SI_FDI_MONS_WRC, SI_FDI_MONS_WH, SI_FDI_MONS_SAF };
+			SiteIndexEquation[] cuIndices = { SI_FDI_MONS_GF, SI_FDI_MONS_WRC, SI_FDI_MONS_WH, SI_FDI_MONS_SAF };
 			SiteIndexEquation cuIndex = SI_FDI_MONS_DF;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
@@ -3704,9 +3702,9 @@ class SindxdllTest {
 
 		@Test
 		void testSI_HWC_WILEY_BC_HWC_WILEY_MB() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_HWC_WILEY_BC, SI_HWC_WILEY_MB };
+			SiteIndexEquation[] cuIndices = { SI_HWC_WILEY_BC, SI_HWC_WILEY_MB };
 			SiteIndexEquation cuIndex = SI_HWC_WILEY;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
@@ -3720,9 +3718,9 @@ class SindxdllTest {
 
 		@Test
 		void testSI_PLI_GOUDIE_WET_SW_GOUDIE_PLA_SW_GOUDIE_NAT() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_PLI_GOUDIE_WET, SI_SW_GOUDIE_PLA, SI_SW_GOUDIE_NAT };
+			SiteIndexEquation[] cuIndices = { SI_PLI_GOUDIE_WET, SI_SW_GOUDIE_PLA, SI_SW_GOUDIE_NAT };
 			SiteIndexEquation cuIndex = SI_PLI_GOUDIE_DRY;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}
@@ -3801,9 +3799,9 @@ class SindxdllTest {
 
 		@Test
 		void testSI_FDI_MONS_GF_FDI_MONS_WRC_FDI_MONS_WH_FDI_MONS_SAF() throws CommonCalculatorException {
-			SiteIndexEquation[] cu_indices = { SI_FDI_MONS_GF, SI_FDI_MONS_WRC, SI_FDI_MONS_WH, SI_FDI_MONS_SAF };
+			SiteIndexEquation[] cuIndices = { SI_FDI_MONS_GF, SI_FDI_MONS_WRC, SI_FDI_MONS_WH, SI_FDI_MONS_SAF };
 			SiteIndexEquation cuIndex = SI_FDI_MONS_DF;
-			for (SiteIndexEquation index : cu_indices) {
+			for (SiteIndexEquation index : cuIndices) {
 				assertTrue(testHelperFunction(index, cuIndex));
 			}
 		}

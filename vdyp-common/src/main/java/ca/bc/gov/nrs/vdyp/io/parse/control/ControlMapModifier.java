@@ -13,25 +13,19 @@ public interface ControlMapModifier {
 	void modify(Map<String, Object> control, FileResolver fileResolver) throws ResourceParseException, IOException;
 
 	/**
-	 * The name of the key for this resource's entry in the control map
-	 *
-	 * @return
+	 * @return the name of the key for this resource's entry in the control map
 	 */
 	default String getControlKeyName() {
 		return getControlKey().name();
 	}
 
 	/**
-	 * The key for this resource's entry in the control map
-	 *
-	 * @return
+	 * @return the key for this resource's entry in the control map
 	 */
 	ControlKey getControlKey();
 
 	/**
-	 * Value parser for the control value before modification
-	 *
-	 * @return
+	 * @return value parser for the control value before modification
 	 */
 	ValueParser<Object> getValueParser();
 

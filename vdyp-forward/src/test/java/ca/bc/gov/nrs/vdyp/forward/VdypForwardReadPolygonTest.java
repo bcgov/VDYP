@@ -79,7 +79,7 @@ class VdypForwardReadPolygonTest {
 					}
 				}
 
-				var genusMap = primaryLayer.getGenus();
+				var genusMap = primaryLayer.getGenera();
 				assertThat(genusMap.size(), is(5));
 
 				var genus = genusMap.values().iterator().next();
@@ -112,7 +112,7 @@ class VdypForwardReadPolygonTest {
 					}
 				}
 
-				var genusMap = veteranLayer.getGenus();
+				var genusMap = veteranLayer.getGenera();
 				assertThat(genusMap.size(), is(5));
 
 				var genus = genusMap.values().iterator().next();
@@ -135,8 +135,7 @@ class VdypForwardReadPolygonTest {
 
 	static InputStream addToEnd(InputStream is, String... lines) {
 		var appendix = new ByteArrayInputStream(String.join("\r\n", lines).getBytes(StandardCharsets.US_ASCII));
-		var result = new SequenceInputStream(is, appendix);
-		return result;
+		return new SequenceInputStream(is, appendix);
 	}
 
 	static Map<String, ?> parseWithAppendix(ForwardControlParser parser, String... lines)

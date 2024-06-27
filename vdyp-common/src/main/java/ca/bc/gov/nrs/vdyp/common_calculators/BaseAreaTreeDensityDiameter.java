@@ -11,7 +11,7 @@ public class BaseAreaTreeDensityDiameter {
 	}
 
 	/**
-	 * π/10⁴
+	 * π/4/10⁴ = π/(4 * 10⁴)
 	 */
 	public static final float PI_40K = (float) (Math.PI / 40_000);
 
@@ -20,11 +20,11 @@ public class BaseAreaTreeDensityDiameter {
 	 * Return an estimate of the number of trees per hectare based on a given base area (a) and quadratic mean diameter
 	 * (q) according to the formula
 	 * <p>
-	 * a / π/10⁴ / q^2
+	 * a / π/4/10⁴ / q^2
 	 * <p>
 	 *
-	 * @param baseArea              the base area
-	 * @param quadraticMeanDiameter the quadratic mean diameter
+	 * @param baseArea              the base area (m^2 / hectare)
+	 * @param quadraticMeanDiameter the quadratic mean diameter (cm / tree)
 	 * @return as described. If baseArea or quadraticMeanDiameter is 0 (or less), 0 is returned.
 	 */
 	public static float treesPerHectare(float baseArea, float quadraticMeanDiameter) {

@@ -1,7 +1,6 @@
 package ca.bc.gov.nrs.vdyp.forward.parsers;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,9 +25,9 @@ import ca.bc.gov.nrs.vdyp.io.parse.streaming.StreamingParserFactory;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ControlledValueParser;
 import ca.bc.gov.nrs.vdyp.io.parse.value.ValueParser;
 import ca.bc.gov.nrs.vdyp.model.GenusDefinition;
-import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.GenusDistribution;
 import ca.bc.gov.nrs.vdyp.model.GenusDistributionSet;
+import ca.bc.gov.nrs.vdyp.model.LayerType;
 
 public class VdypSpeciesParser implements ControlMapValueReplacer<Object, String> {
 
@@ -76,8 +75,8 @@ public class VdypSpeciesParser implements ControlMapValueReplacer<Object, String
 							)
 					).space(1).value(2, GENUS_INDEX, ValueParser.INTEGER).space(1)
 					.value(2, GENUS, ControlledValueParser.optional(ControlledValueParser.GENUS)).space(1)
-					.value(3, SPECIES_0, ControlledValueParser.SPECIES)
-					.value(5, PERCENT_SPECIES_0, ValueParser.PERCENTAGE)
+					.value(3, SPECIES_0, ControlledValueParser.optional(ControlledValueParser.SPECIES))
+					.value(5, PERCENT_SPECIES_0, ControlledValueParser.optional(ValueParser.PERCENTAGE))
 					.value(3, SPECIES_1, ControlledValueParser.optional(ControlledValueParser.SPECIES))
 					.value(5, PERCENT_SPECIES_1, ControlledValueParser.optional(ValueParser.PERCENTAGE))
 					.value(3, SPECIES_2, ControlledValueParser.optional(ControlledValueParser.SPECIES))
@@ -114,9 +113,9 @@ public class VdypSpeciesParser implements ControlMapValueReplacer<Object, String
 						layerType = builder.marker(EndOfRecord.END_OF_RECORD);
 					}
 					var genusIndex = (Integer) entry.get(GENUS_INDEX);
-					var genus = (Optional<String>) entry.get(GENUS);
-					var genusNameText0 = (String) entry.get(SPECIES_0);
-					var percentGenus0 = (Float) entry.get(PERCENT_SPECIES_0);
+					var optionalGenus = (Optional<String>) entry.get(GENUS);
+					var genusNameText0 = (Optional<String>) entry.get(SPECIES_0);
+					var percentGenus0 = (Optional<Float>) entry.get(PERCENT_SPECIES_0);
 					var genusNameText1 = (Optional<String>) entry.get(SPECIES_1);
 					var percentGenus1 = (Optional<Float>) entry.get(PERCENT_SPECIES_1);
 					var genusNameText2 = (Optional<String>) entry.get(SPECIES_2);
@@ -137,13 +136,10 @@ public class VdypSpeciesParser implements ControlMapValueReplacer<Object, String
 
 						List<GenusDistribution> gdList = new ArrayList<>();
 
-						if (!genusDefinitionMap.contains(genusNameText0)) {
-							new ResourceParseException(
-									MessageFormat.format("Genus {0} is not known a known genus", genusNameText0)
-							);
-						}
-
-						gdList.add(new GenusDistribution(0, genusDefinitionMap.get(genusNameText0), percentGenus0));
+						Utils.ifBothPresent(
+								genusNameText0.filter(t -> genusDefinitionMap.contains(t)), percentGenus0,
+								(s, p) -> gdList.add(new GenusDistribution(0, genusDefinitionMap.get(s), p))
+						);
 
 						Utils.ifBothPresent(
 								genusNameText1.filter(t -> genusDefinitionMap.contains(t)), percentGenus1,
@@ -167,6 +163,8 @@ public class VdypSpeciesParser implements ControlMapValueReplacer<Object, String
 						}
 
 						GenusDistributionSet speciesDistributionSet = new GenusDistributionSet(3, gdList);
+
+						var genus = optionalGenus.orElse(genusDefinitionMap.getByIndex(genusIndex).getAlias());
 
 						return new VdypLayerSpecies(
 								polygonId, lt, genusIndex, genus, speciesDistributionSet, siteIndex, dominantHeight,

@@ -1,6 +1,9 @@
 package ca.bc.gov.nrs.vdyp.forward.model;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import ca.bc.gov.nrs.vdyp.model.BecDefinition;
 
@@ -18,7 +21,8 @@ public class VdypPolygon extends VdypEntity {
 
 	// Set after construction
 	private VdypPolygonLayer primaryLayer;
-	private Optional<VdypPolygonLayer> veteranLayer;
+	private Optional<VdypPolygonLayer> veteranLayer = Optional.empty();
+	private Set<VdypPolygonLayer> layers = new HashSet<>();
 
 	public VdypPolygon(
 			VdypPolygonDescription vdypPolygonDescription, BecDefinition bec, Character fizId, float percentForestLand,
@@ -48,12 +52,20 @@ public class VdypPolygon extends VdypEntity {
 		return sb.toString();
 	}
 
-	public void setPrimaryLayer(VdypPolygonLayer primaryLayer) {
-		this.primaryLayer = primaryLayer;
+	public void setLayers(VdypPolygonLayer primaryLayer, VdypPolygonLayer veteranLayer) {
+		if (primaryLayer != null) {
+			this.primaryLayer = primaryLayer;
+			this.layers.add(primaryLayer);
+		}
+
+		if (veteranLayer != null) {
+			this.veteranLayer = Optional.of(veteranLayer);
+			this.layers.add(veteranLayer);
+		}
 	}
 
-	public void setVeteranLayer(Optional<VdypPolygonLayer> veteranLayer) {
-		this.veteranLayer = veteranLayer;
+	public Set<VdypPolygonLayer> getLayers() {
+		return Collections.unmodifiableSet(layers);
 	}
 
 	public VdypPolygonDescription getDescription() {

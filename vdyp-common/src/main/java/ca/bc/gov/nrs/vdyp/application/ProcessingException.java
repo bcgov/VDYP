@@ -24,6 +24,10 @@ public class ProcessingException extends Exception {
 		super(MessageFormat.format("{0} ({1})", message, errorNumber), cause);
 	}
 
+	public ProcessingException(String message, int errorNumber) {
+		super(MessageFormat.format("{0} ({1})", message, errorNumber));
+	}
+
 	public ProcessingException(String message, Throwable cause) {
 		super(message, cause);
 	}

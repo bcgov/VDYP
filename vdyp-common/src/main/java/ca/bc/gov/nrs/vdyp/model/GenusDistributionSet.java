@@ -65,14 +65,9 @@ public class GenusDistributionSet implements Comparable<GenusDistributionSet> {
 	}
 
 	public static void validate(int maxIndex, List<GenusDistribution> gdList) throws InvalidGenusDistributionSet {
-		if (gdList == null || gdList.size() == 0) {
-			throw new InvalidGenusDistributionSet("GenusDistributionSet does not have the required first entry");
-		}
 
 		Set<GenusDefinition> generaSeen = new HashSet<>();
 		Set<Integer> indicesSeen = new HashSet<>();
-
-		float distributionTotal = 0.0f;
 
 		for (GenusDistribution gd : gdList) {
 			if (generaSeen.contains(gd.getGenus())) {
@@ -96,14 +91,6 @@ public class GenusDistributionSet implements Comparable<GenusDistributionSet> {
 			}
 			generaSeen.add(gd.getGenus());
 			indicesSeen.add(gd.getIndex());
-			distributionTotal += gd.getPercentage();
-		}
-
-		if (distributionTotal > 100.05f || distributionTotal < 99.95) {
-			throw new InvalidGenusDistributionSet(
-					MessageFormat
-							.format("Sum {0} of species distributions is not within 0.05 of 100.0", distributionTotal)
-			);
 		}
 	}
 

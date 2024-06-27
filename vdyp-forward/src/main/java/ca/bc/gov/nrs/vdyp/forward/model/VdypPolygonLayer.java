@@ -3,7 +3,6 @@ package ca.bc.gov.nrs.vdyp.forward.model;
 import java.util.Map;
 import java.util.Optional;
 
-import ca.bc.gov.nrs.vdyp.model.GenusDefinition;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
 
@@ -14,16 +13,16 @@ public class VdypPolygonLayer extends VdypEntity {
 	private final LayerType layerType; // LAYERG
 
 	private final VdypPolygon parent;
-	private final Map<GenusDefinition, VdypLayerSpecies> genus;
+	private final Map<Integer, VdypLayerSpecies> genera;
 	private final Optional<Map<UtilizationClass, VdypSpeciesUtilization>> defaultUtilizationMap;
 
 	public VdypPolygonLayer(
-			LayerType layerType, VdypPolygon parent, Map<GenusDefinition, VdypLayerSpecies> genus,
+			LayerType layerType, VdypPolygon parent, Map<Integer, VdypLayerSpecies> genera,
 			Optional<Map<UtilizationClass, VdypSpeciesUtilization>> defaultUtilizationMap
 	) {
 		this.layerType = layerType;
 		this.parent = parent;
-		this.genus = genus;
+		this.genera = genera;
 		this.defaultUtilizationMap = defaultUtilizationMap;
 	}
 
@@ -35,11 +34,16 @@ public class VdypPolygonLayer extends VdypEntity {
 		return parent;
 	}
 
-	public Map<GenusDefinition, VdypLayerSpecies> getGenus() {
-		return genus;
+	public Map<Integer, VdypLayerSpecies> getGenera() {
+		return genera;
 	}
 
 	public Optional<Map<UtilizationClass, VdypSpeciesUtilization>> getDefaultUtilizationMap() {
 		return defaultUtilizationMap;
+	}
+
+	@Override
+	public String toString() {
+		return layerType.toString();
 	}
 }
