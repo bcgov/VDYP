@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,6 +34,7 @@ import ca.bc.gov.nrs.vdyp.io.parse.coe.BecDefinitionParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.BreakageParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.CloseUtilVolumeParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.GenusDefinitionParser;
+import ca.bc.gov.nrs.vdyp.io.parse.coe.ModifierParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.UtilComponentWSVolumeParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.VeteranBAParser;
 import ca.bc.gov.nrs.vdyp.io.parse.coe.VolumeNetDecayParser;
@@ -47,6 +49,7 @@ import ca.bc.gov.nrs.vdyp.model.BecLookup;
 import ca.bc.gov.nrs.vdyp.model.Coefficients;
 import ca.bc.gov.nrs.vdyp.model.GenusDefinition;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap2Impl;
+import ca.bc.gov.nrs.vdyp.model.PolygonIdentifier;
 import ca.bc.gov.nrs.vdyp.model.Region;
 
 public class TestUtils {
@@ -278,7 +281,7 @@ public class TestUtils {
 	}
 
 	public static void
-			populateControlMapNetBreakage(HashMap<String, Object> controlMap, Function<Integer, Coefficients> mapper) {
+			populateControlMapNetBreakage(Map<String, Object> controlMap, Function<Integer, Coefficients> mapper) {
 		var groupIndicies = groupIndices(BreakageParser.MAX_GROUPS);
 
 		populateControlMap1(controlMap, ControlKey.BREAKAGE.name(), groupIndicies, mapper);
@@ -301,6 +304,34 @@ public class TestUtils {
 		var result = keys1.stream().collect(Collectors.toMap(k -> k, mapper));
 
 		controlMap.put(key, result);
+	}
+
+	/**
+	 * Fill in the decay modifiers in a control map with mock data for testing.
+	 *
+	 * @param controlMap
+	 * @param mapper
+	 */
+	public static void
+			populateControlMapDecayModifiers(Map<String, Object> controlMap, BiFunction<String, Region, Float> mapper) {
+		var spec = Arrays.asList(TestUtils.getSpeciesAliases());
+		var regions = Arrays.asList(Region.values());
+		TestUtils
+				.populateControlMap2(controlMap, ModifierParser.CONTROL_KEY_MOD301_DECAY.name(), spec, regions, mapper);
+	}
+
+	/**
+	 * Fill in the waste modifiers in a control map with mock data for testing.
+	 *
+	 * @param controlMap
+	 * @param mapper
+	 */
+	public static void
+			populateControlMapWasteModifiers(Map<String, Object> controlMap, BiFunction<String, Region, Float> mapper) {
+		var spec = Arrays.asList(TestUtils.getSpeciesAliases());
+		var regions = Arrays.asList(Region.values());
+		TestUtils
+				.populateControlMap2(controlMap, ModifierParser.CONTROL_KEY_MOD301_WASTE.name(), spec, regions, mapper);
 	}
 
 	static final Collection<Integer> UTIL_CLASSES = IntStream.rangeClosed(-1, 4).mapToObj(x -> x).toList();
@@ -384,10 +415,8 @@ public class TestUtils {
 
 	}
 
-	public static String polygonId(String name, int year) {
-		String result = String.format("%-21s%4d", name, year);
-		assert result.length() == 25;
-		return result;
+	public static PolygonIdentifier polygonId(String name, int year) {
+		return new PolygonIdentifier(name, year);
 	}
 
 	public static StartApplicationControlParser startAppControlParser() {
@@ -414,6 +443,81 @@ public class TestUtils {
 		protected VdypApplicationIdentifier getProgramId() {
 			return VdypApplicationIdentifier.VRI_START;
 		}
+	}
+
+	/**
+	 * Do nothing to mutate valid test data
+	 */
+	public static final <T> Consumer<T> valid() {
+		return x -> {
+		};
+	}
+
+	public static BiFunction<Integer, Integer, Optional<Coefficients>> wholeStemMap(int group) {
+		return (u, g) -> {
+			if (g == group) {
+				switch (u) {
+				case 1:
+					return Optional.of(
+							new Coefficients(new float[] { -1.20775998f, 0.670000017f, 1.43023002f, -0.886789978f }, 0)
+					);
+				case 2:
+					return Optional.of(
+							new Coefficients(new float[] { -1.58211005f, 0.677200019f, 1.36449003f, -0.781769991f }, 0)
+					);
+				case 3:
+					return Optional.of(
+							new Coefficients(new float[] { -1.61995006f, 0.651030004f, 1.17782998f, -0.607379973f }, 0)
+					);
+				case 4:
+					return Optional
+							.of(
+									new Coefficients(
+											new float[] { -0.172529995f, 0.932619989f, -0.0697899982f,
+													-0.00362000009f },
+											0
+									)
+							);
+				}
+			}
+			return Optional.empty();
+		};
+	}
+
+	public static BiFunction<Integer, Integer, Optional<Coefficients>> closeUtilMap(int group) {
+		return (u, g) -> {
+			if (g == group) {
+				switch (u) {
+				case 1:
+					return Optional.of(new Coefficients(new float[] { -10.6339998f, 0.835500002f, 0f }, 1));
+				case 2:
+					return Optional.of(new Coefficients(new float[] { -4.44999981f, 0.373400003f, 0f }, 1));
+				case 3:
+					return Optional.of(new Coefficients(new float[] { -0.796000004f, 0.141299993f, 0.0033499999f }, 1));
+				case 4:
+					return Optional.of(new Coefficients(new float[] { 2.35400009f, 0.00419999985f, 0.0247699991f }, 1));
+				}
+			}
+			return Optional.empty();
+		};
+	}
+
+	public static BiFunction<Integer, Integer, Optional<Coefficients>> netDecayMap(int group) {
+		return (u, g) -> {
+			if (g == group) {
+				switch (u) {
+				case 1:
+					return Optional.of(new Coefficients(new float[] { 9.84819984f, -0.224209994f, -0.814949989f }, 1));
+				case 2:
+					return Optional.of(new Coefficients(new float[] { 9.61330032f, -0.224209994f, -0.814949989f }, 1));
+				case 3:
+					return Optional.of(new Coefficients(new float[] { 9.40579987f, -0.224209994f, -0.814949989f }, 1));
+				case 4:
+					return Optional.of(new Coefficients(new float[] { 10.7090998f, -0.952880025f, -0.808309972f }, 1));
+				}
+			}
+			return Optional.empty();
+		};
 	};
 
 }

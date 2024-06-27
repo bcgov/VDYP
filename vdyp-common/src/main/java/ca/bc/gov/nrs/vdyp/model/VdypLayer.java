@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import ca.bc.gov.nrs.vdyp.common.Computed;
+import ca.bc.gov.nrs.vdyp.common.Utils;
 
 public class VdypLayer extends SingleSiteLayer<VdypSpecies, VdypSite> implements VdypUtilizationHolder {
 
@@ -208,14 +209,63 @@ public class VdypLayer extends SingleSiteLayer<VdypSpecies, VdypSite> implements
 			this.empiricalRelationshipParameterIndex(Optional.of(empiricalRelationshipParameterIndex));
 		}
 
+		Coefficients loreyHeight = VdypUtilizationHolder.emptyLoreyHeightUtilization();
+
+		public void loreyHeight(float height) {
+			this.loreyHeight = Utils.heightVector(0, height);
+		}
+
+		public void loreyHeight(float small, float height) {
+			this.loreyHeight = Utils.heightVector(small, height);
+		}
+
+		protected Coefficients baseArea = VdypUtilizationHolder.emptyUtilization();
+
+		public void baseArea(float small, float u1, float u2, float u3, float u4) {
+			this.baseArea = Utils.utilizationVector(small, u1, u2, u3, u4);
+		}
+
+		public void baseArea(float height) {
+			this.baseArea = Utils.utilizationVector(height);
+		}
+
+		protected Coefficients treesPerHectare = VdypUtilizationHolder.emptyUtilization();
+
+		public void treesPerHectare(float small, float u1, float u2, float u3, float u4) {
+			this.treesPerHectare = Utils.utilizationVector(small, u1, u2, u3, u4);
+		}
+
+		public void treesPerHectare(float height) {
+			this.treesPerHectare = Utils.utilizationVector(height);
+		}
+
+		protected Coefficients quadMeanDiameter = VdypUtilizationHolder.emptyUtilization();
+
+		public void quadMeanDiameter(float small, float u1, float u2, float u3, float u4) {
+			this.quadMeanDiameter = Utils.utilizationVector(small, u1, u2, u3, u4);
+		}
+
+		public void quadMeanDiameter(float height) {
+			this.quadMeanDiameter = Utils.utilizationVector(height);
+		}
+
+		@Override
+		protected void postProcess(VdypLayer layer) {
+			super.postProcess(layer);
+			layer.setLoreyHeightByUtilization(loreyHeight);
+			layer.setBaseAreaByUtilization(baseArea);
+			layer.setTreesPerHectareByUtilization(treesPerHectare);
+			layer.setQuadraticMeanDiameterByUtilization(quadMeanDiameter);
+		}
+
 		@Override
 		protected VdypLayer doBuild() {
-			return (new VdypLayer(
+			return new VdypLayer(
 					polygonIdentifier.get(), //
 					layerType.get(), //
 					inventoryTypeGroup, //
 					empericalRelationshipParameterIndex
-			));
+			);
 		}
 
 		@Override

@@ -42,6 +42,7 @@ import ca.bc.gov.nrs.vdyp.model.Coefficients;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap;
 import ca.bc.gov.nrs.vdyp.model.ModelClassBuilder;
 import ca.bc.gov.nrs.vdyp.model.PolygonIdentifier;
+import ca.bc.gov.nrs.vdyp.model.UtilizationClass;
 
 /**
  * Custom Hamcrest Matchers
@@ -581,5 +582,54 @@ public class VdypMatchers {
 
 	public static Matcher<PolygonIdentifier> isPolyId(String base, int year) {
 		return allOf(instanceOf(PolygonIdentifier.class), hasProperty("base", is(base)), hasProperty("year", is(year)));
+	}
+
+	public static Matcher<Coefficients>
+			utilization(float small, float all, float util1, float util2, float util3, float util4) {
+		return new TypeSafeDiagnosingMatcher<Coefficients>() {
+
+			boolean matchesComponent(Description description, float expected, float result) {
+				boolean matches = closeTo(expected).matches(result);
+				description.appendText(String.format(matches ? "%f" : "[[%f]]", result));
+				return matches;
+			}
+
+			@Override
+			public void describeTo(Description description) {
+				String utilizationRep = String.format(
+						"[Small: %f, All: %f, 7.5cm: %f, 12.5cm: %f, 17.5cm: %f, 22.5cm: %f]", small, all, util1, util2,
+						util3, util4
+				);
+				description.appendText("A utilization vector ").appendValue(utilizationRep);
+			}
+
+			@Override
+			protected boolean matchesSafely(Coefficients item, Description mismatchDescription) {
+				if (item.size() != 6 || item.getIndexFrom() != -1) {
+					mismatchDescription.appendText("Was not a utilization vector");
+					return false;
+				}
+				boolean matches = true;
+				mismatchDescription.appendText("Was [Small: ");
+				matches &= matchesComponent(mismatchDescription, small, item.getCoe(UtilizationClass.SMALL.index));
+				mismatchDescription.appendText(", All: ");
+				matches &= matchesComponent(mismatchDescription, all, item.getCoe(UtilizationClass.ALL.index));
+				mismatchDescription.appendText(", 7.5cm: ");
+				matches &= matchesComponent(mismatchDescription, util1, item.getCoe(UtilizationClass.U75TO125.index));
+				mismatchDescription.appendText(", 12.5cm: ");
+				matches &= matchesComponent(mismatchDescription, util2, item.getCoe(UtilizationClass.U125TO175.index));
+				mismatchDescription.appendText(", 17.5cm: ");
+				matches &= matchesComponent(mismatchDescription, util3, item.getCoe(UtilizationClass.U175TO225.index));
+				mismatchDescription.appendText(", 22.5cm: ");
+				matches &= matchesComponent(mismatchDescription, util4, item.getCoe(UtilizationClass.OVER225.index));
+				mismatchDescription.appendText("]");
+				return matches;
+			}
+
+		};
+	}
+
+	public static Matcher<Coefficients> utilizationAllAndBiggest(float all) {
+		return utilization(0f, all, 0f, 0f, 0f, all);
 	}
 }

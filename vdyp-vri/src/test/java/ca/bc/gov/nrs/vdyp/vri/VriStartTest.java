@@ -1,20 +1,25 @@
 package ca.bc.gov.nrs.vdyp.vri;
 
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.closeTo;
+import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.coe;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.isPolyId;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.notPresent;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.present;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,17 +30,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.exception.NoBracketingException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import ca.bc.gov.nrs.vdyp.application.ApplicationTestUtils;
+import ca.bc.gov.nrs.vdyp.application.ProcessingException;
 import ca.bc.gov.nrs.vdyp.application.StandProcessingException;
 import ca.bc.gov.nrs.vdyp.application.VdypApplicationIdentifier;
 import ca.bc.gov.nrs.vdyp.application.VdypStartApplication;
@@ -64,6 +75,7 @@ import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.MatrixMap2Impl;
 import ca.bc.gov.nrs.vdyp.model.PolygonMode;
 import ca.bc.gov.nrs.vdyp.model.Region;
+import ca.bc.gov.nrs.vdyp.model.VdypLayer;
 import ca.bc.gov.nrs.vdyp.test.MockFileResolver;
 import ca.bc.gov.nrs.vdyp.test.TestUtils;
 import ca.bc.gov.nrs.vdyp.test.VdypMatchers;
@@ -523,10 +535,1111 @@ class VriStartTest {
 	}
 
 	@Nested
+	class QuadMeanDiameterRootFinding {
+		@Nested
+		class ErrorFunction {
+			@Test
+			void testCompute() throws StandProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x = 0.161783934f;
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				float result = app
+						.quadMeanDiameterFractionalError(x, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph);
+
+				assertThat(result, closeTo(0.00525851687f));
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(12.8846836f)), //
+								hasEntry(is("C"), closeTo(8.87247944f)), //
+								hasEntry(is("F"), closeTo(12.5603895f)), //
+								hasEntry(is("H"), closeTo(9.33975124f)), //
+								hasEntry(is("S"), closeTo(10.9634094f))
+						)
+				);
+			}
+
+			@Test
+			void testComputeXClamppedHigh() throws StandProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x = 12;
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				float result = app
+						.quadMeanDiameterFractionalError(x, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph);
+
+				assertThat(result, closeTo(-0.45818153f));
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(13.8423338f)), //
+								hasEntry(is("C"), closeTo(16.6669998f)), //
+								hasEntry(is("F"), closeTo(15.5116472f)), //
+								hasEntry(is("H"), closeTo(12.5369997f)), //
+								hasEntry(is("S"), closeTo(12.6630001f))
+						)
+				);
+			}
+
+			@Test
+			void testComputeXClamppedLow() throws StandProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x = -12;
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				float result = app
+						.quadMeanDiameterFractionalError(x, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph);
+
+				assertThat(result, closeTo(0.868255138f));
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(7.6f)), //
+								hasEntry(is("C"), closeTo(7.6f)), //
+								hasEntry(is("F"), closeTo(7.6f)), //
+								hasEntry(is("H"), closeTo(7.6f)), //
+								hasEntry(is("S"), closeTo(7.6f))
+						)
+				);
+			}
+
+			@Test
+			void testComputeInitial() throws StandProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x = -10;
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				float result = app
+						.quadMeanDiameterFractionalError(x, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph);
+
+				assertThat(result, closeTo(0.868255138f));
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(7.6f)), //
+								hasEntry(is("C"), closeTo(7.6f)), //
+								hasEntry(is("F"), closeTo(7.6f)), //
+								hasEntry(is("H"), closeTo(7.6f)), //
+								hasEntry(is("S"), closeTo(7.6f))
+						)
+				);
+			}
+
+		}
+
+		@Nested
+		class ExpandIntervalOfRootFinder {
+			@Test
+			void testNoChange() throws StandProcessingException {
+
+				UnivariateFunction errorFunc = x -> x;
+
+				var xInterval = new VriStart.Interval(-1, 1);
+
+				VriStart app = new VriStart();
+
+				var result = app.findInterval(xInterval, errorFunc);
+
+				assertThat(result, equalTo(xInterval));
+
+			}
+
+			@Test
+			void testSimpleChange() throws StandProcessingException {
+
+				UnivariateFunction errorFunc = x -> x;
+
+				var xInterval = new VriStart.Interval(-2, -1);
+
+				VriStart app = new VriStart();
+
+				var result = app.findInterval(xInterval, errorFunc);
+
+				var evaluated = result.evaluate(errorFunc);
+				assertTrue(
+						evaluated.start() * evaluated.end() <= 0,
+						() -> "F(" + result + ") should have mixed signs but was " + evaluated
+				);
+
+			}
+
+			@ParameterizedTest
+			@CsvSource({ "1, 1", "-1, 1", "1, -1", "-1, -1" })
+			void testDifficultChange(float a, float b) throws StandProcessingException {
+
+				UnivariateFunction errorFunc = x -> a * (Math.exp(b * x) - 0.000001);
+
+				var xInterval = new VriStart.Interval(-1, 1);
+
+				VriStart app = new VriStart();
+
+				var result = app.findInterval(xInterval, errorFunc);
+
+				var evaluated = result.evaluate(errorFunc);
+				assertTrue(
+						evaluated.start() * evaluated.end() <= 0,
+						() -> "F(" + result + ") should have mixed signs but was " + evaluated
+				);
+
+			}
+
+			@ParameterizedTest
+			@ValueSource(floats = { 1, -1, 20, -20 })
+			void testTwoRoots(float a) throws StandProcessingException {
+
+				UnivariateFunction errorFunc = x -> a * (x * x - 0.5);
+
+				var xInterval = new VriStart.Interval(-1, 1);
+
+				VriStart app = new VriStart();
+
+				var result = app.findInterval(xInterval, errorFunc);
+
+				var evaluated = result.evaluate(errorFunc);
+				assertTrue(
+						evaluated.start() * evaluated.end() <= 0,
+						() -> "F(" + result + ") should have mixed signs but was " + evaluated
+				);
+
+			}
+
+			@ParameterizedTest
+			@CsvSource({ "1, 1", "-1, 1", "1, -1", "-1, -1" })
+			void testImpossible(float a, float b) throws StandProcessingException {
+
+				UnivariateFunction errorFunc = x -> a * (Math.exp(b * x) + 1);
+
+				var xInterval = new VriStart.Interval(-1, 1);
+
+				VriStart app = new VriStart();
+
+				var ex = assertThrows(NoBracketingException.class, () -> app.findInterval(xInterval, errorFunc));
+
+			}
+
+		}
+
+		@Nested
+		class FindRootOfErrorFunction {
+
+			@Test
+			void testSuccess() throws StandProcessingException {
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				float result = app.findRootForQuadMeanDiameterFractionalError(
+						x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+				);
+
+				assertThat(result, closeTo(0.172141284f));
+
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(12.9407434f)), //
+								hasEntry(is("C"), closeTo(8.88676834f)), //
+								hasEntry(is("F"), closeTo(12.6130743f)), //
+								hasEntry(is("H"), closeTo(9.35890579f)), //
+								hasEntry(is("S"), closeTo(10.9994669f))
+						)
+				);
+
+			}
+
+			@Test
+			void testNoIntervalThrow() {
+				controlMap = VriTestUtils.loadControlMap();
+
+				VriStart app = new VriStart() {
+
+					@Override
+					float quadMeanDiameterFractionalError(
+							double x, Map<String, Float> finalDiameters, Map<String, Float> initial,
+							Map<String, Float> baseArea, Map<String, Float> min, Map<String, Float> max,
+							float totalTreeDensity
+					) {
+						// Force this to be something with no root. Finding a set of inputs that have no real root or
+						// which the interval fixer can't handle would be better
+
+						var f = Math.exp(x) + 1;
+
+						initial.forEach((k, v) -> finalDiameters.put(k, (float) (v * x)));
+
+						return (float) f;
+					}
+
+				};
+
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				app.setDebugMode(1, 2);
+
+				assertThrows(
+						StandProcessingException.class,
+						() -> app.findRootForQuadMeanDiameterFractionalError(
+								x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+						)
+				);
+			}
+
+			@Test
+			void testNoIntervalGuess() throws StandProcessingException {
+				controlMap = VriTestUtils.loadControlMap();
+
+				VriStart app = new VriStart() {
+
+					@Override
+					float quadMeanDiameterFractionalError(
+							double x, Map<String, Float> finalDiameters, Map<String, Float> initial,
+							Map<String, Float> baseArea, Map<String, Float> min, Map<String, Float> max,
+							float totalTreeDensity
+					) {
+						// Force this to be something with no root. Finding a set of inputs that have no real root or
+						// which the interval fixer can't handle would be better
+
+						var f = Math.exp(x) + 1;
+
+						initial.forEach((k, v) -> finalDiameters.put(k, (float) (v * x)));
+
+						return (float) f;
+					}
+
+				};
+
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				app.setDebugMode(1, 0);
+
+				var result = app.findRootForQuadMeanDiameterFractionalError(
+						x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+				);
+
+				assertThat(result, closeTo(-0.1f));
+
+				// Complete nonsense numbers, but they test if the function is doing the right thing based on the
+				// nonsense function used in the mock
+				assertThat(
+						resultPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(12.0803461f * (-0.1f))), //
+								hasEntry(is("C"), closeTo(8.66746521f * (-0.1f))), //
+								hasEntry(is("F"), closeTo(11.8044939f * (-0.1f))), //
+								hasEntry(is("H"), closeTo(9.06493855f * (-0.1f))), //
+								hasEntry(is("S"), closeTo(10.4460621f * (-0.1f)))
+						)
+				);
+
+			}
+
+			@Test
+			void testTooManyEvaluationsStrictThrow() {
+				controlMap = VriTestUtils.loadControlMap();
+
+				float expectedX = 0.172142f;
+
+				VriStart app = new VriStart() {
+
+					@Override
+					double doSolve(float min, float max, UnivariateFunction errorFunc) {
+						errorFunc.value(0.1);
+						errorFunc.value(expectedX);
+						throw new TooManyEvaluationsException(100);
+					}
+
+				};
+
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				app.setDebugMode(1, 2);
+
+				assertThrows(
+						StandProcessingException.class,
+						() -> app.findRootForQuadMeanDiameterFractionalError(
+								x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+						)
+				);
+			}
+
+			@Test
+			void testTooManyEvaluationsGuess() throws StandProcessingException {
+				controlMap = VriTestUtils.loadControlMap();
+
+				float expectedX = 0.172142f;
+
+				VriStart app = new VriStart() {
+
+					@Override
+					double doSolve(float min, float max, UnivariateFunction errorFunc) {
+						errorFunc.value(0.1);
+						errorFunc.value(expectedX);
+						throw new TooManyEvaluationsException(100);
+					}
+
+				};
+
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				app.setDebugMode(1, 0);
+
+				var result = app.findRootForQuadMeanDiameterFractionalError(
+						x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+				);
+
+				assertThat(result, closeTo((float) expectedX));
+				assertThat(
+						resultPerSpecies,
+						allOf(
+								appliedX("B", expectedX, app, initialDqs, minDq, maxDq),
+								appliedX("C", expectedX, app, initialDqs, minDq, maxDq),
+								appliedX("F", expectedX, app, initialDqs, minDq, maxDq),
+								appliedX("H", expectedX, app, initialDqs, minDq, maxDq),
+								appliedX("S", expectedX, app, initialDqs, minDq, maxDq)
+						)
+				);
+
+			}
+
+			@Test
+			void testTooManyEvaluationsDiscontinuity() {
+				controlMap = VriTestUtils.loadControlMap();
+
+				float expectedX = -0.2f;
+
+				VriStart app = new VriStart() {
+
+					@Override
+					double doSolve(float min, float max, UnivariateFunction errorFunc) {
+						errorFunc.value(0.1);
+						errorFunc.value(expectedX);
+						throw new TooManyEvaluationsException(100);
+					}
+
+				};
+
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				Map<String, Float> initialDqs = Utils.constMap(map -> {
+					map.put("B", 12.0803461f);
+					map.put("C", 8.66746521f);
+					map.put("F", 11.8044939f);
+					map.put("H", 9.06493855f);
+					map.put("S", 10.4460621f);
+				});
+				Map<String, Float> baseAreas = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+
+				});
+				Map<String, Float> minDq = Utils.constMap(map -> {
+					map.put("B", 7.6f);
+					map.put("C", 7.6f);
+					map.put("F", 7.6f);
+					map.put("H", 7.6f);
+					map.put("S", 7.6f);
+				});
+				Map<String, Float> maxDq = Utils.constMap(map -> {
+					map.put("B", 13.8423338f);
+					map.put("C", 16.6669998f);
+					map.put("F", 15.5116472f);
+					map.put("H", 12.5369997f);
+					map.put("S", 12.6630001f);
+				});
+
+				float x1 = -0.6f;
+				float x2 = 0.5f;
+
+				float tph = 748.402222f;
+
+				var resultPerSpecies = new HashMap<String, Float>();
+
+				app.setDebugMode(1, 0);
+
+				assertThrows(
+						StandProcessingException.class,
+						() -> app.findRootForQuadMeanDiameterFractionalError(
+								x1, x2, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph
+						)
+				);
+			}
+
+			static Matcher<Map<? extends String, ? extends Float>> appliedX(
+					String species, float expectedX, VriStart app, Map<String, Float> initialDqs,
+					Map<String, Float> minDq, Map<String, Float> maxDq
+			) {
+				return hasEntry(
+						is(species),
+						closeTo(
+								app.quadMeanDiameterSpeciesAdjust(
+										expectedX, initialDqs.get(species), minDq.get(species), maxDq.get(species)
+								)
+						)
+				);
+			}
+
+		}
+
+		@Nested
+		class BestOf {
+
+			static double func(double x) {
+				return 7 * Math.sin(x / 7) + 2 * Math.sin(x / 2);
+			}
+
+			@ParameterizedTest
+			@CsvSource(
+				{ //
+						"-1, 0, 1, 0", // Increasing middle
+						"-23, -21, -19, -21", // Decreasing middle
+						"4, 10, 20, 20", // Last from above
+						"-9, -5, -1, -1", // Last from below
+						"2, 8, 14, 2", // First from above
+						"22, 30, 34, 22" // First from below
+				}
+			)
+			void testThreePoints(double x1, double x2, double x3, double expect) {
+
+				var result = VriStart.bestOf(BestOf::func, x1, x2, x3);
+
+				assertThat(result, is(expect));
+			}
+
+			@ParameterizedTest
+			@ValueSource(doubles = { 0, -1, 1, -23, -21, -19, -9, -5, 4, 10, 20, 2, 8, 14, 22, 30, 34 })
+			void testOnePoint(double x) {
+
+				var result = VriStart.bestOf(BestOf::func, x);
+
+				assertThat(result, is(x));
+			}
+
+			@Test
+			void noPoints() {
+
+				assertThrows(IllegalArgumentException.class, () -> VriStart.bestOf(BestOf::func));
+			}
+		}
+
+		@Nested
+		class InitialMaps {
+			@Test
+			void testCompute() throws ProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				VdypLayer layer = VdypLayer.build((lb) -> {
+					lb.polygonIdentifier("Test", 2024);
+					lb.layerType(LayerType.PRIMARY);
+					lb.addSpecies(sb -> {
+						sb.genus("B");
+						sb.percentGenus(10);
+						sb.volumeGroup(15);
+						sb.decayGroup(11);
+						sb.breakageGroup(4);
+						sb.loreyHeight(8.98269558f);
+						sb.baseArea(0.634290636f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("C");
+						sb.percentGenus(20);
+						sb.volumeGroup(23);
+						sb.decayGroup(15);
+						sb.breakageGroup(10);
+						sb.loreyHeight(5.06450224f);
+						sb.baseArea(1.26858127f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("F");
+						sb.percentGenus(30);
+						sb.volumeGroup(33);
+						sb.decayGroup(27);
+						sb.breakageGroup(16);
+						sb.loreyHeight(7.1979804f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("H");
+						sb.percentGenus(30);
+						sb.volumeGroup(40);
+						sb.decayGroup(33);
+						sb.breakageGroup(19);
+						sb.loreyHeight(6.18095589f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("S");
+						sb.percentGenus(10);
+						sb.volumeGroup(69);
+						sb.decayGroup(59);
+						sb.breakageGroup(30);
+						sb.loreyHeight(6.89051533f);
+						sb.baseArea(0.634290636f);
+					});
+				});
+
+				Region region = Region.INTERIOR;
+
+				float quadMeanDiameterTotal = 10.3879938f;
+				float baseAreaTotal = 6.34290648f;
+				float treeDensityTotal = 748.402222f;
+				float loreyHeightTotal = 6.61390257f;
+
+				Map<String, Float> initialDqs = new HashMap<>(5);
+				Map<String, Float> baseAreaPerSpecies = new HashMap<>(5);
+				Map<String, Float> minPerSpecies = new HashMap<>(5);
+				Map<String, Float> maxPerSpecies = new HashMap<>(5);
+
+				app.getDqBySpeciesInitial(
+						layer, region, quadMeanDiameterTotal, baseAreaTotal, treeDensityTotal, loreyHeightTotal,
+						initialDqs, baseAreaPerSpecies, minPerSpecies, maxPerSpecies
+				);
+
+				assertThat(
+						initialDqs, allOf(
+								hasEntry(is("B"), closeTo(12.0803461f)), //
+								hasEntry(is("C"), closeTo(8.66746521f)), //
+								hasEntry(is("F"), closeTo(11.8044939f)), //
+								hasEntry(is("H"), closeTo(9.06493855f)), //
+								hasEntry(is("S"), closeTo(10.4460621f))
+						)
+				);
+				assertThat(
+						baseAreaPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(0.634290636f)), //
+								hasEntry(is("C"), closeTo(1.26858127f)), //
+								hasEntry(is("F"), closeTo(1.90287197f)), //
+								hasEntry(is("H"), closeTo(1.90287197f)), //
+								hasEntry(is("S"), closeTo(0.634290636f))
+						)
+				);
+				assertThat(
+						minPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(7.6f)), //
+								hasEntry(is("C"), closeTo(7.6f)), //
+								hasEntry(is("F"), closeTo(7.6f)), //
+								hasEntry(is("H"), closeTo(7.6f)), //
+								hasEntry(is("S"), closeTo(7.6f))
+						)
+				);
+				assertThat(
+						maxPerSpecies, allOf(
+								hasEntry(is("B"), closeTo(13.8423338f)), //
+								hasEntry(is("C"), closeTo(16.6669998f)), //
+								hasEntry(is("F"), closeTo(15.5116472f)), //
+								hasEntry(is("H"), closeTo(12.5369997f)), //
+								hasEntry(is("S"), closeTo(12.6630001f))
+						)
+				);
+			}
+		}
+
+		@Nested
+		class ApplyResults {
+			@Test
+			void testApply() throws ProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				VdypLayer layer = VdypLayer.build((lb) -> {
+					lb.polygonIdentifier("Test", 2024);
+					lb.layerType(LayerType.PRIMARY);
+					lb.addSpecies(sb -> {
+						sb.genus("B");
+						sb.percentGenus(10);
+						sb.volumeGroup(15);
+						sb.decayGroup(11);
+						sb.breakageGroup(4);
+						sb.loreyHeight(8.98269558f);
+						sb.baseArea(0.634290636f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("C");
+						sb.percentGenus(20);
+						sb.volumeGroup(23);
+						sb.decayGroup(15);
+						sb.breakageGroup(10);
+						sb.loreyHeight(5.06450224f);
+						sb.baseArea(1.26858127f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("F");
+						sb.percentGenus(30);
+						sb.volumeGroup(33);
+						sb.decayGroup(27);
+						sb.breakageGroup(16);
+						sb.loreyHeight(7.1979804f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("H");
+						sb.percentGenus(30);
+						sb.volumeGroup(40);
+						sb.decayGroup(33);
+						sb.breakageGroup(19);
+						sb.loreyHeight(6.18095589f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("S");
+						sb.percentGenus(10);
+						sb.volumeGroup(69);
+						sb.decayGroup(59);
+						sb.breakageGroup(30);
+						sb.loreyHeight(6.89051533f);
+						sb.baseArea(0.634290636f);
+					});
+				});
+
+				float baseAreaTotal = 6.34290648f;
+
+				Map<String, Float> baseAreaPerSpecies = Utils.constMap(map -> {
+					map.put("B", 0.634290636f);
+					map.put("C", 1.26858127f);
+					map.put("F", 1.90287197f);
+					map.put("H", 1.90287197f);
+					map.put("S", 0.634290636f);
+				});
+
+				Map<String, Float> diameterPerSpecies = Utils.constMap(map -> {
+					map.put("B", 12.9407434f);
+					map.put("C", 8.88676834f);
+					map.put("F", 12.6130743f);
+					map.put("H", 9.35890579f);
+					map.put("S", 10.9994669f);
+				});
+
+				app.applyDqBySpecies(layer, baseAreaTotal, baseAreaPerSpecies, diameterPerSpecies);
+
+				assertThat(layer.getQuadraticMeanDiameterByUtilization(), coe(-1, 0f, 10.3879948f, 0f, 0f, 0f, 0f));
+				assertThat(layer.getTreesPerHectareByUtilization(), coe(-1, 0f, 748.4021f, 0f, 0f, 0f, 0f));
+
+				var spec = layer.getSpecies().get("C");
+				assertThat(spec.getQuadraticMeanDiameterByUtilization(), coe(-1, 0f, 8.88676834f, 0f, 0f, 0f, 0f));
+				assertThat(spec.getTreesPerHectareByUtilization(), coe(-1, 0f, 204.522324f, 0f, 0f, 0f, 0f));
+
+				// Total is correct and one of the individual species is correct. No need to check the other 4.
+
+			}
+		}
+
+		@Nested
+		class CompleteRun {
+			@Test
+			void testCompute() throws ProcessingException {
+
+				controlMap = VriTestUtils.loadControlMap();
+				VriStart app = new VriStart();
+				ApplicationTestUtils.setControlMap(app, controlMap);
+
+				VdypLayer layer = VdypLayer.build((lb) -> {
+					lb.polygonIdentifier("Test", 2024);
+					lb.layerType(LayerType.PRIMARY);
+					lb.baseArea(6.34290648f);
+					lb.treesPerHectare(748.402222f);
+					lb.quadMeanDiameter(10.3879938f);
+					lb.loreyHeight(6.61390257f);
+					lb.addSpecies(sb -> {
+						sb.genus("B");
+						sb.percentGenus(10);
+						sb.volumeGroup(15);
+						sb.decayGroup(11);
+						sb.breakageGroup(4);
+						sb.loreyHeight(8.98269558f);
+						sb.baseArea(0.634290636f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("C");
+						sb.percentGenus(20);
+						sb.volumeGroup(23);
+						sb.decayGroup(15);
+						sb.breakageGroup(10);
+						sb.loreyHeight(5.06450224f);
+						sb.baseArea(1.26858127f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("F");
+						sb.percentGenus(30);
+						sb.volumeGroup(33);
+						sb.decayGroup(27);
+						sb.breakageGroup(16);
+						sb.loreyHeight(7.1979804f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("H");
+						sb.percentGenus(30);
+						sb.volumeGroup(40);
+						sb.decayGroup(33);
+						sb.breakageGroup(19);
+						sb.loreyHeight(6.18095589f);
+						sb.baseArea(1.90287197f);
+					});
+					lb.addSpecies(sb -> {
+						sb.genus("S");
+						sb.percentGenus(10);
+						sb.volumeGroup(69);
+						sb.decayGroup(59);
+						sb.breakageGroup(30);
+						sb.loreyHeight(6.89051533f);
+						sb.baseArea(0.634290636f);
+					});
+				});
+
+				app.getDqBySpecies(layer, Region.INTERIOR);
+
+				assertThat(
+						layer.getQuadraticMeanDiameterByUtilization(), coe(-1, 0f, 10.3879948f, 0f, 0f, 0f, 10.3879948f)
+				);
+				assertThat(layer.getTreesPerHectareByUtilization(), coe(-1, 0f, 748.4021f, 0f, 0f, 0f, 748.4021f));
+
+				var spec = layer.getSpecies().get("C");
+				assertThat(spec.getQuadraticMeanDiameterByUtilization(), coe(-1, 0f, 8.88676834f, 0f, 0f, 0f, 0f));
+				assertThat(spec.getTreesPerHectareByUtilization(), coe(-1, 0f, 204.522324f, 0f, 0f, 0f, 0f));
+
+				// Total is correct and one of the individual species is correct. No need to check the other 4.
+
+			}
+		}
+	}
+
+	@Nested
 	class Process {
 		@ParameterizedTest
 		@EnumSource(value = PolygonMode.class, names = { "START", "YOUNG", "BATC", "BATN" })
 		void testDontSkip(PolygonMode mode) throws Exception {
+
+			TestUtils.populateControlMapBecReal(controlMap);
+
 			var control = EasyMock.createControl();
 
 			VriStart app = EasyMock.createMockBuilder(VriStart.class) //
@@ -534,6 +1647,8 @@ class VriStartTest {
 					.addMockedMethod("processBatc") //
 					.addMockedMethod("processBatn") //
 					.addMockedMethod("checkPolygon") //
+					.addMockedMethod("processPrimaryLayer") //
+					.addMockedMethod("getDebugMode") //
 					.createMock(control);
 
 			MockFileResolver resolver = dummyInput();
@@ -543,6 +1658,11 @@ class VriStartTest {
 				pb.biogeoclimaticZone("IDF");
 				pb.yieldFactor(1.0f);
 				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
 			});
 
 			var polyYoung = VriPolygon.build(pb -> {
@@ -550,24 +1670,43 @@ class VriStartTest {
 				pb.biogeoclimaticZone("IDF");
 				pb.yieldFactor(1.0f);
 				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
 			});
 			var polyBatc = VriPolygon.build(pb -> {
 				pb.polygonIdentifier("TestPolyBatc", 2024);
 				pb.biogeoclimaticZone("IDF");
 				pb.yieldFactor(1.0f);
 				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
 			});
 			var polyBatn = VriPolygon.build(pb -> {
 				pb.polygonIdentifier("TestPolyBatn", 2024);
 				pb.biogeoclimaticZone("IDF");
 				pb.yieldFactor(1.0f);
 				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
 			});
 
 			EasyMock.expect(app.checkPolygon(poly)).andReturn(mode).once();
 			EasyMock.expect(app.processYoung(poly)).andReturn(polyYoung).times(0, 1);
 			EasyMock.expect(app.processBatc(poly)).andReturn(polyBatc).times(0, 1);
 			EasyMock.expect(app.processBatn(poly)).andReturn(polyBatn).times(0, 1);
+			app.processPrimaryLayer(EasyMock.anyObject(VriPolygon.class), EasyMock.anyObject(VdypLayer.Builder.class));
+			EasyMock.expectLastCall().once();
+			EasyMock.expect(app.getDebugMode(9)).andStubReturn(0);
+			EasyMock.expect(app.getDebugMode(1)).andStubReturn(0);
 
 			control.replay();
 
@@ -598,6 +1737,7 @@ class VriStartTest {
 			});
 
 			// expect no calls
+			TestUtils.populateControlMapBecReal(controlMap);
 
 			control.replay();
 
@@ -637,6 +1777,7 @@ class VriStartTest {
 			StreamingParser<Collection<VriSite>> siteStream = easyMockInputStreamFactory(
 					controlMap, ControlKey.VRI_INPUT_YIELD_HEIGHT_AGE_SI, control
 			);
+			TestUtils.populateControlMapBecReal(controlMap);
 
 			EasyMock.expect(polyStream.hasNext()).andReturn(false);
 
@@ -693,6 +1834,7 @@ class VriStartTest {
 			StreamingParser<Collection<VriSite>> siteStream = easyMockInputStreamFactory(
 					controlMap, ControlKey.VRI_INPUT_YIELD_HEIGHT_AGE_SI, control
 			);
+			TestUtils.populateControlMapBecReal(controlMap);
 
 			EasyMock.expect(polyStream.hasNext()).andReturn(true);
 			EasyMock.expect(app.getPolygon(polyStream, layerStream, specStream, siteStream)).andReturn(poly);
@@ -714,6 +1856,86 @@ class VriStartTest {
 			app.init(resolver, controlMap);
 
 			app.process();
+
+			app.close();
+
+			control.verify();
+		}
+
+		@Test
+		void testStandExceptionProcessingPrimaryLayer() throws Exception {
+
+			TestUtils.populateControlMapBecReal(controlMap);
+
+			var control = EasyMock.createControl();
+
+			var mode = PolygonMode.START;
+
+			VriStart app = EasyMock.createMockBuilder(VriStart.class) //
+					.addMockedMethod("processYoung") //
+					.addMockedMethod("processBatc") //
+					.addMockedMethod("processBatn") //
+					.addMockedMethod("checkPolygon") //
+					.addMockedMethod("processPrimaryLayer") //
+					.createMock(control);
+
+			MockFileResolver resolver = dummyInput();
+
+			var poly = VriPolygon.build(pb -> {
+				pb.polygonIdentifier("TestPoly", 2024);
+				pb.biogeoclimaticZone("IDF");
+				pb.yieldFactor(1.0f);
+				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
+			});
+
+			var polyYoung = VriPolygon.build(pb -> {
+				pb.polygonIdentifier("TestPolyYoung", 2024);
+				pb.biogeoclimaticZone("IDF");
+				pb.yieldFactor(1.0f);
+				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
+			});
+			var polyBatc = VriPolygon.build(pb -> {
+				pb.polygonIdentifier("TestPolyBatc", 2024);
+				pb.biogeoclimaticZone("IDF");
+				pb.yieldFactor(1.0f);
+				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
+			});
+			var polyBatn = VriPolygon.build(pb -> {
+				pb.polygonIdentifier("TestPolyBatn", 2024);
+				pb.biogeoclimaticZone("IDF");
+				pb.yieldFactor(1.0f);
+				pb.mode(mode);
+				pb.addLayer(lb -> {
+					lb.layerType(LayerType.PRIMARY);
+					lb.crownClosure(80f);
+					lb.utilization(0.6f);
+				});
+			});
+
+			EasyMock.expect(app.checkPolygon(poly)).andReturn(mode).once();
+			app.processPrimaryLayer(EasyMock.same(poly), EasyMock.anyObject(VdypLayer.Builder.class));
+			EasyMock.expectLastCall().andThrow(new StandProcessingException("Test Exception")).once();
+
+			control.replay();
+
+			app.init(resolver, controlMap);
+
+			var ex = assertThrows(StandProcessingException.class, () -> app.processPolygon(0, poly));
 
 			app.close();
 
@@ -1368,7 +2590,7 @@ class VriStartTest {
 			MockFileResolver resolver = dummyInput();
 
 			var poly = VriPolygon.build(pb -> {
-				pb.polygonIdentifier(TestUtils.polygonId("TestPolygon", 1899));
+				pb.polygonIdentifier("TestPolygon", 1899);
 				pb.biogeoclimaticZone("IDF");
 				pb.yieldFactor(1.0f);
 				pb.mode(PolygonMode.YOUNG);

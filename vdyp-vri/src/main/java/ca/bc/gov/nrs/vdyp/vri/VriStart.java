@@ -1,5 +1,7 @@
 package ca.bc.gov.nrs.vdyp.vri;
 
+import static ca.bc.gov.nrs.vdyp.common_calculators.BaseAreaTreeDensityDiameter.*;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -14,6 +16,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.solvers.BrentSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ca.bc.gov.nrs.vdyp.application.ProcessingException;
@@ -25,7 +31,8 @@ import ca.bc.gov.nrs.vdyp.application.VdypStartApplication;
 import ca.bc.gov.nrs.vdyp.common.ControlKey;
 import ca.bc.gov.nrs.vdyp.common.Utils;
 import ca.bc.gov.nrs.vdyp.common.ValueOrMarker;
-import ca.bc.gov.nrs.vdyp.common_calculators.BaseAreaTreeDensityDiameter;
+import ca.bc.gov.nrs.vdyp.common_calculators.EMP;
+import ca.bc.gov.nrs.vdyp.common_calculators.EMP.Limits;
 import ca.bc.gov.nrs.vdyp.common_calculators.SiteIndex2Height;
 import ca.bc.gov.nrs.vdyp.common_calculators.custom_exceptions.CommonCalculatorException;
 import ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexAgeType;
@@ -49,6 +56,7 @@ import ca.bc.gov.nrs.vdyp.model.ModelClassBuilder;
 import ca.bc.gov.nrs.vdyp.model.PolygonIdentifier;
 import ca.bc.gov.nrs.vdyp.model.VdypLayer;
 import ca.bc.gov.nrs.vdyp.model.VdypPolygon;
+import ca.bc.gov.nrs.vdyp.model.VdypSpecies;
 import ca.bc.gov.nrs.vdyp.vri.model.VriLayer;
 import ca.bc.gov.nrs.vdyp.vri.model.VriPolygon;
 import ca.bc.gov.nrs.vdyp.vri.model.VriSite;
@@ -69,6 +77,21 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 
 			doMain(app, args);
 		}
+	}
+
+	protected static <T extends Number> T requirePositive(Optional<T> opt, String name)
+			throws StandProcessingException {
+		T value = require(opt, name);
+
+		if (value.doubleValue() <= 0) {
+			throw new StandProcessingException(name + " " + value + " is not positive");
+		}
+
+		return value;
+	}
+
+	protected static <T> T require(Optional<T> opt, String name) throws StandProcessingException {
+		return opt.orElseThrow(() -> new StandProcessingException(name + " is not present"));
 	}
 
 	// VRI_SUB
@@ -291,10 +314,8 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 		// This was being done in VRI_CHK but I moved it here to when the object is
 		// being built instead.
 		if (builder.getBaseArea()
-				.flatMap(
-						ba -> builder.getTreesPerHectare()
-								.map(tph -> BaseAreaTreeDensityDiameter.quadMeanDiameter(ba, tph) < 7.5f)
-				).orElse(false)) {
+				.flatMap(ba -> builder.getTreesPerHectare().map(tph -> quadMeanDiameter(ba, tph) < 7.5f))
+				.orElse(false)) {
 			builder.baseArea(Optional.empty());
 			builder.treesPerHectare(Optional.empty());
 		}
@@ -313,6 +334,7 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 	Optional<VdypPolygon> processPolygon(int polygonsRead, VriPolygon polygon) throws ProcessingException {
 		log.atInfo().setMessage("Read polygon {}, preparing to process").addArgument(polygon.getPolygonIdentifier())
 				.log();
+		var bec = Utils.getBec(polygon.getBiogeoclimaticZone(), controlMap);
 
 		var mode = polygon.getMode().orElse(PolygonMode.START);
 
@@ -326,27 +348,274 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 
 		mode = checkPolygon(polygon);
 
+		final VriPolygon preProcessedPolygon;
 		switch (mode) {
 		case YOUNG:
 			log.atTrace().setMessage(SPECIAL_PROCESSING_LOG_TEMPLATE).addArgument(mode).log();
-			polygon = processYoung(polygon);
+			preProcessedPolygon = processYoung(polygon);
 			break;
 		case BATC:
 			log.atTrace().setMessage(SPECIAL_PROCESSING_LOG_TEMPLATE).addArgument(mode).log();
-			polygon = processBatc(polygon);
+			preProcessedPolygon = processBatc(polygon);
 			break;
 		case BATN:
 			log.atTrace().setMessage(SPECIAL_PROCESSING_LOG_TEMPLATE).addArgument(mode).log();
-			polygon = processBatn(polygon);
+			preProcessedPolygon = processBatn(polygon);
 			break;
 		default:
 			log.atTrace().setMessage("No special processing for mode {}").addArgument(mode).log();
+			preProcessedPolygon = polygon;
 			break;
 		}
 
-		// TODO
-		return Optional.empty();
+		try {
+			var result = Optional.of(VdypPolygon.build(pBuilder -> {
+				pBuilder.adapt(preProcessedPolygon, x -> x.orElse(0f));
 
+				pBuilder.addLayer(lBuilder -> {
+					try {
+						lBuilder.adapt(preProcessedPolygon.getLayers().get(LayerType.PRIMARY));
+						processPrimaryLayer(preProcessedPolygon, lBuilder);
+					} catch (ProcessingException e) {
+						throw new RuntimeProcessingException(e);
+					}
+				});
+				if (preProcessedPolygon.getLayers().containsKey(LayerType.VETERAN)) {
+					pBuilder.addLayer(lBuilder -> {
+						try {
+							processVeteranLayer(preProcessedPolygon, lBuilder);
+						} catch (StandProcessingException e) {
+							throw new RuntimeStandProcessingException(e);
+						}
+					});
+				}
+
+			}));
+			result.ifPresent(resultPoly -> {
+				var resultPrimaryLayer = resultPoly.getLayers().get(LayerType.PRIMARY);
+				try {
+					getDqBySpecies(resultPrimaryLayer, bec.getRegion());
+					estimateSmallComponents(polygon, resultPrimaryLayer);
+				} catch (ProcessingException e) {
+					throw new RuntimeProcessingException(e);
+				}
+			});
+			return result;
+		} catch (RuntimeProcessingException e) {
+			throw e.getCause();
+		}
+	}
+
+	void processPrimaryLayer(VriPolygon polygon, VdypLayer.Builder lBuilder) throws ProcessingException {
+		var primaryLayer = polygon.getLayers().get(LayerType.PRIMARY);
+		var bec = Utils.getBec(polygon.getBiogeoclimaticZone(), controlMap);
+
+		// BA_L1
+		float primaryBaseArea = requirePositive(primaryLayer.getBaseArea(), "Primary layer base area");
+
+		// TPH_L1
+		var primaryLayerDensity = requirePositive(primaryLayer.getTreesPerHectare(), "Primary layer trees per hectare");
+
+		var primarySiteIn = require(primaryLayer.getPrimarySite(), "Primary site for primary layer");
+
+		var primarySpeciesPercent = require(primaryLayer.getPrimarySpeciesRecord(), "Primary species for primary layer")
+				.getFractionGenus();
+
+		// TPH_L1
+
+		// TPHsp
+		var primarySpeciesDensity = primarySpeciesPercent * primaryLayerDensity;
+
+		// HDL1 or HT_L1
+		var leadHeight = requirePositive(primarySiteIn.getHeight(), "Primary layer lead species height");
+
+		// HLPL1
+		var primaryHeight = emp.primaryHeightFromLeadHeight(
+				leadHeight, primarySiteIn.getSiteGenus(), bec.getRegion(), primarySpeciesDensity
+		);
+
+		// TODO store this in util class ALL
+		float layerQuadMeanDiameter = quadMeanDiameter(primaryBaseArea, primaryLayerDensity);
+
+		// TODO set TPH, BA, DQ for util class ALL
+
+		lBuilder.adaptSpecies(primaryLayer, (sBuilder, vriSpec) -> {
+			float factor = primaryLayer.getSpecies().size() == 1 ? 1 : vriSpec.getFractionGenus();
+		});
+
+		lBuilder.adaptSites(primaryLayer, (sBuilder, vriSite) -> {
+			var vriSpec = primaryLayer.getSpecies().get(vriSite.getSiteGenus());
+
+			if (vriSite != primarySiteIn) {
+
+				float loreyHeight = vriSite.getHeight().filter((x) -> getDebugMode(2) == 1).map(height -> {
+					float speciesQuadMeanDiameter = Math.max(7.5f, height / leadHeight * layerQuadMeanDiameter);
+					float speciesDensity = treesPerHectare(primaryBaseArea, layerQuadMeanDiameter);
+					float speciesLoreyHeight = emp.primaryHeightFromLeadHeight(
+							vriSite.getHeight().get(), vriSite.getSiteGenus(), bec.getRegion(), speciesDensity
+					);
+
+					return 0f;
+				}).orElseGet(() -> {
+					try {
+						return emp.estimateNonPrimaryLoreyHeight(
+								vriSite.getSiteGenus(), primarySiteIn.getSiteGenus(), bec, leadHeight, primaryHeight
+						);
+					} catch (ProcessingException e) {
+						throw new RuntimeProcessingException(e);
+					}
+				});
+
+				float maxHeight = emp.getLimitsForHeightAndDiameter(vriSpec.getGenus(), bec.getRegion())
+						.maxLoreyHeight();
+				loreyHeight = Math.min(loreyHeight, maxHeight);
+				sBuilder.height(loreyHeight);
+			}
+		});
+
+		lBuilder.buildChildren();
+
+		var species = lBuilder.getSpecies();
+		var sites = lBuilder.getSites();
+
+		// TODO save to util ALL
+		var layerLoreyHeight = sites.stream().map(BaseVdypSite::getHeight).mapToDouble(Optional::get).sum()
+				/ primaryBaseArea;
+
+		var primarySpeciesOut = species.stream().filter(s -> s.getGenus().equals(primaryLayer.getPrimaryGenus()))
+				.findAny().get();
+		var primarySiteOut = sites.stream().filter(s -> s.getSiteGenus().equals(primaryLayer.getPrimaryGenus()))
+				.findAny().get();
+
+		// Assign BA by species
+		if (species.size() == 1) {
+			species.get(0).getBaseAreaByUtilization().setCoe(UTIL_ALL, primaryBaseArea);
+		} else {
+			for (var spec : species) {
+				spec.getBaseAreaByUtilization().set(UTIL_ALL, primaryBaseArea * spec.getFractionGenus());
+			}
+		}
+
+		this.applyGroups(polygon, species);
+
+	}
+
+	// ROOTV01
+	void getDqBySpecies(VdypLayer layer, Region region) throws ProcessingException {
+
+		float quadMeanDiameterTotal = layer.getQuadraticMeanDiameterByUtilization().getCoe(UTIL_ALL);
+		float baseAreaTotal = layer.getBaseAreaByUtilization().getCoe(UTIL_ALL);
+		float treeDensityTotal = treesPerHectare(baseAreaTotal, quadMeanDiameterTotal);
+		float loreyHeightTotal = layer.getLoreyHeightByUtilization().getCoe(UTIL_ALL);
+
+		Map<String, Float> initialDqEstimate = new HashMap<>(layer.getSpecies().size());
+		Map<String, Float> baseAreaPerSpecies = new HashMap<>(layer.getSpecies().size());
+		Map<String, Float> minPerSpecies = new HashMap<>(layer.getSpecies().size());
+		Map<String, Float> maxPerSpecies = new HashMap<>(layer.getSpecies().size());
+
+		Map<String, Float> resultsPerSpecies = new HashMap<>(layer.getSpecies().size());
+
+		getDqBySpeciesInitial(
+				layer, region, quadMeanDiameterTotal, baseAreaTotal, treeDensityTotal, loreyHeightTotal,
+				initialDqEstimate, baseAreaPerSpecies, minPerSpecies, maxPerSpecies
+		);
+
+		if (this.getDebugMode(9) > 0) {
+			// TODO
+		}
+
+		findRootForQuadMeanDiameterFractionalError(
+				-0.6f, 0.5f, resultsPerSpecies, initialDqEstimate, baseAreaPerSpecies, minPerSpecies, maxPerSpecies,
+				treeDensityTotal
+		);
+
+		applyDqBySpecies(layer, baseAreaTotal, baseAreaPerSpecies, resultsPerSpecies);
+	}
+
+	void applyDqBySpecies(
+			VdypLayer layer, float baseAreaTotal, Map<String, Float> baseAreaPerSpecies,
+			Map<String, Float> resultsPerSpecies
+	) {
+		float quadMeanDiameterTotal;
+		float treeDensityTotal;
+		treeDensityTotal = 0;
+		for (var spec : layer.getSpecies().values()) {
+			float specDq = resultsPerSpecies.get(spec.getGenus());
+			float specBa = baseAreaPerSpecies.get(spec.getGenus());
+			float specTph = treesPerHectare(specBa, specDq);
+			treeDensityTotal += specTph;
+			spec.getQuadraticMeanDiameterByUtilization().setCoe(UTIL_ALL, specDq);
+			spec.getTreesPerHectareByUtilization().setCoe(UTIL_ALL, specTph);
+		}
+		quadMeanDiameterTotal = quadMeanDiameter(baseAreaTotal, treeDensityTotal);
+		layer.getTreesPerHectareByUtilization().setCoe(UTIL_ALL, treeDensityTotal);
+		layer.getQuadraticMeanDiameterByUtilization().setCoe(UTIL_ALL, quadMeanDiameterTotal);
+	}
+
+	void getDqBySpeciesInitial(
+			VdypLayer layer, Region region, float quadMeanDiameterTotal, float baseAreaTotal, float treeDensityTotal,
+			float loreyHeightTotal, Map<String, Float> initialDqEstimate, Map<String, Float> baseAreaPerSpecies,
+			Map<String, Float> minPerSpecies, Map<String, Float> maxPerSpecies
+	) throws ProcessingException {
+		for (var spec : layer.getSpecies().values()) {
+			float specDq = emp.estimateQuadMeanDiameterForSpecies(
+					spec, layer.getSpecies(), region, quadMeanDiameterTotal, baseAreaTotal, treeDensityTotal,
+					loreyHeightTotal
+			);
+
+			var limits = getLimitsForSpecies(spec, region);
+
+			float min = Math
+					.max(7.6f, limits.minDiameterHeight() * spec.getLoreyHeightByUtilization().getCoe(UTIL_ALL));
+			float loreyHeightToUse = Math.max(spec.getLoreyHeightByUtilization().getCoe(UTIL_ALL), 7.0f);
+			float max = Math.min(limits.maxQuadMeanDiameter(), limits.maxDiameterHeight() * loreyHeightToUse);
+			max = Math.max(7.75f, max);
+
+			minPerSpecies.put(spec.getGenus(), min);
+			maxPerSpecies.put(spec.getGenus(), max);
+
+			specDq = FloatMath.clamp(specDq, Math.max(min, 7.75f), max);
+
+			initialDqEstimate.put(spec.getGenus(), specDq);
+
+			baseAreaPerSpecies.put(spec.getGenus(), spec.getBaseAreaByUtilization().getCoe(UTIL_ALL));
+		}
+	}
+
+	protected Limits getLimitsForSpecies(VdypSpecies spec, Region region) {
+		// TODO for JPROGRAM = 7 implement this differently, see ROOTV01 L91-L99
+
+		// EMP061
+		return emp.getLimitsForHeightAndDiameter(spec.getGenus(), region);
+	}
+
+	float quadMeanDiameterFractionalError(
+			double x, Map<String, Float> finalDiameters, Map<String, Float> initial, Map<String, Float> baseArea,
+			Map<String, Float> min, Map<String, Float> max, float totalTreeDensity
+	) {
+		finalDiameters.clear();
+
+		float xToUse = FloatMath.clamp((float) x, -10, 10);
+
+		double tphSum = initial.entrySet().stream().mapToDouble(spec -> {
+			float speciesFinal = quadMeanDiameterSpeciesAdjust(
+					xToUse, spec.getValue(), min.get(spec.getKey()), max.get(spec.getKey())
+			);
+			finalDiameters.put(spec.getKey(), speciesFinal);
+			return treesPerHectare(baseArea.get(spec.getKey()), speciesFinal);
+		}).sum();
+
+		return (float) ( (tphSum - totalTreeDensity) / totalTreeDensity);
+	}
+
+	float quadMeanDiameterSpeciesAdjust(float x, float initialDq, float min, float max) {
+		return FloatMath.clamp(7.5f + (initialDq - 7.5f) * FloatMath.exp(x), min, max);
+	}
+
+	private void processVeteranLayer(VriPolygon polygon, VdypLayer.Builder lBuilder) throws StandProcessingException {
+		var veteranLayer = polygon.getLayers().get(LayerType.VETERAN);
+
+		// TODO
 	}
 
 	// VRI_CHK
@@ -546,7 +815,7 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 
 		float ageToUse = breastHeightAge;
 
-		// TODO NDEBUG(2)
+		// TODO getDebugMode(2)==1
 
 		if (ageToUse <= 0f) {
 			throw new StandProcessingException("Age was not positive");
@@ -615,7 +884,7 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 	) throws StandProcessingException {
 		final var coe = sumCoefficientsWeightedBySpeciesAndDecayBec(species, bec, ControlKey.DQ_YIELD, 6);
 
-		// TODO handle NDEBUG(2) case
+		// TODO handle getDebugMode(2) case
 		final float ageUse = breastHeightAge;
 
 		final float upperBoundsQuadMeanDiameter = upperBoundsQuadMeanDiameter(baseAreaGroup);
@@ -920,9 +1189,7 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 				pBuilder.addLayer(lBuilder -> {
 					lBuilder.copy(primaryLayer);
 					lBuilder.baseArea(primaryBaseArea * (percentForestLand / 100));
-					lBuilder.treesPerHectare(
-							BaseAreaTreeDensityDiameter.treesPerHectare(primaryBaseArea, primaryQuadMeanDiameter)
-					);
+					lBuilder.treesPerHectare(treesPerHectare(primaryBaseArea, primaryQuadMeanDiameter));
 					lBuilder.copySites(primaryLayer, noChange());
 					lBuilder.copySpecies(primaryLayer, noChange());
 				});
@@ -977,8 +1244,7 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 
 		final float primaryBaseAreaFinal = primaryBaseAreaEstimated * (100 / normativePercentAvailable);
 
-		final float primaryTreesPerHectare = BaseAreaTreeDensityDiameter
-				.treesPerHectare(primaryBaseAreaFinal, normativeQuadMeanDiameter);
+		final float primaryTreesPerHectare = treesPerHectare(primaryBaseAreaFinal, normativeQuadMeanDiameter);
 
 		if (primaryBaseAreaFinal < 0.5f) {
 			throw new StandProcessingException(
@@ -1044,5 +1310,189 @@ public class VriStart extends VdypStartApplication<VriPolygon, VriLayer, VriSpec
 	@Override
 	protected float getYieldFactor(VriPolygon polygon) {
 		return polygon.getYieldFactor();
+	}
+
+	float findRootForQuadMeanDiameterFractionalError(
+			float min, float max, Map<String, Float> resultPerSpecies, Map<String, Float> initialDqs,
+			Map<String, Float> baseAreas, Map<String, Float> minDq, Map<String, Float> maxDq, float tph
+	) throws StandProcessingException {
+
+		// Note, this function has side effects in that it modifies resultPerSpecies. This is intentional, the goal is
+		// to apply adjustment factor x to the values in initialDqs until the combination of their values has minimal
+		// error then use those adjusted values.
+
+		// Keeping track of the recent X values tied can be used to make some sort of guess if it doesn't converge.
+		double[] lastXes = new double[2];
+		double[] lastFs = new double[2];
+
+		final double tol = 0.00001;
+
+		UnivariateFunction errorFunc = x -> {
+			lastXes[1] = lastXes[0];
+			lastXes[0] = x;
+			lastFs[1] = lastFs[0];
+			lastFs[0] = this
+					.quadMeanDiameterFractionalError(x, resultPerSpecies, initialDqs, baseAreas, minDq, maxDq, tph);
+			return lastFs[0];
+		};
+		try {
+			double x = doSolve(min, max, errorFunc);
+
+			return (float) x;
+		} catch (NoBracketingException ex) {
+
+			// Decide if we want to propagate the exception or try to come up with something anyway.
+			handleRootForQuadMeanDiameterFractionalErrorException(ex);
+
+			// Try three values and take the least bad option.
+
+			double x = bestOf(errorFunc, 0, -0.1, 0.1);
+
+			// Invoke the function again to set the species map via
+			errorFunc.value(x);
+
+			return (float) x;
+
+		} catch (TooManyEvaluationsException ex) {
+
+			if (tol > 0.0 && Math.abs(lastFs[0]) < tol / 2) {
+
+				double f = errorFunc.value(lastXes[0]);
+				if (Math.abs(lastFs[0]) < tol) {
+
+					// Decide if we want to propagate the exception or try to use the last result.
+					handleRootForQuadMeanDiameterFractionalErrorException(ex);
+
+					return (float) lastXes[0];
+				}
+			}
+
+			throw new StandProcessingException(
+					"Could not find solution for quadratic mean diameter.  There appears to be a discontinuity.", ex
+			);
+
+		}
+	}
+
+	double doSolve(float min, float max, UnivariateFunction errorFunc) {
+		var interval = new Interval(min, max);
+
+		// I couldn't identify the method the original Fortran was using, so I just picked one and it worked
+		// We could swap this for another like NewtonRaphsonSolver
+		var solver = new BrentSolver();
+
+		// The Fortran solver library, $ZERO, included an ability to search for a better interval if given one where
+		// the function values at the end points have the same sign. This replicates that.
+		interval = findInterval(new Interval(min, max), errorFunc);
+
+		double x = solver.solve(100, errorFunc, interval.start(), interval.end(), interval.mid());
+		return x;
+	}
+
+	/**
+	 * Returns the x value for which func(x) is closest to 0.
+	 *
+	 * @param func
+	 * @param values
+	 * @return
+	 */
+	static double bestOf(UnivariateFunction func, double... values) {
+		if (values.length <= 0) {
+			throw new IllegalArgumentException("bestOf requires at least one point to compare");
+		}
+		double bestX = values[0];
+		double bestY = func.value(bestX);
+		for (int i = 1; i < values.length; i++) {
+			double newX = values[i];
+			double newY = func.value(newX);
+			if (Math.abs(newY) < Math.abs(bestY)) {
+				bestX = newX;
+				bestY = newY;
+			}
+		}
+		return bestX;
+	}
+
+	private void handleRootForQuadMeanDiameterFractionalErrorException(RuntimeException ex)
+			throws StandProcessingException {
+		// Only do this in VRIStart
+
+		if (getDebugMode(1) == 2) {
+			throw new StandProcessingException("Could not find solution for quadratic mean diameter", ex);
+		}
+
+		log.atWarn().setMessage("Could not find exact solution for quadratic mean diameter.  Using inexact estimate.")
+				.setCause(ex);
+
+	}
+
+	public static record Interval(double start, double end) {
+		double mid() {
+			return (start() + end()) / 2;
+		}
+
+		double size() {
+			return end() - start();
+		}
+
+		Interval evaluate(UnivariateFunction func) {
+			return new Interval(func.value(start()), func.value(end()));
+		}
+
+	}
+
+	/**
+	 * This replicates the behavior of the SZERO root finding library used by VDYP7
+	 *
+	 * @param interval Initial interval of parameters to func
+	 * @param func
+	 * @return an interval for parameters to func
+	 */
+	public Interval findInterval(Interval intervalInit, UnivariateFunction func) {
+
+		var interval = intervalInit;
+		// Try 40 times before giving up.
+
+		double currentX = interval.start();
+		double lastX = interval.end();
+		double lastF = func.value(lastX);
+		double currentF = func.value(currentX);
+		int i;
+		for (i = 0; i < 40; i++) {
+
+			if (currentF * lastF <= 0) {
+				var newInterval = new Interval(Math.min(currentX, lastX), Math.max(currentX, lastX));
+				log.atInfo().setMessage("Looking for root in range {}").addArgument(interval);
+				return newInterval;
+			}
+
+			double tp = currentF / lastF;
+
+			if (tp >= 1) {
+				double temp = currentX;
+				currentX = lastX;
+				lastX = temp;
+				temp = currentF;
+				currentF = lastF;
+				lastF = temp;
+			}
+
+			if (Math.abs(currentF) >= 8 * Math.abs(lastF - currentF)) {
+				tp = 8;
+			} else {
+				tp = Math.max(0.25 * i, currentF / (lastF - currentF));
+			}
+
+			lastF = currentF;
+			double oppositeX = lastX;
+			lastX = currentX;
+			if (currentX == oppositeX) {
+				oppositeX = 1.03125 * currentX + (0.001 * Math.signum(currentX));
+			}
+			currentX += tp * (currentX - oppositeX);
+			currentF = func.value(currentX);
+		}
+
+		throw new NoBracketingException(currentX, lastX, currentF, lastF);
 	}
 }

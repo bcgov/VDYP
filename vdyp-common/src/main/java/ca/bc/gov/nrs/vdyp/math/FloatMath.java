@@ -2,6 +2,8 @@ package ca.bc.gov.nrs.vdyp.math;
 
 import java.io.IOException;
 
+import ca.bc.gov.nrs.vdyp.application.ProcessingException;
+
 public class FloatMath {
 
 	private FloatMath() {
@@ -78,5 +80,17 @@ public class FloatMath {
 			builder.append(Float.toString(x));
 		}
 		builder.append("]");
+	}
+
+	public static float exponentRatio(float logit) throws ProcessingException {
+		float exp = safeExponent(logit);
+		return exp / (1f + exp);
+	}
+
+	public static float safeExponent(float logit) throws ProcessingException {
+		if (logit > 88f) {
+			throw new ProcessingException("logit " + logit + " exceeds 88");
+		}
+		return exp(logit);
 	}
 }
