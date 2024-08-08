@@ -6,7 +6,6 @@ import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexAgeTyp
 import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexAgeType.SI_AT_TOTAL;
 import static ca.bc.gov.nrs.vdyp.common_calculators.enumerations.SiteIndexEstimationType.*;
 
-import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 
 import ca.bc.gov.nrs.vdyp.common.Utils;

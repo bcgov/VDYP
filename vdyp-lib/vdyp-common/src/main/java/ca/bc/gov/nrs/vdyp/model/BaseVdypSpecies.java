@@ -1,12 +1,16 @@
 package ca.bc.gov.nrs.vdyp.model;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import ca.bc.gov.nrs.vdyp.common.Computed;
 
-public abstract class BaseVdypSpecies {
+public abstract class BaseVdypSpecies<I extends BaseVdypSite> {
 	private final PolygonIdentifier polygonIdentifier; // FIP_P/POLYDESC
 	private final LayerType layerType; // This is also represents the distinction between data stored in
 	// FIPL_1(A) and FIP_V(A). Where VDYP7 stores both and looks at certain values
@@ -23,24 +27,16 @@ public abstract class BaseVdypSpecies {
 	private float fractionGenus; // FRBASP0/FR
 
 	private Map<String, Float> speciesPercent; // Map from
+	private Optional<I> site;
 
 	protected BaseVdypSpecies(
-			PolygonIdentifier polygonIdentifier, LayerType layerType, String genus, float percentGenus
+			PolygonIdentifier polygonIdentifier, LayerType layerType, String genus, float percentGenus, Optional<I> site
 	) {
 		this.polygonIdentifier = polygonIdentifier;
 		this.layerType = layerType;
 		this.genus = genus;
 		this.setPercentGenus(percentGenus);
-	}
-
-	protected BaseVdypSpecies(BaseVdypSpecies toCopy) {
-		this(
-				toCopy.getPolygonIdentifier(), //
-				toCopy.getLayerType(), //
-				toCopy.getGenus(), //
-				toCopy.getPercentGenus()
-		);
-		setSpeciesPercent(toCopy.getSpeciesPercent());
+		this.site = site;
 	}
 
 	public PolygonIdentifier getPolygonIdentifier() {
@@ -82,61 +78,85 @@ public abstract class BaseVdypSpecies {
 		return genus;
 	}
 
-	public abstract static class Builder<T extends BaseVdypSpecies> extends ModelClassBuilder<T> {
+	public Optional<I> getSite() {
+		return site;
+	}
+
+	public abstract static class Builder<T extends BaseVdypSpecies<I>, I extends BaseVdypSite, IB extends BaseVdypSite.Builder<I>>
+			extends ModelClassBuilder<T> {
 		protected Optional<PolygonIdentifier> polygonIdentifier = Optional.empty();
 		protected Optional<LayerType> layerType = Optional.empty();
 		protected Optional<String> genus = Optional.empty();
 		protected Optional<Float> percentGenus = Optional.empty();
 		protected Optional<Float> fractionGenus = Optional.empty();
 		protected Map<String, Float> speciesPercent = new LinkedHashMap<>();
+		protected Optional<Consumer<IB>> siteBuilder = Optional.empty();
+		protected Optional<I> site = Optional.empty();
 
-		public Builder<T> polygonIdentifier(PolygonIdentifier polygonIdentifier) {
+		public Builder<T, I, IB> polygonIdentifier(PolygonIdentifier polygonIdentifier) {
 			this.polygonIdentifier = Optional.of(polygonIdentifier);
 			return this;
 		}
 
-		public Builder<T> polygonIdentifier(String polygonIdentifier) {
+		public Builder<T, I, IB> polygonIdentifier(String polygonIdentifier) {
 			this.polygonIdentifier = Optional.of(PolygonIdentifier.split(polygonIdentifier));
 			return this;
 		}
 
-		public Builder<T> polygonIdentifier(String base, int year) {
+		public Builder<T, I, IB> polygonIdentifier(String base, int year) {
 			this.polygonIdentifier = Optional.of(new PolygonIdentifier(base, year));
 			return this;
 		}
 
-		public Builder<T> layerType(LayerType layer) {
+		public Builder<T, I, IB> layerType(LayerType layer) {
 			this.layerType = Optional.of(layer);
 			return this;
 		}
 
-		public Builder<T> genus(String genus) {
+		public Builder<T, I, IB> genus(String genus) {
 			this.genus = Optional.of(genus);
 			return this;
 		}
 
-		public Builder<T> percentGenus(float percentGenus) {
+		public Builder<T, I, IB> percentGenus(float percentGenus) {
 			this.percentGenus = Optional.of(percentGenus);
 			return this;
 		}
 
-		protected Builder<T> fractionGenus(float fractionGenus) {
+		protected Builder<T, I, IB> fractionGenus(float fractionGenus) {
 			this.fractionGenus = Optional.of(fractionGenus);
 			return this;
 		}
 
-		public Builder<T> addSpecies(String id, float percent) {
+		public Builder<T, I, IB> addSpecies(String id, float percent) {
 			this.speciesPercent.put(id, percent);
 			return this;
 		}
 
-		public Builder<T> addSpecies(Map<String, Float> toAdd) {
+		public Builder<T, I, IB> addSpecies(Map<String, Float> toAdd) {
 			this.speciesPercent.putAll(toAdd);
 			return this;
 		}
 
-		public Builder<T> copy(T toCopy) {
-			return adapt(toCopy);
+		public Builder<T, I, IB> copy(T toCopy) {
+			return this.adapt(toCopy);
+		}
+
+		public Builder<T, I, IB> addSite(Consumer<IB> config) {
+			this.siteBuilder = Optional.of(config);
+			this.site = Optional.empty();
+			return this;
+		}
+
+		public Builder<T, I, IB> addSite(I site) {
+			addSite(Optional.of(site));
+			return this;
+		}
+
+		public Builder<T, I, IB> addSite(Optional<I> site) {
+			this.site = site;
+			this.siteBuilder = Optional.empty();
+			return this;
 		}
 
 		@Override
@@ -154,7 +174,23 @@ public abstract class BaseVdypSpecies {
 			this.fractionGenus.ifPresent(result::setFractionGenus);
 		}
 
-		public Builder<T> adapt(BaseVdypSpecies toCopy) {
+		@Override
+		protected void preProcess() {
+			super.preProcess();
+			site = siteBuilder.map(this::buildSite).or(() -> site);
+		}
+
+		@Override
+		protected String getBuilderId() {
+			return MessageFormat.format(
+					"Species {0} {1} {2}", //
+					polygonIdentifier.map(Object::toString).orElse("N/A"), //
+					layerType.map(Object::toString).orElse("N/A"), //
+					genus.map(Object::toString).orElse("N/A")//
+			);
+		}
+
+		public Builder<T, I, IB> adapt(BaseVdypSpecies<?> toCopy) {
 			polygonIdentifier(toCopy.getPolygonIdentifier());
 			layerType(toCopy.getLayerType());
 			genus(toCopy.getGenus());
@@ -169,6 +205,39 @@ public abstract class BaseVdypSpecies {
 			return this;
 		}
 
+		public <I2 extends BaseVdypSite> Builder<T, I, IB> adaptSite(I2 toCopy, BiConsumer<IB, I2> config) {
+			this.addSite(builder -> {
+				builder.adapt(toCopy);
+				builder.polygonIdentifier = Optional.empty();
+				builder.layerType = Optional.empty();
+				config.accept(builder, toCopy);
+			});
+			return this;
+		}
+
+		public <S2 extends BaseVdypSpecies<I2>, I2 extends BaseVdypSite> Builder<T, I, IB>
+				adaptSiteFrom(S2 specToCopy, BiConsumer<IB, I2> config) {
+			specToCopy.getSite().ifPresent(toCopy -> this.adaptSite(toCopy, config));
+			return this;
+		}
+
+		public Builder<T, I, IB> copySite(I toCopy, BiConsumer<IB, I> config) {
+			this.addSite(builder -> {
+				builder.copy(toCopy);
+				builder.siteGenus = Optional.empty();
+				builder.polygonIdentifier = Optional.empty();
+				builder.layerType = Optional.empty();
+				config.accept(builder, toCopy);
+			});
+			return this;
+		}
+
+		public Builder<T, I, IB> copySiteFrom(T specToCopy, BiConsumer<IB, I> config) {
+			specToCopy.getSite().ifPresent(toCopy -> this.copySite(toCopy, config));
+			return this;
+		}
+
+		protected abstract I buildSite(Consumer<IB> config);
 	}
 
 }

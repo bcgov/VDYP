@@ -68,13 +68,5 @@ public class TestLayer extends BaseVdypLayer<TestSpecies, TestSite> implements I
 			});
 		}
 
-		@Override
-		protected TestSite buildSite(Consumer<TestSite.Builder> config) {
-			return TestSite.build(si -> {
-				si.polygonIdentifier(polygonIdentifier.get());
-				si.layerType(layerType.get());
-				config.accept(si);
-			});
-		}
 	}
 }

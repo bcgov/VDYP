@@ -15,9 +15,9 @@ public class FipLayerPrimary extends FipLayer {
 
 	public FipLayerPrimary(
 			PolygonIdentifier polygonIdentifier, Optional<Integer> inventoryTypeGroup, float crownClosure,
-			Optional<Character> stockingClass, Optional<String> primaryGenus
+			Optional<Character> stockingClass, Optional<String> primaryGenus, Optional<FipSite> siteWithoutSpecies
 	) {
-		super(polygonIdentifier, LayerType.PRIMARY, inventoryTypeGroup, crownClosure);
+		super(polygonIdentifier, LayerType.PRIMARY, inventoryTypeGroup, crownClosure, siteWithoutSpecies);
 		this.stockingClass = stockingClass;
 		this.primaryGenus = primaryGenus;
 
@@ -116,7 +116,7 @@ public class FipLayerPrimary extends FipLayer {
 					inventoryTypeGroup, //
 					crownClosure.get(), //
 					stockingClass, //
-					primaryGenus
+					primaryGenus, siteWithoutSpecies
 			);
 		}
 

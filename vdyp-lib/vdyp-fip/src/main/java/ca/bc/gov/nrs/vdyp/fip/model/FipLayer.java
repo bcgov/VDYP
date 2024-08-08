@@ -1,6 +1,7 @@
 package ca.bc.gov.nrs.vdyp.fip.model;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -15,12 +16,15 @@ public class FipLayer extends SingleSiteLayer<FipSpecies, FipSite> implements In
 
 	private float crownClosure; // FIPL_1/CC_L1 or FIP:_V/CC_V1
 
+	private Optional<FipSite> siteWithoutSpecies = Optional.empty();
+
 	public FipLayer(
 			PolygonIdentifier polygonIdentifier, LayerType layer, Optional<Integer> inventoryTypeGroup,
-			float crownClosure
+			float crownClosure, Optional<FipSite> siteWithoutSpecies
 	) {
 		super(polygonIdentifier, layer, inventoryTypeGroup);
 		this.crownClosure = crownClosure;
+		this.siteWithoutSpecies = siteWithoutSpecies;
 	}
 
 	@Override
@@ -49,6 +53,41 @@ public class FipLayer extends SingleSiteLayer<FipSpecies, FipSite> implements In
 
 	public Optional<String> getSiteSpecies() {
 		return getSite().flatMap(FipSite::getSiteSpecies);
+	}
+
+	@Override
+	public Optional<FipSite> getSite() {
+		return siteWithoutSpecies.or(() -> super.getSite());
+	}
+
+	// This is a bit of a hack. The Layer holds on to a site until populated with Species at which point the site is
+	// attached to the correct Species.
+	private void applySiteWithoutSpecies() {
+		siteWithoutSpecies.ifPresent(site -> {
+
+			var spec = this.getSpecies().get(site.getSiteGenus());
+			if (spec != null) {
+				this.getSpecies().put(site.getSiteGenus(), FipSpecies.build(sb -> {
+					sb.copy(spec);
+					sb.addSite(siteWithoutSpecies);
+				}));
+				siteWithoutSpecies = Optional.empty();
+			}
+
+		});
+
+	}
+
+	@Override
+	public void setSpecies(Map<String, FipSpecies> species) {
+		super.setSpecies(species);
+		applySiteWithoutSpecies();
+	}
+
+	@Override
+	public void setSpecies(Collection<FipSpecies> species) {
+		super.setSpecies(species);
+		applySiteWithoutSpecies();
 	}
 
 	/**
@@ -97,6 +136,23 @@ public class FipLayer extends SingleSiteLayer<FipSpecies, FipSite> implements In
 			return this;
 		}
 
+		protected Optional<FipSite> siteWithoutSpecies = Optional.empty();
+		protected Optional<Consumer<FipSite.Builder>> siteWithoutSpeciesBuilder = Optional.empty();
+
+		public Builder addSiteWithoutSpecies(Optional<FipSite> siteWithoutSpecies) {
+			this.siteWithoutSpecies = siteWithoutSpecies;
+			return this;
+		}
+
+		public Builder addSiteWithoutSpecies(FipSite siteWithoutSpecies) {
+			return this.addSiteWithoutSpecies(Optional.of(siteWithoutSpecies));
+		}
+
+		public Builder addSiteWithoutSpecies(Consumer<FipSite.Builder> config) {
+			this.siteWithoutSpeciesBuilder = Optional.of(config);
+			return this;
+		}
+
 		@Override
 		protected void check(Collection<String> errors) {
 			super.check(errors);
@@ -115,7 +171,8 @@ public class FipLayer extends SingleSiteLayer<FipSpecies, FipSite> implements In
 					polygonIdentifier.get(), //
 					layerType.get(), //
 					inventoryTypeGroup, //
-					crownClosure.get() //
+					crownClosure.get(), //
+					siteWithoutSpecies
 			));
 		}
 
@@ -129,12 +186,14 @@ public class FipLayer extends SingleSiteLayer<FipSpecies, FipSite> implements In
 		}
 
 		@Override
-		protected FipSite buildSite(Consumer<FipSite.Builder> config) {
-			return FipSite.build(builder -> {
-				config.accept(builder);
-				builder.polygonIdentifier(polygonIdentifier.get());
-				builder.layerType(layerType.get());
-			});
+		protected void preProcess() {
+			super.preProcess();
+			this.siteWithoutSpecies = siteWithoutSpecies
+					.or(() -> siteWithoutSpeciesBuilder.map(config -> FipSite.build(builder -> {
+						config.accept(builder);
+						builder.polygonIdentifier(this.polygonIdentifier.get());
+						builder.layerType(layerType.get());
+					})));
 		}
 
 	}

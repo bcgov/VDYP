@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.model;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -171,6 +172,16 @@ public abstract class BaseVdypSite {
 			requirePresent(polygonIdentifier, "polygonIdentifier", errors);
 			requirePresent(layerType, "layerType", errors);
 			requirePresent(siteGenus, "siteGenus", errors);
+		}
+
+		@Override
+		protected String getBuilderId() {
+			return MessageFormat.format(
+					"Site {0} {1} {2}", //
+					polygonIdentifier.map(Object::toString).orElse("N/A"), //
+					layerType.map(Object::toString).orElse("N/A"), //
+					siteGenus.map(Object::toString).orElse("N/A")//
+			);
 		}
 
 	}

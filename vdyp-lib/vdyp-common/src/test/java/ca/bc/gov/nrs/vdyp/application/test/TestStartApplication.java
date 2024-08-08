@@ -74,7 +74,7 @@ public class TestStartApplication extends VdypStartApplication<TestPolygon, Test
 	}
 
 	@Override
-	protected TestSpecies copySpecies(TestSpecies toCopy, Consumer<Builder<TestSpecies>> config) {
+	protected TestSpecies copySpecies(TestSpecies toCopy, Consumer<Builder<TestSpecies, TestSite, ?>> config) {
 		return null;
 	}
 

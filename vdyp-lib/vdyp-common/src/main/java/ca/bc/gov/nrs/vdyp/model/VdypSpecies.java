@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import ca.bc.gov.nrs.vdyp.common.Utils;
 
-public class VdypSpecies extends BaseVdypSpecies implements VdypUtilizationHolder {
+public class VdypSpecies extends BaseVdypSpecies<VdypSite> implements VdypUtilizationHolder {
 
 	private UtilizationVector baseAreaByUtilization = Utils.utilizationVector(); // LVCOM/BA
 	private UtilizationVector loreyHeightByUtilization = Utils.heightVector(); // LVCOM/HL
@@ -24,18 +24,14 @@ public class VdypSpecies extends BaseVdypSpecies implements VdypUtilizationHolde
 	int breakageGroup;
 
 	public VdypSpecies(
-			PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus, //
-			int volumeGroup, int decayGroup, int breakageGroup
+			PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus,
+			Optional<VdypSite> site, int volumeGroup, int decayGroup, int breakageGroup
 	) {
-		super(polygonIdentifier, layer, genus, percentGenus);
+		super(polygonIdentifier, layer, genus, percentGenus, site);
 		this.volumeGroup = volumeGroup;
 		this.decayGroup = decayGroup;
 		this.breakageGroup = breakageGroup;
 
-	}
-
-	public VdypSpecies(BaseVdypSpecies toCopy) {
-		super(toCopy);
 	}
 
 	/**
@@ -210,7 +206,7 @@ public class VdypSpecies extends BaseVdypSpecies implements VdypUtilizationHolde
 		return result;
 	}
 
-	public static class Builder extends BaseVdypSpecies.Builder<VdypSpecies> {
+	public static class Builder extends BaseVdypSpecies.Builder<VdypSpecies, VdypSite, VdypSite.Builder> {
 		protected Optional<Integer> volumeGroup = Optional.empty();
 		protected Optional<Integer> decayGroup = Optional.empty();
 		protected Optional<Integer> breakageGroup = Optional.empty();
@@ -255,6 +251,16 @@ public class VdypSpecies extends BaseVdypSpecies implements VdypUtilizationHolde
 			this.quadMeanDiameter = Utils.utilizationVector(height);
 		}
 
+		protected UtilizationVector wholeStemVolume = VdypUtilizationHolder.emptyUtilization();
+
+		public void wholeStemVolume(float small, float u1, float u2, float u3, float u4) {
+			this.wholeStemVolume = Utils.utilizationVector(small, u1, u2, u3, u4);
+		}
+
+		public void wholeStemVolume(float volume) {
+			this.wholeStemVolume = Utils.utilizationVector(volume);
+		}
+
 		@Override
 		protected void check(Collection<String> errors) {
 			super.check(errors);
@@ -279,19 +285,31 @@ public class VdypSpecies extends BaseVdypSpecies implements VdypUtilizationHolde
 			spec.setBaseAreaByUtilization(baseArea);
 			spec.setTreesPerHectareByUtilization(treesPerHectare);
 			spec.setQuadraticMeanDiameterByUtilization(quadMeanDiameter);
+			spec.setWholeStemVolumeByUtilization(wholeStemVolume);
 		}
 
 		@Override
 		protected VdypSpecies doBuild() {
+
 			return new VdypSpecies(
 					polygonIdentifier.get(), //
 					layerType.get(), //
 					genus.get(), //
 					percentGenus.get(), //
-					volumeGroup.get(), //
+					site, volumeGroup.get(), //
 					decayGroup.get(), //
 					breakageGroup.get() //
 			);
+		}
+
+		@Override
+		protected VdypSite buildSite(Consumer<VdypSite.Builder> config) {
+			return VdypSite.build(builder -> {
+				config.accept(builder);
+				builder.polygonIdentifier(polygonIdentifier.get());
+				builder.layerType(layerType.get());
+				builder.siteGenus(genus);
+			});
 		}
 
 		public Builder volumeGroup(int i) {

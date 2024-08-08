@@ -282,24 +282,19 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			builder.adapt(fipLayer);
 			builder.inventoryTypeGroup(itg);
 			builder.empiricalRelationshipParameterIndex(empiricalRelationshipParameterIndex);
-			fipLayer.getSite().ifPresent(site -> {
-				builder.addSite(siteBuilder -> {
-					siteBuilder.adapt(site);
-				});
-			});
-
 		});
 
+		var breastHeightAge = fipLayer.getSite()
+				.flatMap(x -> Utils.mapBoth(x.getAgeTotal(), x.getYearsToBreastHeight(), (at, ytbh) -> at - ytbh))
+				.orElse(0f);
 		// EMP040
 		var baseArea = estimatePrimaryBaseArea(
-				fipLayer, bec, fipPolygon.getYieldFactor(), result.getBreastHeightAge().orElse(0f), baseAreaOverstory
+				fipLayer, bec, fipPolygon.getYieldFactor(), breastHeightAge, baseAreaOverstory
 		); // BA_TOT
 
 		result.getBaseAreaByUtilization().setAll(baseArea);
 
-		var quadMeanDiameter = estimatePrimaryQuadMeanDiameter(
-				fipLayer, bec, result.getBreastHeightAge().orElse(0f), baseAreaOverstory
-		);
+		var quadMeanDiameter = estimatePrimaryQuadMeanDiameter(fipLayer, bec, breastHeightAge, baseAreaOverstory);
 
 		result.getQuadraticMeanDiameterByUtilization().setAll(quadMeanDiameter);
 
@@ -313,53 +308,25 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		// LVCOM4/SP64DISTL1=FIPSA/VDISTRV
 		// LVCOM1/PCLT1=FIPS/PCTVOLV
 		var vdypSpecies = fipLayer.getSpecies().values().stream() //
-				.map(VdypSpecies::new) //
+				.map(fipSpec -> VdypSpecies.build(sb -> {
+					sb.adapt(fipSpec);
+					applyGroups(bec, fipSpec.getGenus(), sb);
+					sb.adaptSiteFrom(fipSpec, (ib, fipSite) -> {
+					});
+				})) //
 				.collect(Collectors.toMap(VdypSpecies::getGenus, Function.identity()));
 
 		var vdypPrimarySpecies = vdypSpecies.get(primarySpecies.get(0).getGenus());
 
-		Map<String, Float> targetPercentages = applyGroups(fipPolygon, vdypSpecies.values());
+		Map<String, Float> targetPercentages = getTargetPercentages(vdypSpecies.values());
 
 		var maxPass = fipLayer.getSpecies().size() > 1 ? 2 : 1;
 
 		result.setSpecies(vdypSpecies);
 
-		float primaryHeight;
 		float leadHeight = fipLayer.getHeight().orElse(0f);
 		for (var iPass = 1; iPass <= maxPass; iPass++) {
-			if (iPass == 2) {
-				for (var vSpec : vdypSpecies.values()) {
-					vSpec.setPercentGenus(targetPercentages.get(vSpec.getGenus()));
-				}
-			}
-			// Estimate lorey height for primary species
-			if (iPass == 1 && vdypSpecies.size() == 1) {
-				primaryHeight = estimationMethods.primaryHeightFromLeadHeight(
-						leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion(), tphTotal
-				);
-			} else if (iPass == 1) {
-				primaryHeight = estimationMethods
-						.primaryHeightFromLeadHeightInitial(leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion());
-			} else {
-				primaryHeight = estimationMethods.primaryHeightFromLeadHeight(
-						leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion(),
-						vdypPrimarySpecies.getTreesPerHectareByUtilization().getAll()
-				);
-			}
-			vdypPrimarySpecies.getLoreyHeightByUtilization().setAll(primaryHeight);
-
-			// Estimate lorey height for non-primary species
-			for (var vspec : vdypSpecies.values()) {
-				if (vspec == vdypPrimarySpecies)
-					continue;
-
-				// EMP053
-				vspec.getLoreyHeightByUtilization().setAll(
-						estimationMethods.estimateNonPrimaryLoreyHeight(
-								vspec, vdypPrimarySpecies, bec, leadHeight, primaryHeight
-						)
-				);
-			}
+			findPrimaryHeightPass(bec, tphTotal, vdypSpecies, vdypPrimarySpecies, targetPercentages, leadHeight, iPass);
 
 			// ROOTF01
 			findRootsForDiameterAndBaseArea(result, fipLayer, bec, iPass + 1);
@@ -371,6 +338,44 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		computeUtilizationComponentsPrimary(bec, result, VolumeComputeMode.BY_UTIL, CompatibilityVariableMode.NONE);
 
 		return result;
+	}
+
+	void findPrimaryHeightPass(
+			BecDefinition bec, float tphTotal, Map<String, VdypSpecies> vdypSpecies, VdypSpecies vdypPrimarySpecies,
+			Map<String, Float> targetPercentages, float leadHeight, int iPass
+	) throws ProcessingException {
+		float primaryHeight;
+		if (iPass == 2) {
+			for (var vSpec : vdypSpecies.values()) {
+				vSpec.setPercentGenus(targetPercentages.get(vSpec.getGenus()));
+			}
+		}
+		// Estimate lorey height for primary species
+		if (iPass == 1 && vdypSpecies.size() == 1) {
+			primaryHeight = estimationMethods
+					.primaryHeightFromLeadHeight(leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion(), tphTotal);
+		} else if (iPass == 1) {
+			primaryHeight = estimationMethods
+					.primaryHeightFromLeadHeightInitial(leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion());
+		} else {
+			primaryHeight = estimationMethods.primaryHeightFromLeadHeight(
+					leadHeight, vdypPrimarySpecies.getGenus(), bec.getRegion(),
+					vdypPrimarySpecies.getTreesPerHectareByUtilization().getAll()
+			);
+		}
+		vdypPrimarySpecies.getLoreyHeightByUtilization().setAll(primaryHeight);
+
+		// Estimate lorey height for non-primary species
+		for (var vspec : vdypSpecies.values()) {
+			if (vspec == vdypPrimarySpecies)
+				continue;
+
+			// EMP053
+			vspec.getLoreyHeightByUtilization().setAll(
+					estimationMethods
+							.estimateNonPrimaryLoreyHeight(vspec, vdypPrimarySpecies, bec, leadHeight, primaryHeight)
+			);
+		}
 	}
 
 	public static <T> List<T> utilizationArray(VdypLayer layer, Function<VdypUtilizationHolder, T> accessor) {
@@ -594,7 +599,7 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 				.getGenus();
 
 		// ageTotal copy, LVCOM3/AGETOTLV copied from FIPL_V/AGETOT_LV
-		var ageTotal = fipLayer.getAgeTotal().orElse(0f);
+		var ageTotal = fipLayer.getAgeTotal();
 
 		// yearsToBreastHeight copy, minimum 6.0, LVCOM3/YTBHLV copied from
 		// FIPL_V/YTBH_L
@@ -621,13 +626,18 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		// LVCOM1/HL=FIPL_V/HT_LV
 		var vdypSpecies = fipLayer.getSpecies().values().stream() //
 				.map(fipSpec -> {
-					var vs = new VdypSpecies(fipSpec);
+					var vs = VdypSpecies.build(sb -> {
+						sb.adapt(fipSpec);
+						applyGroups(bec, fipSpec.getGenus(), sb);
+						sb.adaptSiteFrom(fipSpec, (ib, fipSite) -> {
+							ib.ageTotal(ageTotal);
+							ib.yearsToBreastHeight(yearsToBreastHeight);
+						});
+					});
 					vs.setLoreyHeightByUtilization(new UtilizationVector(0f, height));
 					return vs;
 				}) //
 				.collect(Collectors.toMap(VdypSpecies::getGenus, Function.identity()));
-
-		applyGroups(fipPolygon, vdypSpecies.values());
 
 		/*
 		 * From VDYP7
@@ -662,14 +672,6 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		var vdypLayer = VdypLayer.build(builder -> {
 			builder.polygonIdentifier(polygonIdentifier);
 			builder.layerType(layer);
-
-			builder.addSite(siteBuilder -> {
-				siteBuilder.ageTotal(ageTotal);
-				siteBuilder.yearsToBreastHeight(yearsToBreastHeight);
-				siteBuilder.height(height);
-				siteBuilder.siteGenus(fipLayer.getSiteGenus());
-				siteBuilder.siteIndex(fipLayer.getSiteIndex());
-			});
 
 			builder.addSpecies(vdypSpecies.values());
 		});
@@ -833,6 +835,8 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 			throw validationError("Species file has fewer records than polygon file.", ex);
 		}
 
+		var speciesPerLayerMap = new HashMap<LayerType, Map<String, FipSpecies>>();
+
 		// Validate that layers belong to the correct polygon
 		for (var layer : layers.values()) {
 			if (!layer.getPolygonIdentifier().equals(polygon.getPolygonIdentifier())) {
@@ -841,7 +845,7 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 						layer.getPolygonIdentifier(), polygon.getPolygonIdentifier()
 				);
 			}
-			layer.setSpecies(new HashMap<>());
+			speciesPerLayerMap.put(layer.getLayerType(), new HashMap<>());
 		}
 
 		for (var spec : species) {
@@ -859,7 +863,11 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 						polygon.getPolygonIdentifier()
 				);
 			}
-			layer.getSpecies().put(spec.getGenus(), spec);
+			speciesPerLayerMap.get(spec.getLayerType()).put(spec.getGenus(), spec);
+		}
+
+		for (var entry : speciesPerLayerMap.entrySet()) {
+			layers.get(entry.getKey()).setSpecies(entry.getValue());
 		}
 
 		polygon.setLayers(layers);
@@ -895,9 +903,11 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 		// consider changing it.
 
 		if (primaryLayer.getAgeTotal().orElse(0f) - primaryLayer.getYearsToBreastHeight().orElse(0f) < 0.5f) {
+			var ageTotal = primaryLayer.getAgeTotal().map(Object::toString).orElse("N/A (0)");
+			var ytbh = primaryLayer.getYearsToBreastHeight().map(Object::toString).orElse("N/A (0)");
 			throw validationError(
-					"Polygon %s has %s layer where total age is less than YTBH.", polygon.getPolygonIdentifier(),
-					LayerType.PRIMARY
+					"Polygon %s has %s layer where total age (%s) is less than YTBH (%s).",
+					polygon.getPolygonIdentifier(), LayerType.PRIMARY, ageTotal, ytbh
 			);
 		}
 
@@ -1167,7 +1177,8 @@ public class FipStart extends VdypStartApplication<FipPolygon, FipLayer, FipSpec
 	}
 
 	@Override
-	protected FipSpecies copySpecies(FipSpecies toCopy, Consumer<BaseVdypSpecies.Builder<FipSpecies>> config) {
+	protected FipSpecies
+			copySpecies(FipSpecies toCopy, Consumer<BaseVdypSpecies.Builder<FipSpecies, FipSite, ?>> config) {
 		return FipSpecies.build(builder -> {
 			builder.copy(toCopy);
 		});

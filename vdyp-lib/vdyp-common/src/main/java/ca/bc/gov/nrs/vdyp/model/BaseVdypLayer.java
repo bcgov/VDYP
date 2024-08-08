@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.model;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,12 +12,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdypSite> {
+public abstract class BaseVdypLayer<S extends BaseVdypSpecies<I>, I extends BaseVdypSite> {
 
 	private final PolygonIdentifier polygonIdentifier;
 	private final LayerType layerType;
 	private LinkedHashMap<String, S> species = new LinkedHashMap<>();
-	private LinkedHashMap<String, I> sites = new LinkedHashMap<>();
 	private Optional<Integer> inventoryTypeGroup = Optional.empty();
 
 	protected BaseVdypLayer(
@@ -52,17 +52,9 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 	}
 
 	public LinkedHashMap<String, I> getSites() {
-		return sites;
-	}
-
-	public void setSites(Map<String, I> sites) {
-		this.sites.clear();
-		this.sites.putAll(sites);
-	}
-
-	public void setSites(Collection<I> sites) {
-		this.sites.clear();
-		sites.forEach(spec -> this.sites.put(spec.getSiteGenus(), spec));
+		var result = new LinkedHashMap<String, I>(species.size());
+		species.forEach((key, spec) -> spec.getSite().ifPresent(site -> result.put(key, site)));
+		return result;
 	}
 
 	public Optional<Integer> getInventoryTypeGroup() {
@@ -73,7 +65,7 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 		this.inventoryTypeGroup = inventoryTypeGroup;
 	}
 
-	public abstract static class Builder<T extends BaseVdypLayer<S, I>, S extends BaseVdypSpecies, I extends BaseVdypSite, SB extends BaseVdypSpecies.Builder<S>, IB extends BaseVdypSite.Builder<I>>
+	public abstract static class Builder<T extends BaseVdypLayer<S, I>, S extends BaseVdypSpecies<I>, I extends BaseVdypSite, SB extends BaseVdypSpecies.Builder<S, I, IB>, IB extends BaseVdypSite.Builder<I>>
 			extends ModelClassBuilder<T> {
 		protected Optional<PolygonIdentifier> polygonIdentifier = Optional.empty();
 		protected Optional<LayerType> layerType = Optional.empty();
@@ -124,16 +116,6 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 			return this;
 		}
 
-		public Builder<T, S, I, SB, IB> addSite(Consumer<IB> config) {
-			siteBuilders.add(config);
-			return this;
-		}
-
-		public Builder<T, S, I, SB, IB> addSite(I site) {
-			this.sites.add(site);
-			return this;
-		}
-
 		public Builder<T, S, I, SB, IB> inventoryTypeGroup(int inventoryTypeGroup) {
 			return this.inventoryTypeGroup(Optional.of(inventoryTypeGroup));
 		}
@@ -155,37 +137,7 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 			return this;
 		}
 
-		public <I2 extends BaseVdypSite> Builder<T, S, I, SB, IB>
-				adaptSites(BaseVdypLayer<?, I2> toCopy, BiConsumer<IB, I2> config) {
-			toCopy.getSites().values().forEach(siteToCopy -> {
-				this.adaptSite(siteToCopy, config);
-			});
-			return this;
-		}
-
-		public <I2 extends BaseVdypSite> Builder<T, S, I, SB, IB> adaptSite(I2 toCopy, BiConsumer<IB, I2> config) {
-			this.addSite(builder -> {
-				builder.adapt(toCopy);
-				builder.polygonIdentifier = Optional.empty();
-				builder.layerType = Optional.empty();
-				config.accept(builder, toCopy);
-			});
-			return this;
-		}
-
-		public Builder<T, S, I, SB, IB> copySites(T toCopy, BiConsumer<IB, I> config) {
-			toCopy.getSites().values().forEach(siteToCopy -> {
-				this.addSite(builder -> {
-					builder.copy(siteToCopy);
-					builder.polygonIdentifier = Optional.empty();
-					builder.layerType = Optional.empty();
-					config.accept(builder, siteToCopy);
-				});
-			});
-			return this;
-		}
-
-		public <S2 extends BaseVdypSpecies> Builder<T, S, I, SB, IB>
+		public <S2 extends BaseVdypSpecies<I2>, I2 extends BaseVdypSite> Builder<T, S, I, SB, IB>
 				adaptSpecies(BaseVdypLayer<S2, ?> toCopy, BiConsumer<SB, S2> config) {
 			toCopy.getSpecies().values().forEach(speciesToCopy -> {
 				this.addSpecies(builder -> {
@@ -232,16 +184,12 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 
 		protected abstract S buildSpecies(Consumer<SB> config);
 
-		protected abstract I buildSite(Consumer<IB> config);
-
 		/**
 		 * Build any builders for child objects and store the results. This will clear the stored child builders.
 		 */
 		public void buildChildren() {
 			speciesBuilders.stream().map(this::buildSpecies).collect(Collectors.toCollection(() -> species));
 			speciesBuilders.clear();
-			siteBuilders.stream().map(this::buildSite).collect(Collectors.toCollection(() -> sites));
-			siteBuilders.clear();
 		}
 
 		@Override
@@ -249,7 +197,15 @@ public abstract class BaseVdypLayer<S extends BaseVdypSpecies, I extends BaseVdy
 			super.postProcess(result);
 			buildChildren();
 			result.setSpecies(species);
-			result.setSites(sites);
+		}
+
+		@Override
+		protected String getBuilderId() {
+			return MessageFormat.format(
+					"Layer {0} {1}", //
+					polygonIdentifier.map(Object::toString).orElse("N/A"), //
+					layerType.map(Object::toString).orElse("N/A") //
+			);
 		}
 
 	}

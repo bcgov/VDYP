@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.vri.model;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -7,10 +8,13 @@ import ca.bc.gov.nrs.vdyp.model.BaseVdypSpecies;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.PolygonIdentifier;
 
-public class VriSpecies extends BaseVdypSpecies {
+public class VriSpecies extends BaseVdypSpecies<VriSite> {
 
-	public VriSpecies(PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus) {
-		super(polygonIdentifier, layer, genus, percentGenus);
+	public VriSpecies(
+			PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus,
+			Optional<VriSite> site
+	) {
+		super(polygonIdentifier, layer, genus, percentGenus, site);
 	}
 
 	/**
@@ -35,7 +39,7 @@ public class VriSpecies extends BaseVdypSpecies {
 		return builder.build();
 	}
 
-	public static class Builder extends BaseVdypSpecies.Builder<VriSpecies> {
+	public static class Builder extends BaseVdypSpecies.Builder<VriSpecies, VriSite, VriSite.Builder> {
 
 		@Override
 		protected VriSpecies doBuild() {
@@ -43,8 +47,18 @@ public class VriSpecies extends BaseVdypSpecies {
 					this.polygonIdentifier.get(), //
 					this.layerType.get(), //
 					this.genus.get(), //
-					this.percentGenus.get()
+					this.percentGenus.get(), this.site
 			);
+		}
+
+		@Override
+		protected VriSite buildSite(Consumer<VriSite.Builder> config) {
+			return VriSite.build(builder -> {
+				config.accept(builder);
+				builder.polygonIdentifier(this.polygonIdentifier.get());
+				builder.layerType(this.layerType.get());
+				builder.siteGenus(this.genus);
+			});
 		}
 	}
 

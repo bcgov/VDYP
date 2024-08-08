@@ -229,15 +229,6 @@ public class VriLayer extends BaseVdypLayer<VriSpecies, VriSite> implements Inpu
 		}
 
 		@Override
-		protected VriSite buildSite(Consumer<VriSite.Builder> config) {
-			return VriSite.build(builder -> {
-				config.accept(builder);
-				builder.polygonIdentifier(this.polygonIdentifier.get());
-				builder.layerType(layerType.get());
-			});
-		}
-
-		@Override
 		public Builder copy(VriLayer toCopy) {
 			super.copy(toCopy);
 			this.baseArea(toCopy.getBaseArea());

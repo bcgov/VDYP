@@ -1,19 +1,19 @@
 package ca.bc.gov.nrs.vdyp.fip.model;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import ca.bc.gov.nrs.vdyp.model.BaseVdypSpecies;
 import ca.bc.gov.nrs.vdyp.model.LayerType;
 import ca.bc.gov.nrs.vdyp.model.PolygonIdentifier;
 
-public class FipSpecies extends BaseVdypSpecies {
+public class FipSpecies extends BaseVdypSpecies<FipSite> {
 
-	public FipSpecies(PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus) {
-		super(polygonIdentifier, layer, genus, percentGenus);
-	}
-
-	public FipSpecies(FipSpecies toCopy) {
-		super(toCopy);
+	public FipSpecies(
+			PolygonIdentifier polygonIdentifier, LayerType layer, String genus, float percentGenus,
+			Optional<FipSite> site
+	) {
+		super(polygonIdentifier, layer, genus, percentGenus, site);
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class FipSpecies extends BaseVdypSpecies {
 		return result;
 	}
 
-	public static class Builder extends BaseVdypSpecies.Builder<FipSpecies> {
+	public static class Builder extends BaseVdypSpecies.Builder<FipSpecies, FipSite, FipSite.Builder> {
 
 		@Override
 		protected FipSpecies doBuild() {
@@ -64,8 +64,18 @@ public class FipSpecies extends BaseVdypSpecies {
 					this.polygonIdentifier.get(), //
 					this.layerType.get(), //
 					this.genus.get(), //
-					this.percentGenus.get()
+					this.percentGenus.get(), this.site
 			);
+		}
+
+		@Override
+		protected FipSite buildSite(Consumer<FipSite.Builder> config) {
+			return FipSite.build(builder -> {
+				builder.siteGenus(this.genus.get());
+				builder.polygonIdentifier(this.polygonIdentifier.get());
+				builder.layerType(this.layerType.get());
+				config.accept(builder);
+			});
 		}
 	}
 }

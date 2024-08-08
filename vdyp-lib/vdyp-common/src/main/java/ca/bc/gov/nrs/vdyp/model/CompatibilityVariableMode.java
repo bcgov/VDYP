@@ -8,7 +8,7 @@ public enum CompatibilityVariableMode {
 	/**
 	 * Apply compatibility variables to all but volume
 	 */
-	NO_VOLUME, // 1
+	ALL_BUT_VOLUME, // 1
 	/**
 	 * Apply compatibility variables to all components
 	 */

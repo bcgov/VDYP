@@ -2006,10 +2006,9 @@ class VriStartTest {
 						sb.genus("B");
 						sb.percentGenus(10);
 						sb.addSpecies("BL", 100);
-					});
-					lb.addSite(sb -> {
-						sb.siteGenus("B");
-						sb.siteSpecies("BL");
+						sb.addSite(ib -> {
+							ib.siteSpecies("BL");
+						});
 					});
 
 					// 2
@@ -2017,11 +2016,10 @@ class VriStartTest {
 						sb.genus("C");
 						sb.percentGenus(20);
 						sb.addSpecies("CW", 100);
-					});
-					lb.addSite(sb -> {
-						sb.siteGenus("C");
-						sb.siteCurveNumber(11);
-						sb.siteSpecies("CW");
+						sb.addSite(ib -> {
+							ib.siteCurveNumber(11);
+							ib.siteSpecies("CW");
+						});
 					});
 
 					// 3
@@ -2029,16 +2027,15 @@ class VriStartTest {
 						sb.genus("F");
 						sb.percentGenus(30);
 						sb.addSpecies("FD", 100);
-					});
-					lb.addSite(sb -> {
-						sb.siteGenus("F");
-						sb.siteCurveNumber(23);
-						sb.ageTotal(24);
-						sb.height(7.6f);
-						sb.siteIndex(19.7f);
-						sb.yearsToBreastHeight(9);
-						sb.breastHeightAge(15);
-						sb.siteSpecies("FD");
+						sb.addSite(ib -> {
+							ib.siteCurveNumber(23);
+							ib.ageTotal(24);
+							ib.height(7.6f);
+							ib.siteIndex(19.7f);
+							ib.yearsToBreastHeight(9);
+							ib.breastHeightAge(15);
+							ib.siteSpecies("FD");
+						});
 					});
 
 					// 4
@@ -2046,11 +2043,10 @@ class VriStartTest {
 						sb.genus("H");
 						sb.percentGenus(30);
 						sb.addSpecies("HW", 100);
-					});
-					lb.addSite(sb -> {
-						sb.siteGenus("H");
-						sb.siteCurveNumber(37);
-						sb.siteSpecies("HW");
+						sb.addSite(ib -> {
+							ib.siteCurveNumber(37);
+							ib.siteSpecies("HW");
+						});
 					});
 
 					// 5
@@ -2058,11 +2054,10 @@ class VriStartTest {
 						sb.genus("S");
 						sb.percentGenus(10);
 						sb.addSpecies("S", 100);
-					});
-					lb.addSite(sb -> {
-						sb.siteGenus("S");
-						sb.siteCurveNumber(71);
-						sb.siteSpecies("S");
+						sb.addSite(ib -> {
+							ib.siteCurveNumber(71);
+							ib.siteSpecies("S");
+						});
 					});
 				});
 			});
@@ -2299,57 +2294,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -2492,57 +2482,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -2683,57 +2668,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(6f); // Set this low so we have to increment year
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(6f); // Set this low so we have to increment year
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -2912,57 +2892,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -3112,57 +3087,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 				pb.addLayer(lb -> {
 					lb.layerType(LayerType.VETERAN);
@@ -3179,57 +3149,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -3358,57 +3323,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 
@@ -3562,57 +3522,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 				pb.addLayer(lb -> {
 					lb.layerType(LayerType.VETERAN);
@@ -3629,57 +3584,52 @@ class VriStartTest {
 						spb.genus("B");
 						spb.percentGenus(10);
 						spb.addSpecies("BL", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("BL");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("C");
 						spb.percentGenus(20);
 						spb.addSpecies("CW", 100);
+						spb.addSite(sib -> {
+							sib.siteCurveNumber(11);
+							sib.siteSpecies("CW");
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("F");
 						spb.percentGenus(30);
 						spb.addSpecies("FD", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("FD");
+							sib.siteCurveNumber(23);
+							sib.siteIndex(19.7f);
+							sib.height(7.6f);
+							sib.yearsToBreastHeight(9);
+							sib.breastHeightAge(15);
+							sib.ageTotal(24);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("H");
 						spb.percentGenus(30);
 						spb.addSpecies("HW", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("HW");
+							sib.siteCurveNumber(37);
+						});
 					});
 					lb.addSpecies(spb -> {
 						spb.genus("S");
 						spb.percentGenus(10);
 						spb.addSpecies("S", 100);
+						spb.addSite(sib -> {
+							sib.siteSpecies("S");
+							sib.siteCurveNumber(71);
+						});
 					});
 
-					lb.addSite(sib -> {
-						sib.siteGenus("B");
-						sib.siteSpecies("BL");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("C");
-						sib.siteCurveNumber(11);
-						sib.siteSpecies("CW");
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("F");
-						sib.siteSpecies("FD");
-						sib.siteCurveNumber(23);
-						sib.siteIndex(19.7f);
-						sib.height(7.6f);
-						sib.yearsToBreastHeight(9);
-						sib.breastHeightAge(15);
-						sib.ageTotal(24);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("H");
-						sib.siteSpecies("HW");
-						sib.siteCurveNumber(37);
-					});
-					lb.addSite(sib -> {
-						sib.siteGenus("S");
-						sib.siteSpecies("S");
-						sib.siteCurveNumber(71);
-					});
 				});
 			});
 

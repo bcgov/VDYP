@@ -69,7 +69,7 @@ import ca.bc.gov.nrs.vdyp.model.VdypSpecies;
 import ca.bc.gov.nrs.vdyp.model.VdypUtilizationHolder;
 import ca.bc.gov.nrs.vdyp.model.VolumeComputeMode;
 
-public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional<Float>, S, I>, L extends BaseVdypLayer<S, I> & InputLayer, S extends BaseVdypSpecies, I extends BaseVdypSite>
+public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional<Float>, S, I>, L extends BaseVdypLayer<S, I> & InputLayer, S extends BaseVdypSpecies<I>, I extends BaseVdypSite>
 		extends VdypApplication implements Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(VdypStartApplication.class);
@@ -170,8 +170,8 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 
 	public EstimationMethods estimationMethods;
 
-	static final Comparator<BaseVdypSpecies> PERCENT_GENUS_DESCENDING = Utils
-			.compareUsing(BaseVdypSpecies::getPercentGenus).reversed();
+	static final Comparator<BaseVdypSpecies<?>> PERCENT_GENUS_DESCENDING = Utils
+			.compareUsing(BaseVdypSpecies<?>::getPercentGenus).reversed();
 
 	/**
 	 * When finding primary species these genera should be combined
@@ -263,7 +263,7 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 		closeVriWriter();
 	}
 
-	protected Coefficients getCoeForSpecies(BaseVdypSpecies species, ControlKey controlKey) {
+	protected Coefficients getCoeForSpecies(BaseVdypSpecies<?> species, ControlKey controlKey) {
 		var coeMap = Utils.<Map<String, Coefficients>>expectParsedControl(controlMap, controlKey, java.util.Map.class);
 		return coeMap.get(species.getGenus());
 	}
@@ -300,7 +300,7 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 		return percentTotal;
 	}
 
-	protected abstract S copySpecies(S toCopy, Consumer<BaseVdypSpecies.Builder<S>> config);
+	protected abstract S copySpecies(S toCopy, Consumer<BaseVdypSpecies.Builder<S, I, ?>> config);
 
 	/**
 	 * Returns the primary, and secondary if present species records as a one or two element list.
@@ -633,7 +633,7 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 
 	public S leadGenus(L fipLayer) {
 		return fipLayer.getSpecies().values().stream()
-				.sorted(Utils.compareUsing(BaseVdypSpecies::getFractionGenus).reversed()).findFirst().orElseThrow();
+				.sorted(Utils.compareUsing(BaseVdypSpecies<?>::getFractionGenus).reversed()).findFirst().orElseThrow();
 	}
 
 	protected L getPrimaryLayer(P poly) throws StandProcessingException {
@@ -896,12 +896,17 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 		return quadMeanDiameter;
 	}
 
-	protected Map<String, Float>
-			applyGroups(BaseVdypPolygon<?, ?, ?, ?> fipPolygon, Collection<VdypSpecies> vdypSpecies)
-					throws ProcessingException {
-		// Lookup volume group, Decay Group, and Breakage group for each species.
+	protected Map<String, Float> applyGroupsAndGetTargetPercentages(
+			BaseVdypPolygon<?, ?, ?, ?> fipPolygon, Collection<VdypSpecies> vdypSpecies
+	) throws ProcessingException {
 
-		Map<String, Float> targetPercentages = new HashMap<>(vdypSpecies.size());
+		applyGroups(fipPolygon, vdypSpecies);
+		return getTargetPercentages(vdypSpecies);
+	}
+
+	protected void applyGroups(BaseVdypPolygon<?, ?, ?, ?> fipPolygon, Collection<VdypSpecies> vdypSpecies)
+			throws ProcessingException {
+		// Lookup volume group, Decay Group, and Breakage group for each species.
 
 		BecDefinition bec = Utils.getBec(fipPolygon.getBiogeoclimaticZone(), controlMap);
 		var volumeGroupMap = getGroupMap(ControlKey.VOLUME_EQN_GROUPS);
@@ -918,6 +923,15 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 			vSpec.setVolumeGroup(volumeGroup);
 			vSpec.setDecayGroup(decayGroup);
 			vSpec.setBreakageGroup(breakageGroup);
+
+		}
+
+	}
+
+	protected Map<String, Float> getTargetPercentages(Collection<VdypSpecies> vdypSpecies) {
+		Map<String, Float> targetPercentages = new HashMap<>(vdypSpecies.size());
+
+		for (var vSpec : vdypSpecies) {
 
 			targetPercentages.put(vSpec.getGenus(), vSpec.getPercentGenus());
 		}
@@ -1116,6 +1130,7 @@ public abstract class VdypStartApplication<P extends BaseVdypPolygon<L, Optional
 		);
 	}
 
+	// YUC1
 	public void computeUtilizationComponentsPrimary(
 			BecDefinition bec, VdypLayer vdypLayer, VolumeComputeMode volumeComputeMode,
 			CompatibilityVariableMode compatibilityVariableMode

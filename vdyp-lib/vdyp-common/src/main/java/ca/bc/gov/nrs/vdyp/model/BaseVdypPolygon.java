@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.model;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseVdypPolygon<L extends BaseVdypLayer<SP, SI>, PA, SP extends BaseVdypSpecies, SI extends BaseVdypSite> {
+public abstract class BaseVdypPolygon<L extends BaseVdypLayer<SP, SI>, PA, SP extends BaseVdypSpecies<SI>, SI extends BaseVdypSite> {
 
 	private PolygonIdentifier polygonIdentifier; // FIP_P/POLYDESC
 	private PA percentAvailable; // FIP_P2/PCTFLAND
@@ -107,10 +108,10 @@ public abstract class BaseVdypPolygon<L extends BaseVdypLayer<SP, SI>, PA, SP ex
 			T extends BaseVdypPolygon<L, PA, SP, SI>, //
 			L extends BaseVdypLayer<SP, SI>, //
 			PA, //
-			SP extends BaseVdypSpecies, //
+			SP extends BaseVdypSpecies<SI>, //
 			SI extends BaseVdypSite, //
 			LB extends BaseVdypLayer.Builder<L, SP, SI, SPB, SIB>, //
-			SPB extends BaseVdypSpecies.Builder<SP>, //
+			SPB extends BaseVdypSpecies.Builder<SP, SI, SIB>, //
 			SIB extends BaseVdypSite.Builder<SI>> //
 
 			extends ModelClassBuilder<T> {
@@ -252,6 +253,14 @@ public abstract class BaseVdypPolygon<L extends BaseVdypLayer<SP, SI>, PA, SP ex
 		public void buildChildren() {
 			layersBuilders.stream().map(this::buildLayer).collect(Collectors.toCollection(() -> layers));
 			layersBuilders.clear();
+		}
+
+		@Override
+		protected String getBuilderId() {
+			return MessageFormat.format(
+					"Polygon {0}", //
+					polygonIdentifier.map(Object::toString).orElse("N/A") //
+			);
 		}
 
 	}

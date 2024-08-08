@@ -1,11 +1,9 @@
 package ca.bc.gov.nrs.vdyp.model;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
-public class SingleSiteLayer<S extends BaseVdypSpecies, I extends BaseVdypSite> extends BaseVdypLayer<S, I> {
+public class SingleSiteLayer<S extends BaseVdypSpecies<I>, I extends BaseVdypSite> extends BaseVdypLayer<S, I> {
 
 	protected SingleSiteLayer(
 			PolygonIdentifier polygonIdentifier, LayerType layer, Optional<Integer> inventoryTypeGroup
@@ -55,26 +53,6 @@ public class SingleSiteLayer<S extends BaseVdypSpecies, I extends BaseVdypSite> 
 		var result = new LinkedHashMap<String, I>();
 		result.putAll(super.getSites());
 		return result;
-	}
-
-	@Override
-	public void setSites(Map<String, I> sites) {
-		if (sites.size() > 1) {
-			throw new IllegalArgumentException(
-					"Layer type " + this.getClass().getSimpleName() + " can only have one site"
-			);
-		}
-		super.setSites(sites);
-	}
-
-	@Override
-	public void setSites(Collection<I> sites) {
-		if (sites.size() > 1) {
-			throw new IllegalArgumentException(
-					"Layer type " + this.getClass().getSimpleName() + " can only have one site"
-			);
-		}
-		super.setSites(sites);
 	}
 
 }

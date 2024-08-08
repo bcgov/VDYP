@@ -594,7 +594,7 @@ public class TestUtils {
 	 * @param id
 	 * @return The species
 	 */
-	public static <L extends BaseVdypLayer<S, ?>, S extends BaseVdypSpecies> S assertHasSpecies(L layer, String id) {
+	public static <L extends BaseVdypLayer<S, ?>, S extends BaseVdypSpecies<?>> S assertHasSpecies(L layer, String id) {
 
 		assertThat(layer, hasProperty("species", hasKey(id)));
 
@@ -613,7 +613,7 @@ public class TestUtils {
 	 * @param ids
 	 * @return the first species specified
 	 */
-	public static <L extends BaseVdypLayer<S, ?>, S extends BaseVdypSpecies> S
+	public static <L extends BaseVdypLayer<S, ?>, S extends BaseVdypSpecies<?>> S
 			assertHasSpecies(L layer, String... ids) {
 		assertThat(layer, hasProperty("species", aMapWithSize(ids.length)));
 

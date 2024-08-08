@@ -3,6 +3,7 @@ package ca.bc.gov.nrs.vdyp.model;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.isPolyId;
 import static ca.bc.gov.nrs.vdyp.test.VdypMatchers.present;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
@@ -28,12 +29,18 @@ class VdypLayerTest {
 			builder.polygonIdentifier("Test", 2024);
 			builder.layerType(LayerType.PRIMARY);
 
-			builder.addSite(siteBuilder -> {
-				siteBuilder.height(10f);
-				siteBuilder.ageTotal(42f);
-				siteBuilder.yearsToBreastHeight(2f);
-				siteBuilder.siteGenus("PL");
-				siteBuilder.siteCurveNumber(0);
+			builder.addSpecies(specBuilder -> {
+				specBuilder.genus("PL");
+				specBuilder.percentGenus(100);
+				specBuilder.volumeGroup(-1);
+				specBuilder.decayGroup(-1);
+				specBuilder.breakageGroup(-1);
+				specBuilder.addSite(siteBuilder -> {
+					siteBuilder.height(10f);
+					siteBuilder.ageTotal(42f);
+					siteBuilder.yearsToBreastHeight(2f);
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 		});
@@ -42,7 +49,7 @@ class VdypLayerTest {
 		assertThat(result, hasProperty("ageTotal", present(is(42f))));
 		assertThat(result, hasProperty("yearsToBreastHeight", present(is(2f))));
 		assertThat(result, hasProperty("height", present(is(10f))));
-		assertThat(result, hasProperty("species", anEmptyMap()));
+		assertThat(result, hasProperty("species", aMapWithSize(1)));
 	}
 
 	@Test
@@ -65,12 +72,18 @@ class VdypLayerTest {
 
 		var result = VdypLayer.build(poly, builder -> {
 			builder.layerType(LayerType.PRIMARY);
-			builder.addSite(siteBuilder -> {
-				siteBuilder.height(10f);
-				siteBuilder.ageTotal(42f);
-				siteBuilder.yearsToBreastHeight(2f);
-				siteBuilder.siteGenus("PL");
-				siteBuilder.siteCurveNumber(0);
+			builder.addSpecies(specBuilder -> {
+				specBuilder.genus("PL");
+				specBuilder.percentGenus(100);
+				specBuilder.volumeGroup(-1);
+				specBuilder.decayGroup(-1);
+				specBuilder.breakageGroup(-1);
+				specBuilder.addSite(siteBuilder -> {
+					siteBuilder.height(10f);
+					siteBuilder.ageTotal(42f);
+					siteBuilder.yearsToBreastHeight(2f);
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
 
 		});
@@ -80,7 +93,7 @@ class VdypLayerTest {
 		assertThat(result, hasProperty("ageTotal", present(is(42f))));
 		assertThat(result, hasProperty("yearsToBreastHeight", present(is(2f))));
 		assertThat(result, hasProperty("height", present(is(10f))));
-		assertThat(result, hasProperty("species", anEmptyMap()));
+		assertThat(result, hasProperty("species", aMapWithSize(1)));
 
 		assertThat(poly.getLayers(), hasEntry(LayerType.PRIMARY, result));
 	}
@@ -94,13 +107,20 @@ class VdypLayerTest {
 		var result = VdypLayer.build(builder -> {
 			builder.polygonIdentifier("Test", 2024);
 			builder.layerType(LayerType.PRIMARY);
-			builder.addSite(siteBuilder -> {
-				siteBuilder.height(10f);
-				siteBuilder.ageTotal(42f);
-				siteBuilder.yearsToBreastHeight(2f);
-				siteBuilder.siteGenus("PL");
-				siteBuilder.siteCurveNumber(0);
+			builder.addSpecies(specBuilder -> {
+				specBuilder.genus("PL");
+				specBuilder.percentGenus(100);
+				specBuilder.volumeGroup(-1);
+				specBuilder.decayGroup(-1);
+				specBuilder.breakageGroup(-1);
+				specBuilder.addSite(siteBuilder -> {
+					siteBuilder.height(10f);
+					siteBuilder.ageTotal(42f);
+					siteBuilder.yearsToBreastHeight(2f);
+					siteBuilder.siteCurveNumber(0);
+				});
 			});
+
 			builder.addSpecies(specBuilder -> {
 				specBuilder.genus("B");
 				specBuilder.percentGenus(90f);
@@ -140,105 +160,12 @@ class VdypLayerTest {
 	}
 
 	@Test
-	void buildAdaptSites() throws Exception {
-
-		var control = EasyMock.createControl();
-
-		BaseVdypLayer<BaseVdypSpecies, BaseVdypSite> toCopy = control.createMock(BaseVdypLayer.class);
-		BaseVdypSite siteToCopy = control.createMock(BaseVdypSite.class);
-
-		EasyMock.expect(toCopy.getPolygonIdentifier()).andStubReturn(new PolygonIdentifier("Test", 2024));
-		EasyMock.expect(siteToCopy.getPolygonIdentifier()).andStubReturn(new PolygonIdentifier("Test", 2024));
-		EasyMock.expect(toCopy.getLayerType()).andStubReturn(LayerType.PRIMARY);
-		EasyMock.expect(siteToCopy.getLayerType()).andStubReturn(LayerType.PRIMARY);
-		EasyMock.expect(toCopy.getInventoryTypeGroup()).andStubReturn(Optional.of(12));
-		EasyMock.expect(toCopy.getSites())
-				.andStubReturn(new LinkedHashMap<>(Collections.singletonMap("B", siteToCopy)));
-		EasyMock.expect(siteToCopy.getSiteGenus()).andStubReturn("B");
-		EasyMock.expect(siteToCopy.getAgeTotal()).andStubReturn(Optional.of(30f));
-		EasyMock.expect(siteToCopy.getYearsToBreastHeight()).andStubReturn(Optional.of(4f));
-		EasyMock.expect(siteToCopy.getHeight()).andStubReturn(Optional.of(20f));
-		EasyMock.expect(siteToCopy.getSiteIndex()).andStubReturn(Optional.of(19.7f));
-		EasyMock.expect(siteToCopy.getSiteCurveNumber()).andStubReturn(Optional.of(13));
-
-		control.replay();
-
-		var result = VdypLayer.build(builder -> {
-
-			builder.adapt(toCopy);
-			builder.adaptSites(toCopy, (siteBuilder, site) -> {
-				// Do Nothing
-			});
-
-		});
-		assertThat(result, hasProperty("sites", hasEntry(is("B"), hasProperty("siteGenus", is("B")))));
-		var resultSite = result.getSite().get();
-		assertThat(resultSite, hasProperty("polygonIdentifier", isPolyId("Test", 2024)));
-		assertThat(resultSite, hasProperty("layerType", is(LayerType.PRIMARY)));
-		assertThat(resultSite, hasProperty("siteGenus", is("B")));
-		assertThat(resultSite, hasProperty("ageTotal", present(is(30f))));
-		assertThat(resultSite, hasProperty("yearsToBreastHeight", present(is(4f))));
-		assertThat(resultSite, hasProperty("height", present(is(20f))));
-		assertThat(resultSite, hasProperty("siteIndex", present(is(19.7f))));
-		assertThat(resultSite, hasProperty("siteCurveNumber", present(is(13))));
-
-		control.verify();
-
-	}
-
-	@Test
-	void buildCopySites() throws Exception {
-
-		var toCopy = VdypLayer.build(builder -> {
-			builder.polygonIdentifier("Test", 2024);
-			builder.layerType(LayerType.PRIMARY);
-
-			builder.addSite(siteBuilder -> {
-				siteBuilder.height(10f);
-				siteBuilder.ageTotal(42f);
-				siteBuilder.yearsToBreastHeight(2f);
-				siteBuilder.siteGenus("PL");
-				siteBuilder.siteIndex(19.7f);
-				siteBuilder.siteCurveNumber(13);
-			});
-
-		});
-
-		var result = VdypLayer.build(builder -> {
-
-			builder.adapt(toCopy);
-			builder.adaptSites(toCopy, (siteBuilder, site) -> {
-				// Do Nothing
-			});
-
-		});
-		assertThat(result, hasProperty("polygonIdentifier", isPolyId("Test", 2024)));
-		assertThat(result, hasProperty("layerType", is(LayerType.PRIMARY)));
-		assertThat(result, hasProperty("ageTotal", present(is(42f))));
-		assertThat(result, hasProperty("yearsToBreastHeight", present(is(2f))));
-		assertThat(result, hasProperty("height", present(is(10f))));
-		assertThat(result, hasProperty("species", anEmptyMap()));
-
-		assertThat(result, hasProperty("sites", hasEntry(is("PL"), hasProperty("siteGenus", is("PL")))));
-		var resultSite = result.getSite().get();
-		assertThat(resultSite, hasProperty("polygonIdentifier", isPolyId("Test", 2024)));
-		assertThat(resultSite, hasProperty("layerType", is(LayerType.PRIMARY)));
-		assertThat(resultSite, hasProperty("siteGenus", is("PL")));
-		assertThat(resultSite, hasProperty("ageTotal", present(is(42f))));
-		assertThat(resultSite, hasProperty("yearsToBreastHeight", present(is(2f))));
-		assertThat(resultSite, hasProperty("height", present(is(10f))));
-		assertThat(resultSite, hasProperty("siteIndex", present(is(19.7f))));
-		assertThat(resultSite, hasProperty("siteCurveNumber", present(is(13))));
-
-	}
-
-	@Test
 	void buildAdaptSpecies() throws Exception {
 
 		var control = EasyMock.createControl();
 
-		BaseVdypLayer<BaseVdypSpecies, BaseVdypSite> toCopy = control.createMock(BaseVdypLayer.class);
-		BaseVdypSpecies speciesToCopy = control.createMock(BaseVdypSpecies.class);
+		BaseVdypLayer<BaseVdypSpecies<BaseVdypSite>, BaseVdypSite> toCopy = control.createMock(BaseVdypLayer.class);
+		BaseVdypSpecies<BaseVdypSite> speciesToCopy = control.createMock(BaseVdypSpecies.class);
 
 		EasyMock.expect(toCopy.getPolygonIdentifier()).andStubReturn(new PolygonIdentifier("Test", 2024));
 		EasyMock.expect(speciesToCopy.getPolygonIdentifier()).andStubReturn(new PolygonIdentifier("Test", 2024));

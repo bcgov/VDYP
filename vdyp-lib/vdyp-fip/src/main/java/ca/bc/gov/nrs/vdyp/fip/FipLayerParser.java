@@ -101,7 +101,7 @@ public class FipLayerParser
 							FipLayerPrimary fipLayerPrimary = FipLayerPrimary.buildPrimary(flBuilder -> {
 								flBuilder.polygonIdentifier(polygonId);
 
-								flBuilder.addSite(siteBuilder -> {
+								flBuilder.addSiteWithoutSpecies(siteBuilder -> {
 									siteBuilder.ageTotal(ageTotal);
 									siteBuilder.yearsToBreastHeight(yearsToBreastHeight);
 									siteBuilder.height(height);
@@ -109,7 +109,6 @@ public class FipLayerParser
 									siteBuilder.siteGenus(siteSp0.get());
 									siteBuilder.siteCurveNumber(siteCurveNumber);
 									siteBuilder.siteSpecies(siteSp64.get());
-
 								});
 
 								flBuilder.crownClosure(crownClosure);
@@ -122,7 +121,7 @@ public class FipLayerParser
 							FipLayer fipLayerVeteran = FipLayer.build(flBuilder -> {
 								flBuilder.polygonIdentifier(polygonId);
 								flBuilder.layerType(LayerType.VETERAN);
-								flBuilder.addSite(siteBuilder -> {
+								flBuilder.addSiteWithoutSpecies(siteBuilder -> {
 									siteBuilder.ageTotal(ageTotal);
 									siteBuilder.yearsToBreastHeight(yearsToBreastHeight);
 									siteBuilder.height(height);

@@ -1,7 +1,5 @@
 package ca.bc.gov.nrs.vdyp.model;
 
-import java.util.Arrays;
-
 /**
  * Common accessors for utilization vecors shared by Layer and Species
  *

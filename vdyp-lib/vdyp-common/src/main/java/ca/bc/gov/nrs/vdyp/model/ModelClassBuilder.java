@@ -1,5 +1,6 @@
 package ca.bc.gov.nrs.vdyp.model;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -39,13 +40,25 @@ public abstract class ModelClassBuilder<T> {
 	 */
 	public T build() {
 		Collection<String> errors = new LinkedList<>();
+		preProcess();
 		check(errors);
 		if (!errors.isEmpty()) {
-			throw new IllegalStateException(String.join(", ", errors));
+			throw new IllegalStateException(
+					MessageFormat.format("While building {0}: {1}", this.getBuilderId(), String.join(", ", errors))
+			);
 		}
 		var result = doBuild();
 		postProcess(result);
 		return result;
+	}
+
+	protected abstract String getBuilderId();
+
+	/**
+	 * Additional steps before building
+	 */
+	protected void preProcess() {
+		// Do Nothing
 	}
 
 	/**
