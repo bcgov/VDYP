@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vdyp-proofofconcept</artifactId>
+  
+  
+  <name>Variable Density Yield Project - Proof Of Concept</name>
+  <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>ca.bc.gov.nrs.vdyp</groupId>
+    <artifactId>vdyp-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.revelc.code.formatter</groupId>
+					<artifactId>formatter-maven-plugin</artifactId>
+					<dependencies>
+						<dependency>
+							<groupId>ca.bc.gov.nrs.vdyp</groupId>
+							<artifactId>vdyp-buildtools</artifactId>
+							<version>${project.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+        	<artifactId>javafx-controls</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openjfx</groupId>
+        	<artifactId>javafx-fxml</artifactId>
+		</dependency>
+	</dependencies>
+</project>

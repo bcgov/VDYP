@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.7" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.SiteInformationTableSceneController">
+   <center>
+      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+            <Tab text="Model Parameter Selection">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox prefHeight="335.0" prefWidth="594.0">
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                           <children>
+                              <Label text="Site Information" />
+                              <Separator prefHeight="7.0" prefWidth="297.0" />
+                              <GridPane prefHeight="139.0" prefWidth="574.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="21.0" minHeight="0.0" prefHeight="8.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="56.0" minHeight="0.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="110.0" minHeight="0.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="125.0" minHeight="0.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="23.0" minHeight="6.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="BEC Zone">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="ECO Zone" GridPane.columnIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <ChoiceBox fx:id="becZone" prefHeight="15.0" prefWidth="150.0" GridPane.rowIndex="1" />
+                                    <ChoiceBox fx:id="ecoZone" prefHeight="15.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <CheckBox mnemonicParsing="false" prefHeight="0.0" prefWidth="287.0" text="Include Secondary Dominant Height in Yield Table" GridPane.rowIndex="2">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <Label text="Site Species" GridPane.rowIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Site Index Curve" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <ChoiceBox fx:id="siteSpecies" prefHeight="15.0" prefWidth="150.0" GridPane.rowIndex="4" />
+                                    <ChoiceBox fx:id="siteIndexCurve" prefHeight="25.0" prefWidth="204.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label text="*Ministry Default Curve for this Species" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets bottom="2.0" />
+                                       </padding>
+                                       <GridPane.margin>
+                                          <Insets bottom="3.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                 </children>
+                              </GridPane>
+                              <HBox prefHeight="26.0" prefWidth="574.0" spacing="15.0">
+                                 <children>
+                                    <Label text="Site Species Values:">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <RadioButton mnemonicParsing="false" text="Computed">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sitespeciesvalues" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton mnemonicParsing="false" text="Supplied">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sitespeciesvalues" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                 </children>
+                                 <padding>
+                                    <Insets right="15.0" />
+                                 </padding>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </HBox>
+                              <GridPane prefHeight="135.0" prefWidth="574.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <ChoiceBox fx:id="ageType" prefHeight="15.0" prefWidth="150.0" GridPane.rowIndex="1" />
+                                    <RadioButton mnemonicParsing="false" onAction="#standAgeSelected" text="Float" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="floatgroup" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <Label text="Age Type">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Age (years)" GridPane.columnIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Height (meters)" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="BHA 50 Site Index" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <RadioButton mnemonicParsing="false" onAction="#standHeightSelected" text="Float" toggleGroup="$floatgroup" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <RadioButton mnemonicParsing="false" onAction="#siteIndexSelected" selected="true" text="Float" toggleGroup="$floatgroup" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <Spinner fx:id="standAge" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Spinner fx:id="standHeight" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Spinner fx:id="bha50SiteIndex" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                 </children>
+                              </GridPane>
+                              <Separator prefHeight="13.0" prefWidth="574.0">
+                                 <VBox.margin>
+                                    <Insets top="6.0" />
+                                 </VBox.margin>
+                              </Separator>
+                           </children>
+                        </VBox>
+                        <Button layoutX="253.0" layoutY="328.0" mnemonicParsing="false" onAction="#setDefaults" text="Set as Default" />
+                        <Button fx:id="runButton" layoutX="505.0" layoutY="328.0" mnemonicParsing="false" text="Run Model" />
+                        <Button layoutX="348.0" layoutY="328.0" mnemonicParsing="false" onAction="#cancelButtonAction" text="Cancel" />
+                        <Button fx:id="nextPageButton" layoutX="476.0" layoutY="330.0" mnemonicParsing="false" onAction="#switchToScene3" prefHeight="21.0" prefWidth="8.0" text="&gt;">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                        <Button layoutX="416.0" layoutY="330.0" mnemonicParsing="false" onAction="#switchToScene1" prefHeight="22.0" prefWidth="21.0" text="&lt;">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                        <Label layoutX="407.0" layoutY="350.0" text="Previous">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="437.0" layoutY="333.0" prefHeight="16.0" prefWidth="39.0" text="  2 of 5">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="476.0" layoutY="350.0" text="Next">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab fx:id="modelReport" text="Model Report">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea fx:id="modelReportText" layoutX="22.0" layoutY="12.0" prefHeight="306.0" prefWidth="557.0" />
+                        <Button layoutX="227.0" layoutY="332.0" mnemonicParsing="false" text="Print Report" />
+                        <Button layoutX="318.0" layoutY="332.0" mnemonicParsing="false" text="Load Report" />
+                        <Button layoutX="412.0" layoutY="332.0" mnemonicParsing="false" text="Save Report" />
+                        <Button fx:id="runButtonReport" layoutX="504.0" layoutY="332.0" mnemonicParsing="false" text="Run Model" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="View Log File">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane hgap="30.0" layoutX="27.0" layoutY="26.0" maxHeight="60.0" prefHeight="40.0" prefWidth="327.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="183.0" minWidth="10.0" prefWidth="165.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="10.0" prefWidth="162.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="21.0" minHeight="8.0" prefHeight="12.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="47.0" minHeight="10.0" prefHeight="43.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Logging On">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label text="Logging Type" GridPane.columnIndex="1">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <ChoiceBox fx:id="loggingOn" prefWidth="150.0" GridPane.rowIndex="1" />
+                              <ChoiceBox fx:id="loggingType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           </children>
+                        </GridPane>
+                        <TextArea layoutX="26.0" layoutY="84.0" prefHeight="237.0" prefWidth="549.0" />
+                        <Button layoutX="389.0" layoutY="332.0" mnemonicParsing="false" text="Print Log File" />
+                        <Button layoutX="490.0" layoutY="332.0" mnemonicParsing="false" text="Save Log File" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>

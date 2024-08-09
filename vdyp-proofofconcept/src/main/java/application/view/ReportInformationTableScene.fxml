@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.7" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.ReportInformationTableSceneController">
+   <center>
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+            <Tab fx:id="modelParameterSelection" text="Model Parameter Selection">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="338.0" prefWidth="600.0">
+                     <children>
+                        <VBox prefHeight="323.0" prefWidth="600.0">
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                           <children>
+                              <Label text="Report Information" />
+                              <Separator prefHeight="20.0" prefWidth="574.0" />
+                              <GridPane>
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Starting Age">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Finishing Age" GridPane.columnIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Age Increment" GridPane.columnIndex="2">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Spinner fx:id="startingAge" editable="true" GridPane.rowIndex="1" />
+                                    <Spinner fx:id="finishingAge" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Spinner fx:id="ageIncrement" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                 </children>
+                              </GridPane>
+                              <GridPane>
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0" minWidth="10.0" prefWidth="95.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="104.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="84.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="147.0" minWidth="10.0" prefWidth="127.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="163.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label prefHeight="29.0" prefWidth="78.0" text="Volume Reported">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                       <padding>
+                                          <Insets bottom="3.0" />
+                                       </padding>
+                                    </Label>
+                                    <CheckBox fx:id="wholeStem" mnemonicParsing="false" text="Whole Stem" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <CheckBox fx:id="closeUtilization" mnemonicParsing="false" text="Close Utilization" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <CheckBox fx:id="netDecay" mnemonicParsing="false" text="Net Decay" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <CheckBox fx:id="netDecayWaste" mnemonicParsing="false" text="Net Decay and Waste" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <CheckBox fx:id="netDecayWasteBreakage" mnemonicParsing="false" prefHeight="28.0" prefWidth="165.0" text="Net Decay, Waste and Breakage" wrapText="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                 </children>
+                                 <padding>
+                                    <Insets top="5.0" />
+                                 </padding>
+                              </GridPane>
+                              <GridPane>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0" minWidth="10.0" prefWidth="98.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="117.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="113.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="147.0" minWidth="10.0" prefWidth="109.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="143.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <CheckBox fx:id="computedMAI" mnemonicParsing="false" text="Computed MAI" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <CheckBox fx:id="speciesCompostion" mnemonicParsing="false" text="Species Compostion" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <Label prefHeight="1.0" prefWidth="76.0" text="Include in Report">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <GridPane.margin>
+                                          <Insets top="8.0" />
+                                       </GridPane.margin>
+                                       <padding>
+                                          <Insets bottom="8.0" />
+                                       </padding>
+                                    </Label>
+                                    <CheckBox fx:id="culminationValues" mnemonicParsing="false" text="Culmination Values" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </CheckBox>
+                                    <Label text="Projection Type" GridPane.columnIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets bottom="3.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Report Title" GridPane.columnIndex="4">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets bottom="3.0" />
+                                       </padding>
+                                    </Label>
+                                    <ChoiceBox fx:id="projectionType" maxHeight="35.0" minHeight="0.0" prefHeight="8.0" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                    <ChoiceBox prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </ChoiceBox>
+                                    <TextField maxHeight="10.0" prefHeight="0.0" prefWidth="143.0" text="A Sample Report Title" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" top="5.0" />
+                                 </padding>
+                              </GridPane>
+                              <GridPane fx:id="dbhSliders" maxWidth="579.0" prefHeight="170.0" prefWidth="574.0">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="282.0" minWidth="10.0" prefWidth="181.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="398.0" minWidth="10.0" prefWidth="398.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints />
+                                    <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Slider blockIncrement="5.0" majorTickUnit="5.0" max="25.0" maxWidth="260.0" min="5.0" minorTickCount="0" prefHeight="24.0" prefWidth="205.0" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label text="Minimum DBH Limit by Species #1" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Minimum DBH Limit by Species #2" GridPane.rowIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Minimum DBH Limit by Species #3" GridPane.rowIndex="5">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Minimum DBH Limit by Species #4" GridPane.rowIndex="7">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label prefHeight="17.0" prefWidth="286.0" text="4.0 cm+       7.5 cm+         12.5 cm+       17.5 cm+     22.5 cm+" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Slider fx:id="dbhSpecies2Slider" blockIncrement="5.0" majorTickUnit="5.0" max="25.0" maxWidth="260.0" min="5.0" minorTickCount="0" prefHeight="24.0" prefWidth="205.0" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Slider fx:id="dbhSpecies3Slider" blockIncrement="5.0" majorTickUnit="5.0" max="20.0" maxWidth="260.0" minorTickCount="0" prefHeight="24.0" prefWidth="205.0" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                    <Slider fx:id="dbhSpecies4Slider" blockIncrement="5.0" majorTickUnit="5.0" max="25.0" maxWidth="260.0" min="5.0" minorTickCount="0" prefHeight="24.0" prefWidth="205.0" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                    <Label prefHeight="17.0" prefWidth="286.0" text="4.0 cm+       7.5 cm+         12.5 cm+       17.5 cm+     22.5 cm+" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label prefHeight="17.0" prefWidth="286.0" text="4.0 cm+       7.5 cm+         12.5 cm+       17.5 cm+     22.5 cm+" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label prefHeight="17.0" prefWidth="286.0" text="4.0 cm+       7.5 cm+         12.5 cm+       17.5 cm+     22.5 cm+" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="dbhSpecies1" prefHeight="17.0" prefWidth="181.0" GridPane.rowIndex="2" />
+                                    <Label fx:id="dbhSpecies2" prefHeight="17.0" prefWidth="181.0" GridPane.rowIndex="4" />
+                                    <Label fx:id="dbhSpecies3" prefHeight="17.0" prefWidth="181.0" GridPane.rowIndex="6" />
+                                    <Label fx:id="dbhSpecies4" prefHeight="17.0" prefWidth="181.0" GridPane.rowIndex="8" />
+                                 </children>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
+                              </GridPane>
+                              <Separator prefHeight="13.0" prefWidth="574.0">
+                                 <VBox.margin>
+                                    <Insets top="6.0" />
+                                 </VBox.margin>
+                              </Separator>
+                           </children>
+                        </VBox>
+                        <Button layoutX="253.0" layoutY="328.0" mnemonicParsing="false" onAction="#setDefaults" text="Set as Default" />
+                        <Button layoutX="505.0" layoutY="328.0" mnemonicParsing="false" onAction="#runButtonAction" text="Run Model" />
+                        <Button layoutX="348.0" layoutY="328.0" mnemonicParsing="false" onAction="#cancelButtonAction" text="Cancel" />
+                        <Button fx:id="nextPageButton" layoutX="476.0" layoutY="330.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="8.0" text="&gt;">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                        <Button layoutX="416.0" layoutY="330.0" mnemonicParsing="false" onAction="#switchToScene4" prefHeight="22.0" prefWidth="21.0" text="&lt;">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                        <Label layoutX="407.0" layoutY="350.0" text="Previous">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="437.0" layoutY="333.0" prefHeight="16.0" prefWidth="39.0" text="  5 of 5">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="nextLabel" layoutX="476.0" layoutY="350.0" text="Next">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab fx:id="modelReportPane" text="Model Report">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea fx:id="modelReportText" layoutX="22.0" layoutY="12.0" prefHeight="306.0" prefWidth="557.0" />
+                        <Button layoutX="227.0" layoutY="332.0" mnemonicParsing="false" text="Print Report" />
+                        <Button layoutX="318.0" layoutY="332.0" mnemonicParsing="false" text="Load Report" />
+                        <Button layoutX="412.0" layoutY="332.0" mnemonicParsing="false" text="Save Report" />
+                        <Button fx:id="runButtonReport" layoutX="504.0" layoutY="332.0" mnemonicParsing="false" onAction="#runButtonAction" text="Run Model" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="View Log File">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane hgap="30.0" layoutX="27.0" layoutY="26.0" maxHeight="60.0" prefHeight="40.0" prefWidth="327.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="183.0" minWidth="10.0" prefWidth="165.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="10.0" prefWidth="162.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="21.0" minHeight="8.0" prefHeight="12.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="47.0" minHeight="10.0" prefHeight="43.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Logging On">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label text="Logging Type" GridPane.columnIndex="1">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <ChoiceBox fx:id="loggingOn" prefWidth="150.0" GridPane.rowIndex="1" />
+                              <ChoiceBox fx:id="loggingType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           </children>
+                        </GridPane>
+                        <TextArea fx:id="logFileText" layoutX="26.0" layoutY="84.0" prefHeight="237.0" prefWidth="549.0" />
+                        <Button layoutX="389.0" layoutY="332.0" mnemonicParsing="false" text="Print Log File" />
+                        <Button layoutX="490.0" layoutY="332.0" mnemonicParsing="false" text="Save Log File" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
